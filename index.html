@@ -1,123 +1,110 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Michael Rooney - Web Developer" />
-    <title>Michael Rooney | Web Developer</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        padding: 2rem;
-      }
-
-      .container {
-        text-align: center;
-        max-width: 600px;
-        animation: fadeIn 1s ease;
-      }
-
-      h1 {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        font-weight: 700;
-        letter-spacing: -2px;
-      }
-
-      .subtitle {
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-        font-weight: 300;
-      }
-
-      .message {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        opacity: 0.85;
-        margin-bottom: 2rem;
-      }
-
-      .status {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.75rem 1.5rem;
-        border-radius: 2rem;
-        font-size: 0.9rem;
-        backdrop-filter: blur(10px);
-      }
-
-      .dot {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #4ade80;
-        border-radius: 50%;
-        margin-right: 0.5rem;
-        animation: pulse 2s infinite;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.5;
-        }
-      }
-
-      @media (max-width: 768px) {
-        h1 {
-          font-size: 3rem;
-        }
-
-        .subtitle {
-          font-size: 1.2rem;
-        }
-
-        .message {
-          font-size: 1rem;
-        }
-      }
-    </style>
+    <meta
+      name="description"
+      content="Michael Rooney - Web Developer Portfolio Coming Soon"
+    />
+    <link rel="stylesheet" href="css/underConstruction.css" />
+    <title>Michael Rooney | Under Construction</title>
   </head>
   <body>
+    <!-- Animated background -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
     <div class="container">
-      <h1>Coming Soon</h1>
-      <p class="subtitle">Michael Rooney</p>
-      <p class="message">
-        Currently building something great.<br />
-        Check back soon for my portfolio and projects.
-      </p>
-      <div class="status">
-        <span class="dot"></span>
-        Site Under Construction
+      <h1>Under Construction</h1>
+      <p class="subtitle">Building something worth the wait</p>
+
+      <div class="features">
+        <div class="feature-card">
+          <span class="feature-icon">⚡</span>
+          <h3>Lightning Fast</h3>
+          <p>
+            Optimized performance with modern web technologies and best
+            practices for instant loading.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <h3>Fully Responsive</h3>
+          <p>
+            Beautiful on every device - from phones to desktops. Mobile-first
+            design approach.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🎨</span>
+          <h3>Modern Design</h3>
+          <p>
+            Clean, intuitive interfaces with smooth animations and attention to
+            detail.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">♿</span>
+          <h3>Accessible</h3>
+          <p>
+            Built with WCAG standards in mind. Everyone deserves a great web
+            experience.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🔒</span>
+          <h3>Secure</h3>
+          <p>
+            HTTPS encryption, secure coding practices, and regular security
+            updates.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🚀</span>
+          <h3>Future Ready</h3>
+          <p>
+            Built with scalability in mind using React, Vue.js, and modern
+            frameworks.
+          </p>
+        </div>
       </div>
+
+      <div class="status-section">
+        <h3 style="margin-bottom: 1rem; font-size: 1.2rem">
+          Development Progress
+        </h3>
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="status-text">
+          <span>Portfolio in Development</span>
+          <span class="eta">ETA: December 2025</span>
+        </div>
+
+        <div class="building">
+          <span>Building</span>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <footer>
+        <p>michaelrooney.dev &copy; 2025</p>
+        <p style="margin-top: 0.5rem; opacity: 0.7">
+          Crafted with care by Michael Rooney
+        </p>
+      </footer>
     </div>
   </body>
 </html>
