@@ -7,334 +7,26 @@
       name="description"
       content="Michael Rooney - Front-End Developer specializing in responsive web design"
     />
+    <link rel="stylesheet" href="css/styles.css" />
     <title>Michael Rooney | Front-End Developer</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      :root {
-        --primary: #2563eb;
-        --primary-dark: #1e40af;
-        --text: #1f2937;
-        --text-light: #6b7280;
-        --bg: #ffffff;
-        --bg-alt: #f9fafb;
-        --border: #e5e7eb;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
-        line-height: 1.6;
-        color: var(--text);
-        background: var(--bg);
-      }
-
-      /* Navigation */
-      nav {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-      }
-
-      nav .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      nav .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary);
-      }
-
-      nav ul {
-        list-style: none;
-        display: flex;
-        gap: 2rem;
-      }
-
-      nav a {
-        text-decoration: none;
-        color: var(--text);
-        font-weight: 500;
-        transition: color 0.3s;
-      }
-
-      nav a:hover {
-        color: var(--primary);
-      }
-
-      /* Hero Section */
-      .hero {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-      }
-
-      .hero-content h1 {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
-        animation: fadeInUp 0.8s ease;
-      }
-
-      .hero-content .tagline {
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-        animation: fadeInUp 0.8s ease 0.2s backwards;
-      }
-
-      .hero-content p {
-        font-size: 1.1rem;
-        max-width: 600px;
-        margin: 0 auto 2rem;
-        opacity: 0.85;
-        animation: fadeInUp 0.8s ease 0.4s backwards;
-      }
-
-      .btn {
-        display: inline-block;
-        padding: 0.875rem 2rem;
-        background: white;
-        color: var(--primary);
-        text-decoration: none;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        transition: transform 0.3s, box-shadow 0.3s;
-        animation: fadeInUp 0.8s ease 0.6s backwards;
-      }
-
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      }
-
-      /* Section Styles */
-      section {
-        padding: 5rem 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      section h2 {
-        font-size: 2.5rem;
-        margin-bottom: 3rem;
-        text-align: center;
-        color: var(--text);
-      }
-
-      /* About Section */
-      .about-content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3rem;
-        align-items: center;
-      }
-
-      .about-text p {
-        margin-bottom: 1rem;
-        color: var(--text-light);
-        font-size: 1.1rem;
-      }
-
-      .about-stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-      }
-
-      .stat-card {
-        background: var(--bg-alt);
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        text-align: center;
-        border: 1px solid var(--border);
-      }
-
-      .stat-card .number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 0.5rem;
-      }
-
-      .stat-card .label {
-        color: var(--text-light);
-        font-size: 0.9rem;
-      }
-
-      /* Skills Section */
-      #skills {
-        background: var(--bg-alt);
-      }
-
-      .skills-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-      }
-
-      .skill-category {
-        background: white;
-        padding: 2rem;
-        border-radius: 0.5rem;
-        border: 1px solid var(--border);
-      }
-
-      .skill-category h3 {
-        color: var(--primary);
-        margin-bottom: 1rem;
-        font-size: 1.3rem;
-      }
-
-      .skill-category ul {
-        list-style: none;
-      }
-
-      .skill-category li {
-        padding: 0.5rem 0;
-        color: var(--text-light);
-        border-bottom: 1px solid var(--border);
-      }
-
-      .skill-category li:last-child {
-        border-bottom: none;
-      }
-
-      /* Contact Section */
-      .contact-content {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      .contact-info {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-      }
-
-      .contact-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--bg-alt);
-        border-radius: 0.5rem;
-      }
-
-      .contact-item .icon {
-        width: 40px;
-        height: 40px;
-        background: var(--primary);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-      }
-
-      .contact-item a {
-        color: var(--primary);
-        text-decoration: none;
-      }
-
-      .contact-item a:hover {
-        text-decoration: underline;
-      }
-
-      /* Footer */
-      footer {
-        background: var(--text);
-        color: white;
-        text-align: center;
-        padding: 2rem;
-      }
-
-      /* Animations */
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        nav ul {
-          gap: 1rem;
-        }
-
-        .hero-content h1 {
-          font-size: 2.5rem;
-        }
-
-        .hero-content .tagline {
-          font-size: 1.2rem;
-        }
-
-        .about-content {
-          grid-template-columns: 1fr;
-        }
-
-        section {
-          padding: 3rem 1.5rem;
-        }
-
-        section h2 {
-          font-size: 2rem;
-        }
-      }
-
-      @media (max-width: 480px) {
-        nav .logo {
-          font-size: 1.2rem;
-        }
-
-        nav ul {
-          gap: 0.5rem;
-          font-size: 0.9rem;
-        }
-
-        .hero-content h1 {
-          font-size: 2rem;
-        }
-
-        .about-stats {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
   </head>
   <body>
+    <!-- Animated background -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
     <!-- Navigation -->
     <nav>
       <div class="container">
         <div class="logo">MR</div>
         <ul>
           <li><a href="#home">Home</a></li>
+          <li><a href="#projects">Projects</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#skills">Skills</a></li>
           <li><a href="#contact">Contact</a></li>
@@ -347,12 +39,81 @@
       <div class="hero-content">
         <h1>Michael Rooney</h1>
         <p class="tagline">Front-End Developer</p>
-        <p>
-          Building responsive, user-centered web experiences with modern
+        <p class="description">
+          Crafting responsive, user-centered web experiences with modern
           technologies. Combining 20+ years of leadership with a passion for
           clean code and intuitive design.
         </p>
-        <a href="#contact" class="btn">Get In Touch</a>
+        <div class="cta-buttons">
+          <a href="#projects" class="btn btn-primary">View My Work</a>
+          <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+      <h2>Featured Projects</h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-image">🌐</div>
+          <div class="project-content">
+            <h3>Local Business Website</h3>
+            <p>
+              Modern, responsive website for a local business featuring online
+              booking, contact forms, and service showcase.
+            </p>
+            <div class="tech-stack">
+              <span class="tech-tag">HTML5</span>
+              <span class="tech-tag">CSS3</span>
+              <span class="tech-tag">JavaScript</span>
+            </div>
+            <div class="project-links">
+              <a href="#" class="project-link link-demo">View Demo</a>
+              <a href="#" class="project-link link-code">View Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-image">📱</div>
+          <div class="project-content">
+            <h3>Task Management App</h3>
+            <p>
+              Full-featured task manager with drag-and-drop, categories, due
+              dates, and local storage persistence.
+            </p>
+            <div class="tech-stack">
+              <span class="tech-tag">React</span>
+              <span class="tech-tag">TypeScript</span>
+              <span class="tech-tag">CSS Grid</span>
+            </div>
+            <div class="project-links">
+              <a href="#" class="project-link link-demo">View Demo</a>
+              <a href="#" class="project-link link-code">View Code</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-image">🎨</div>
+          <div class="project-content">
+            <h3>Portfolio Showcase</h3>
+            <p>
+              Interactive portfolio template with smooth animations, dark theme,
+              and modern design patterns.
+            </p>
+            <div class="tech-stack">
+              <span class="tech-tag">Vue.js</span>
+              <span class="tech-tag">Figma</span>
+              <span class="tech-tag">Animation</span>
+            </div>
+            <div class="project-links">
+              <a href="#" class="project-link link-demo">View Demo</a>
+              <a href="#" class="project-link link-code">View Code</a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -376,26 +137,26 @@
           </p>
           <p>
             When I'm not coding, you'll find me exploring new web technologies,
-            contributing to open-source projects, and helping local Oxford
+            contributing to the development community, and helping local Oxford
             businesses establish their online presence.
           </p>
         </div>
-        <div class="about-stats">
+        <div class="stats-grid">
           <div class="stat-card">
-            <div class="number">20+</div>
-            <div class="label">Years Leadership</div>
+            <div class="stat-number">20+</div>
+            <div class="stat-label">Years Leadership</div>
           </div>
           <div class="stat-card">
-            <div class="number">2026</div>
-            <div class="label">Expected Graduation</div>
+            <div class="stat-number">2026</div>
+            <div class="stat-label">Expected Graduation</div>
           </div>
           <div class="stat-card">
-            <div class="number">100%</div>
-            <div class="label">Self-Motivated</div>
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Dedicated</div>
           </div>
           <div class="stat-card">
-            <div class="number">∞</div>
-            <div class="label">Passion for Code</div>
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Passion for Code</div>
           </div>
         </div>
       </div>
@@ -406,7 +167,7 @@
       <h2>Technical Skills</h2>
       <div class="skills-grid">
         <div class="skill-category">
-          <h3>Frontend Development</h3>
+          <h3><span>💻</span> Frontend Development</h3>
           <ul>
             <li>HTML5 & Semantic Markup</li>
             <li>CSS3 & Responsive Design</li>
@@ -416,26 +177,28 @@
             <li>Mobile-First Development</li>
           </ul>
         </div>
+
         <div class="skill-category">
-          <h3>Design & Tools</h3>
+          <h3><span>🎨</span> Design & Tools</h3>
           <ul>
             <li>Figma & Sketch</li>
-            <li>Canva</li>
             <li>UI/UX Principles</li>
             <li>Wireframing & Prototyping</li>
             <li>Accessibility (WCAG)</li>
             <li>Cross-Browser Testing</li>
+            <li>Version Control (Git)</li>
           </ul>
         </div>
+
         <div class="skill-category">
-          <h3>Backend & Database</h3>
+          <h3><span>⚙️</span> Backend & Database</h3>
           <ul>
-            <li>MySQL</li>
-            <li>DynamoDB</li>
+            <li>MySQL & DynamoDB</li>
             <li>AWS Cloud Services</li>
             <li>RESTful APIs</li>
-            <li>Git & Version Control</li>
             <li>Linux & CLI</li>
+            <li>Node.js Basics</li>
+            <li>Database Design</li>
           </ul>
         </div>
       </div>
@@ -445,18 +208,24 @@
     <section id="contact">
       <h2>Let's Connect</h2>
       <div class="contact-content">
+        <p>
+          I'm always interested in hearing about new projects and opportunities.
+          Whether you have a question or just want to say hi, feel free to reach
+          out!
+        </p>
         <div class="contact-info">
           <div class="contact-item">
-            <div class="icon">@</div>
-            <div>
-              <strong>Email</strong><br />
+            <div class="contact-icon">📧</div>
+            <div class="contact-details">
+              <strong>Email</strong>
               <a href="mailto:msroone@gmail.com">msroone@gmail.com</a>
             </div>
           </div>
+
           <div class="contact-item">
-            <div class="icon">in</div>
-            <div>
-              <strong>LinkedIn</strong><br />
+            <div class="contact-icon">💼</div>
+            <div class="contact-details">
+              <strong>LinkedIn</strong>
               <a
                 href="https://www.linkedin.com/in/michael-rooney99"
                 target="_blank"
@@ -464,11 +233,12 @@
               >
             </div>
           </div>
+
           <div class="contact-item">
-            <div class="icon">📍</div>
-            <div>
-              <strong>Location</strong><br />
-              Oxford, WI 53952
+            <div class="contact-icon">📍</div>
+            <div class="contact-details">
+              <strong>Location</strong>
+              <span style="color: var(--text-gray)">Oxford, WI 53952</span>
             </div>
           </div>
         </div>
@@ -478,7 +248,7 @@
     <!-- Footer -->
     <footer>
       <p>&copy; 2024 Michael Rooney. All rights reserved.</p>
-      <p>Built with HTML, CSS, and passion for clean code.</p>
+      <p>Built with HTML, CSS, and a passion for clean code.</p>
     </footer>
   </body>
 </html>
