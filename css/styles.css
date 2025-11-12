@@ -17,6 +17,7 @@ body {
   overflow-x: hidden;
 }
 
+/* Animated background particles */
 .particles {
   position: fixed;
   top: 0;
@@ -29,9 +30,10 @@ body {
 
 .particle {
   position: absolute;
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.5);
   border-radius: 50%;
   animation: float 25s infinite ease-in-out;
+  filter: blur(20px);
 }
 
 .particle:nth-child(1) {
@@ -69,22 +71,98 @@ body {
   0%,
   100% {
     transform: translateY(0) translateX(0);
-    opacity: 0.2;
+    opacity: 0.5;
   }
   25% {
     transform: translateY(-120px) translateX(60px);
-    opacity: 0.4;
+    opacity: 0.7;
   }
   50% {
     transform: translateY(-240px) translateX(-60px);
-    opacity: 0.2;
+    opacity: 0.5;
   }
   75% {
     transform: translateY(-120px) translateX(120px);
-    opacity: 0.3;
+    opacity: 0.6;
   }
 }
 
+/* Bottom particles */
+.particles-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.particle-bottom {
+  position: absolute;
+  background: rgba(236, 72, 153, 0.4);
+  border-radius: 50%;
+  animation: floatUp 25s infinite ease-in-out;
+  filter: blur(20px);
+}
+
+.particle-bottom:nth-child(1) {
+  width: 75px;
+  height: 75px;
+  left: 15%;
+  bottom: 0;
+  animation-delay: 1s;
+}
+.particle-bottom:nth-child(2) {
+  width: 65px;
+  height: 65px;
+  left: 30%;
+  bottom: 0;
+  animation-delay: 4s;
+}
+.particle-bottom:nth-child(3) {
+  width: 95px;
+  height: 95px;
+  left: 55%;
+  bottom: 0;
+  animation-delay: 7s;
+}
+.particle-bottom:nth-child(4) {
+  width: 80px;
+  height: 80px;
+  left: 75%;
+  bottom: 0;
+  animation-delay: 10s;
+}
+.particle-bottom:nth-child(5) {
+  width: 70px;
+  height: 70px;
+  left: 45%;
+  bottom: 0;
+  animation-delay: 13s;
+}
+
+@keyframes floatUp {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translateY(120px) translateX(-60px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(240px) translateX(60px);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(120px) translateX(-100px);
+    opacity: 0.5;
+  }
+}
+
+/* Navigation */
 .navbar {
   background: rgba(15, 23, 42, 0.8) !important;
   backdrop-filter: blur(20px);
@@ -128,6 +206,7 @@ body {
   width: 100%;
 }
 
+/* Hero Section */
 .hero {
   min-height: 100vh;
   display: flex;
@@ -202,6 +281,7 @@ body {
   transform: translateY(-3px);
 }
 
+/* Section Styles */
 section {
   position: relative;
   z-index: 1;
@@ -218,6 +298,7 @@ section h2 {
   background-clip: text;
 }
 
+/* Card Styles */
 .card-custom {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
@@ -327,6 +408,7 @@ section h2 {
   color: var(--primary);
 }
 
+/* Stat Card */
 .stat-card {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
@@ -357,6 +439,7 @@ section h2 {
   color: var(--text-gray);
 }
 
+/* Skills */
 .skill-category {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
@@ -399,6 +482,7 @@ section h2 {
   border-bottom: none;
 }
 
+/* Contact */
 .contact-item {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
@@ -438,6 +522,7 @@ section h2 {
   color: var(--secondary);
 }
 
+/* Footer */
 footer {
   border-top: 1px solid var(--border);
   padding: 3rem 0;
@@ -445,6 +530,57 @@ footer {
   color: var(--text-gray);
 }
 
+/* Carousel Customization */
+.carousel-indicators {
+  position: relative;
+  margin-top: 3rem;
+  margin-bottom: 0;
+}
+
+.carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--text-gray);
+  border: none;
+  opacity: 0.5;
+}
+
+.carousel-indicators button.active {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  opacity: 1;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+  opacity: 0.8;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  opacity: 1;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: var(--primary);
+  border-radius: 50%;
+  padding: 1.5rem;
+}
+
+.carousel-item {
+  padding: 2rem 0;
+}
+
+@media (max-width: 768px) {
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 10%;
+  }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .hero h1 {
     font-size: 2.5rem;
