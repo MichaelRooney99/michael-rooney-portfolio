@@ -24,7 +24,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Animated background particles */
 .particles {
   position: fixed;
   top: 0;
@@ -93,7 +92,6 @@ body {
   }
 }
 
-/* Navigation */
 nav {
   position: fixed;
   top: 0;
@@ -155,7 +153,6 @@ nav a:hover::after {
   width: 100%;
 }
 
-/* Hero Section */
 .hero {
   position: relative;
   min-height: 100vh;
@@ -247,7 +244,6 @@ nav a:hover::after {
   transform: translateY(-3px);
 }
 
-/* Section Styles */
 section {
   position: relative;
   padding: 6rem 2rem;
@@ -266,7 +262,6 @@ section h2 {
   background-clip: text;
 }
 
-/* Projects Section */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -398,7 +393,6 @@ section h2 {
   color: var(--primary);
 }
 
-/* About Section */
 .about-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -449,7 +443,6 @@ section h2 {
   font-size: 0.95rem;
 }
 
-/* Skills Section */
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -499,7 +492,6 @@ section h2 {
   border-bottom: none;
 }
 
-/* Contact Section */
 .contact-content {
   max-width: 600px;
   margin: 0 auto;
@@ -568,7 +560,6 @@ section h2 {
   color: var(--secondary);
 }
 
-/* Footer */
 footer {
   position: relative;
   z-index: 1;
@@ -582,7 +573,6 @@ footer p {
   margin-bottom: 0.5rem;
 }
 
-/* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -594,7 +584,6 @@ footer p {
   }
 }
 
-/* Responsive Design */
 @media (max-width: 968px) {
   .hero h1 {
     font-size: 3.5rem;
