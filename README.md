@@ -1,16 +1,44 @@
 # React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hello All, ive been playing with web native offering a littlebit. React turns out to have been a good starting point for a framework. Im not very good but I do want to
+share an important finding that caused a LOT of grey hairs. I use github and deploy the web apps from repo pages, like many people. But something that works on my local PC doesnt mean it will deploy properly. some important things to do if following the same steps i did for deployment, vite.config.js should have a
+base: "/your-repo-name-here/" like ;
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-Currently, two official plugins are available:qwew
+// https://vite.dev/config/
+export default defineConfig({
+plugins: [react()],
+base: "/task-manager/" //<---IMPORTANT
+});
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Also if your like me, i dont like multiple branches from each repo (im not at that level yet). so i deploy from docs, ill explain.
+once your happy with your project on your pc, build it.
+CLI: npm run build
+mv dist docs //<--this will move the build into a folder named docs>
+should look something like this...(im using this project as an example if you havnt noticed)
 
-## React Compiler
+task-manager/
+docs/
+index.html
+assets/
+<hashed vite files>
+src/
+vite.config.js
+package.json
+...
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+the files in assets will be a css and a js thats is something like,
+docs/assets/index-somehash.js
+docs/assets/index-somehash.css
 
-## Expanding the ESLint configuration
+ok your build is ready for deployment. now just gotta make sure githup deploys the build.
+Go to your Repo, Go to:
+Settings then Pages
+And make sure it says:
+Source: main (or what ever your working branch name is)
+Branch: main
+Folder: /docs
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+click save and wait, you can view the progress of the deployment in the actions tab of the repo. helpful hint, if your deployment keeps getting queued and taking 3+ miniutes, go back to your local source fule and just update something like the README with anything. commit the change, the queue will be forced to finish.
+anyway, thank you for visiting my portfolio and even more so for reading the README, YOU ROCK!!!!
