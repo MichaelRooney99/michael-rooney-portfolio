@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Michael Rooney - Front-End Developer specializing in responsive web design"
+    />
+    <title>Michael Rooney | Front-End Developer</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <!-- Animated background -->
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
+    <!-- Bottom particles -->
+    <div class="particles-bottom">
+      <div class="particle-bottom"></div>
+      <div class="particle-bottom"></div>
+      <div class="particle-bottom"></div>
+      <div class="particle-bottom"></div>
+      <div class="particle-bottom"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#home">MR</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+            <li class="nav-item">
+              <a class="nav-link" href="#projects">Projects</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#about">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#skills">Skills</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-8">
+            <h1>Michael Rooney</h1>
+            <p class="tagline">Front-End Developer</p>
+            <p class="description mb-4">
+              Crafting responsive, user-centered web experiences with modern
+              technologies. Combining 20+ years of leadership with a passion for
+              clean code and intuitive design.
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+              <a href="#projects" class="btn btn-primary-custom"
+                >View My Work</a
+              >
+              <a href="#contact" class="btn btn-outline-custom">Get In Touch</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+      <div class="container">
+        <h2>Featured Projects</h2>
+
+        <div
+          id="projectsCarousel"
+          class="carousel slide"
+          data-bs-ride="carousel"
+          role="region"
+          aria-label="Featured projects carousel"
+          aria-roledescription="carousel"
+        >
+          <!-- Carousel Items -->
+          <div class="carousel-inner">
+            <!-- Project 1 -->
+            <div class="carousel-item active">
+              <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                  <article class="card card-custom">
+                    <div
+                      class="project-image"
+                      role="img"
+                      aria-label="Local Business Website project icon"
+                    >
+                      🌐
+                    </div>
+                    <div class="card-body">
+                      <h3 class="card-title">Local Business Website</h3>
+                      <p class="card-text">
+                        Modern, responsive website for a local business
+                        featuring online booking, contact forms, and service
+                        showcase.
+                      </p>
+                      <div class="mb-3">
+                        <span class="tech-tag">HTML5</span>
+                        <span class="tech-tag">CSS3</span>
+                        <span class="tech-tag">JavaScript</span>
+                      </div>
+                      <div class="d-flex gap-2 justify-content-center">
+                        <a
+                          href="#"
+                          class="btn btn-demo btn-sm"
+                          aria-label="View demo of Local Business Website"
+                          >View Demo</a
+                        >
+                        <a
+                          href="#"
+                          class="btn btn-code btn-sm"
+                          aria-label="View code for Local Business Website"
+                          >View Code</a
+                        >
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <!-- Project 2 -->
+            <div class="carousel-item">
+              <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                  <article class="card card-custom">
+                    <div
+                      class="project-image"
+                      role="img"
+                      aria-label="Task Management App project icon"
+                    >
+                      📱
+                    </div>
+                    <div class="card-body">
+                      <h3 class="card-title">Task Management App</h3>
+                      <p class="card-text">
+                        Full-featured task manager with drag-and-drop,
+                        categories, due dates, and local storage persistence.
+                      </p>
+                      <div class="mb-3">
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">TypeScript</span>
+                        <span class="tech-tag">CSS Grid</span>
+                      </div>
+                      <div class="d-flex gap-2 justify-content-center">
+                        <a
+                          href="https://michaelrooney99.github.io/task-manager/"
+                          class="btn btn-demo btn-sm"
+                          aria-label="View demo of Task Management App"
+                          >View Demo</a
+                        >
+                        <a
+                          href="https://github.com/MichaelRooney99/task-manager"
+                          target="_blank"
+                          class="btn btn-code btn-sm"
+                          aria-label="View code for Task Management App"
+                          >View Code</a
+                        >
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <!-- Project 3 -->
+            <div class="carousel-item">
+              <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                  <article class="card card-custom">
+                    <div
+                      class="project-image"
+                      role="img"
+                      aria-label="Portfolio Showcase project icon"
+                    >
+                      🎨
+                    </div>
+                    <div class="card-body">
+                      <h3 class="card-title">Portfolio Showcase</h3>
+                      <p class="card-text">
+                        Interactive portfolio template with smooth animations,
+                        dark theme, and modern design patterns.
+                      </p>
+                      <div class="mb-3">
+                        <span class="tech-tag">Vue.js</span>
+                        <span class="tech-tag">Figma</span>
+                        <span class="tech-tag">Animation</span>
+                      </div>
+                      <div class="d-flex gap-2 justify-content-center">
+                        <a
+                          href="#"
+                          class="btn btn-demo btn-sm"
+                          aria-label="View demo of Portfolio Showcase"
+                          >View Demo</a
+                        >
+                        <a
+                          href="#"
+                          class="btn btn-code btn-sm"
+                          aria-label="View code for Portfolio Showcase"
+                          >View Code</a
+                        >
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <button
+            class="carousel-control-prev"
+            type="button"
+            data-bs-target="#projectsCarousel"
+            data-bs-slide="prev"
+            aria-label="Previous project"
+          >
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button
+            class="carousel-control-next"
+            type="button"
+            data-bs-target="#projectsCarousel"
+            data-bs-slide="next"
+            aria-label="Next project"
+          >
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+
+          <!-- Indicators moved below -->
+          <div class="carousel-indicators">
+            <button
+              type="button"
+              data-bs-target="#projectsCarousel"
+              data-bs-slide-to="0"
+              class="active"
+              aria-current="true"
+              aria-label="Project 1 of 3"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#projectsCarousel"
+              data-bs-slide-to="1"
+              aria-label="Project 2 of 3"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#projectsCarousel"
+              data-bs-slide-to="2"
+              aria-label="Project 3 of 3"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" role="region" aria-labelledby="about-heading">
+      <div class="container">
+        <h2 id="about-heading">About Me</h2>
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <p class="lead" style="color: var(--text-gray); line-height: 1.8">
+              I'm a front-end developer transitioning from two decades of retail
+              leadership into web design and development. My background in
+              managing teams, analyzing metrics, and solving complex problems
+              gives me a unique perspective on creating websites that work for
+              both users and businesses.
+            </p>
+            <p style="color: var(--text-gray); line-height: 1.8">
+              Currently pursuing my Associate Degree in Front End Software
+              Development at Madison Area Technical College, I'm passionate
+              about building accessible, responsive websites that deliver
+              exceptional user experiences.
+            </p>
+            <p style="color: var(--text-gray); line-height: 1.8">
+              When I'm not coding, you'll find me exploring new web
+              technologies, contributing to the development community, and
+              helping local Oxford businesses establish their online presence.
+            </p>
+          </div>
+          <div class="col-lg-6">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-number">20+</div>
+                  <div class="stat-label">Years Leadership</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-number">2026</div>
+                  <div class="stat-label">Expected Graduation</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-number">100%</div>
+                  <div class="stat-label">Dedicated</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-number">∞</div>
+                  <div class="stat-label">Passion for Code</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" role="region" aria-labelledby="skills-heading">
+      <div class="container">
+        <h2 id="skills-heading">Technical Skills</h2>
+        <div class="row g-4">
+          <div class="col-lg-4 col-md-6">
+            <div class="skill-category">
+              <h3>💻 Frontend Development</h3>
+              <ul>
+                <li>HTML5 & Semantic Markup</li>
+                <li>CSS3 & Responsive Design</li>
+                <li>JavaScript (ES6+)</li>
+                <li>TypeScript</li>
+                <li>React & Vue.js</li>
+                <li>Mobile-First Development</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6">
+            <div class="skill-category">
+              <h3>🎨 Design & Tools</h3>
+              <ul>
+                <li>Figma & Sketch</li>
+                <li>UI/UX Principles</li>
+                <li>Wireframing & Prototyping</li>
+                <li>Accessibility (WCAG)</li>
+                <li>Cross-Browser Testing</li>
+                <li>Version Control (Git)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6">
+            <div class="skill-category">
+              <h3>⚙️ Backend & Database</h3>
+              <ul>
+                <li>MySQL & DynamoDB</li>
+                <li>AWS Cloud Services</li>
+                <li>RESTful APIs</li>
+                <li>Linux & CLI</li>
+                <li>Node.js Basics</li>
+                <li>Database Design</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" role="region" aria-labelledby="contact-heading">
+      <div class="container">
+        <h2 id="contact-heading">Let's Connect</h2>
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <p
+              class="text-center mb-5"
+              style="
+                color: var(--text-gray);
+                font-size: 1.2rem;
+                line-height: 1.8;
+              "
+            >
+              I'm always interested in hearing about new projects and
+              opportunities. Whether you have a question or just want to say hi,
+              feel free to reach out!
+            </p>
+
+            <div class="contact-item d-flex align-items-center gap-3 mb-3">
+              <div class="contact-icon" role="img" aria-label="Email icon">
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                  />
+                </svg>
+              </div>
+              <div class="contact-details">
+                <strong>Email</strong><br />
+                <a href="mailto:msroone@gmail.com">msroone@gmail.com</a>
+              </div>
+            </div>
+
+            <div class="contact-item d-flex align-items-center gap-3 mb-3">
+              <div class="contact-icon" role="img" aria-label="LinkedIn icon">
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"
+                  />
+                </svg>
+              </div>
+              <div class="contact-details">
+                <strong>LinkedIn</strong><br />
+                <a
+                  href="https://www.linkedin.com/in/michael-rooney99"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >linkedin.com/in/michael-rooney99</a
+                >
+              </div>
+            </div>
+
+            <div class="contact-item d-flex align-items-center gap-3">
+              <div class="contact-icon" role="img" aria-label="GitHub icon">
+                <svg
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+              </div>
+              <div class="contact-details">
+                <strong>GitHub</strong><br />
+                <a
+                  href="https://github.com/MichaelRooney99"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >github.com/MichaelRooney99</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer role="contentinfo">
+      <div class="container">
+        <p class="mb-2">&copy; 2024 Michael Rooney. All rights reserved.</p>
+        <p>Built with Bootstrap, HTML, CSS, and a passion for clean code.</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
