@@ -2,12 +2,10 @@
   "name": "task-manager",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://michaelrooney99.github.io/task-manager/",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
