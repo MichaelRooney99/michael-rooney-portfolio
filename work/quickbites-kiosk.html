@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>QuickBite Kiosk — Flagship Case Study</title>
+    <meta
+      name="description"
+      content="Flagship case study: an accessible, touch-first self-service kiosk built with React."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" aria-label="Primary">
+        <span class="logo" aria-hidden="true">MR</span>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../portfolio-showcase.html">Showcase</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- HERO -->
+      <section class="hero hero-load reveal">
+        <h1>QuickBite Kiosk</h1>
+        <p>
+          Designing and building an accessible, touch-first self-service
+          ordering interface for fast-paced environments.
+        </p>
+      </section>
+
+      <!-- CONTEXT -->
+      <section class="reveal">
+        <h2>Context</h2>
+        <p><strong>Role:</strong> Front-End Developer</p>
+        <p><strong>Stack:</strong> React, JavaScript, CSS</p>
+        <p>
+          <strong>Focus:</strong> UX clarity, accessibility, state management
+        </p>
+      </section>
+
+      <!-- PROBLEM -->
+      <section class="reveal">
+        <h2>The Problem</h2>
+        <p>
+          Many self-service kiosks overwhelm users with cluttered interfaces,
+          small touch targets, and poor accessibility support. This leads to
+          slower ordering, user frustration, and increased staff intervention.
+        </p>
+      </section>
+
+      <!-- CONSTRAINTS -->
+      <section class="reveal">
+        <h2>Constraints</h2>
+        <ul>
+          <li>Touch-first interaction</li>
+          <li>Fast decision-making in high-traffic environments</li>
+          <li>Clear pricing feedback</li>
+          <li>Keyboard and screen-reader accessibility</li>
+          <li>No external UI libraries</li>
+        </ul>
+      </section>
+
+      <!-- SOLUTION -->
+      <section class="reveal">
+        <h2>The Solution</h2>
+        <p>
+          I designed a state-driven kiosk interface that guides users through
+          menu selection, customization, cart review, and confirmation with
+          minimal cognitive load.
+        </p>
+        <p>
+          Each screen focuses on a single task, reducing errors and improving
+          completion speed.
+        </p>
+      </section>
+
+      <!-- ACCESSIBILITY -->
+      <section class="stagger">
+        <h2>Accessibility-First Decisions</h2>
+        <ul>
+          <li>Large tap targets for touch and motor accessibility</li>
+          <li>ARIA labels for all interactive controls</li>
+          <li>Live price updates announced to screen readers</li>
+          <li>Keyboard-accessible navigation and controls</li>
+          <li>Reduced motion support</li>
+        </ul>
+      </section>
+
+      <!-- TECHNICAL -->
+      <section class="reveal">
+        <h2>Technical Architecture</h2>
+        <p>
+          The application is built as a single React component with clearly
+          defined UI states representing each screen of the kiosk flow.
+        </p>
+        <p>
+          Cart items are uniquely identified to support customization without
+          collisions, and pricing is derived dynamically based on selected
+          options.
+        </p>
+      </section>
+
+      <!-- CHALLENGES -->
+      <section class="reveal">
+        <h2>Key Challenges & Tradeoffs</h2>
+        <ul>
+          <li>Balancing customization depth with speed</li>
+          <li>Ensuring accessibility without cluttering the UI</li>
+          <li>Managing state transitions cleanly without routing</li>
+        </ul>
+      </section>
+
+      <!-- OUTCOME -->
+      <section class="reveal">
+        <h2>Outcome</h2>
+        <p>
+          The final result is a responsive kiosk prototype that feels fast,
+          intuitive, and inclusive — demonstrating how thoughtful front-end
+          engineering can improve real-world usability.
+        </p>
+
+        <a
+          href="https://michaelrooney99.github.io/quickbites-kiosk/"
+          class="magnetic"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Live Kiosk Demo →
+        </a>
+      </section>
+    </main>
+
+    <footer role="contentinfo">© 2025 Michael Rooney</footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

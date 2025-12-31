@@ -2,367 +2,150 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Michael Rooney — Front-End Developer</title>
     <meta
       name="description"
-      content="Michael Rooney - Front-End Developer specializing in responsive web design"
+      content="Accessible, modern front-end development portfolio by Michael Rooney."
     />
-    <title>Michael Rooney | Front-End Developer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./css/styles.css" />
+
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
+
   <body>
-    <div class="particles">
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-    </div>
+    <!-- Skip Link -->
+    <a href="#main" class="skip-link">Skip to main content</a>
 
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-      <div class="container-fluid px-3 px-md-5">
-        <a class="navbar-brand" href="#home">MR</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
+    <!-- NAV -->
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <span class="logo" aria-hidden="true">MR</span>
+        <ul>
+          <li><a href="#work" data-section="work">Work</a></li>
+          <li><a href="#about" data-section="about">About</a></li>
+          <li><a href="#contact" data-section="contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- MAIN -->
+    <main id="main">
+      <!-- HERO -->
+      <section class="hero hero-load reveal" aria-labelledby="hero-heading">
+        <h1 id="hero-heading">
+          Front-end developer<br />
+          crafting clear, modern<br />
+          web experiences.
+        </h1>
+        <p>
+          Based in the U.S. — focused on responsive interfaces, accessibility,
+          and design-driven development.
+        </p>
+      </section>
+
+      <!-- WORK -->
+      <section id="work" class="work reveal" aria-labelledby="work-heading">
+        <h2 id="work-heading">Selected Work</h2>
+
+        <article class="project stagger">
+          <div class="project-meta">
+            <span aria-hidden="true">01</span>
+            <span>Web Application</span>
+          </div>
+          <h3>Quick Bites Kiosk</h3>
+          <p>
+            A responsive self-service kiosk experience designed for speed,
+            clarity, and usability.
+          </p>
+          <a
+            href="/work/quickbites-kiosk.html"
+            class="magnetic"
+            rel="noopener noreferrer"
+          >
+            View Quick Bites Kiosk project
+          </a>
+        </article>
+
+        <article class="project stagger">
+          <div class="project-meta">
+            <span aria-hidden="true">02</span>
+            <span>React / TypeScript</span>
+          </div>
+          <h3>Task Management App</h3>
+          <p>
+            A task manager with drag-and-drop workflows, persistent state, and
+            scalable architecture.
+          </p>
+          <a
+            href="https://michaelrooney99.github.io/task-manager/"
+            class="magnetic"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Task Management App project
+          </a>
+        </article>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="about stagger" aria-labelledby="about-heading">
+        <h2 id="about-heading">About</h2>
+        <p>
+          I’m a front-end developer transitioning from 20+ years of leadership
+          into design-focused software development.
+        </p>
+        <p>
+          My background in operations and metrics informs how I build
+          interfaces: clear, efficient, and purposeful.
+        </p>
+      </section>
+
+      <!-- SKILLS -->
+      <section class="skills stagger" aria-labelledby="skills-heading">
+        <h2 id="skills-heading">Capabilities</h2>
+        <ul>
+          <li>HTML, CSS, JavaScript (ES6+)</li>
+          <li>React & TypeScript</li>
+          <li>Responsive & mobile-first design</li>
+          <li>Accessibility (WCAG 2.2)</li>
+          <li>Git & modern workflows</li>
+        </ul>
+      </section>
+
+      <!-- CONTACT -->
+      <section
+        id="contact"
+        class="contact reveal"
+        aria-labelledby="contact-heading"
+      >
+        <h2 id="contact-heading">Contact</h2>
+        <a href="mailto:msroone@gmail.com">Email Michael Rooney</a>
+        <a
+          href="https://www.linkedin.com/in/michael-rooney99"
+          target="_blank"
+          rel="noopener noreferrer"
+          >LinkedIn profile</a
         >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-            <li class="nav-item">
-              <a class="nav-link" href="#projects">Projects</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#about">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#skills">Skills</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#contact">Contact</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+        <a
+          href="https://github.com/MichaelRooney99"
+          target="_blank"
+          rel="noopener noreferrer"
+          >GitHub profile</a
+        >
+      </section>
+    </main>
 
-    <section id="home" class="hero">
-      <div class="container-fluid px-3">
-        <div class="row justify-content-center">
-          <div class="col-lg-8 col-md-10">
-            <h1>Michael Rooney</h1>
-            <p class="tagline">Front-End Developer</p>
-            <p class="description">
-              Crafting responsive, user-centered web experiences with modern
-              technologies. Combining 20+ years of leadership with a passion for
-              clean code and intuitive design.
-            </p>
-            <div class="d-flex gap-3 justify-content-center">
-              <a href="#projects" class="btn btn-primary-custom"
-                >View My Work</a
-              >
-              <a href="#contact" class="btn btn-outline-custom">Get In Touch</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <footer role="contentinfo">© 2025 Michael Rooney</footer>
 
-    <section id="projects">
-      <div class="container-fluid px-3">
-        <h2>Featured Projects</h2>
-        <div class="projects-grid">
-          <!-- Project 1 -->
-          <div class="project-card-wrapper">
-            <div class="project-card">
-              <article class="card card-custom">
-                <div class="project-image">🌮</div>
-                <div class="card-body">
-                  <h3 class="card-title">Quick Bites Kiosk</h3>
-                  <p class="card-text">
-                    Modern, responsive kiosk for a local restaurant featuring
-                    full menu, customizations, and order tracking.
-                  </p>
-                  <div class="mb-3">
-                    <span class="tech-tag">HTML5</span>
-                    <span class="tech-tag">CSS3</span>
-                    <span class="tech-tag">JavaScript</span>
-                  </div>
-                  <div class="d-flex gap-2 justify-content-center flex-wrap">
-                    <a
-                      href="https://michaelrooney99.github.io/quickbites-kiosk/"
-                      class="btn btn-demo btn-sm"
-                      >View Demo</a
-                    >
-                    <a
-                      href="https://github.com/MichaelRooney99/quickbites-kiosk"
-                      class="btn btn-code btn-sm"
-                      >View Code</a
-                    >
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <!-- Project 2 -->
-          <div class="project-card-wrapper">
-            <div class="project-card">
-              <article class="card card-custom">
-                <div class="project-image">📱</div>
-                <div class="card-body">
-                  <h3 class="card-title">Task Management App</h3>
-                  <p class="card-text">
-                    Full-featured task manager with drag-and-drop, categories,
-                    due dates, and local storage persistence.
-                  </p>
-                  <div class="mb-3">
-                    <span class="tech-tag">React</span>
-                    <span class="tech-tag">TypeScript</span>
-                    <span class="tech-tag">CSS Grid</span>
-                  </div>
-                  <div class="d-flex gap-2 justify-content-center flex-wrap">
-                    <a
-                      href="https://michaelrooney99.github.io/task-manager/"
-                      class="btn btn-demo btn-sm"
-                      >View Demo</a
-                    >
-                    <a
-                      href="https://github.com/MichaelRooney99/task-manager"
-                      class="btn btn-code btn-sm"
-                      >View Code</a
-                    >
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <!-- Project 3 -->
-          <div class="project-card-wrapper">
-            <div class="project-card">
-              <article class="card card-custom">
-                <div class="project-image">🎨</div>
-                <div class="card-body">
-                  <h3 class="card-title">Portfolio Showcase</h3>
-                  <p class="card-text">
-                    a Showcase of projects, completed and in progress.
-                  </p>
-                  <div class="mb-3">
-                    <span class="tech-tag">Bootstrap</span>
-                    <span class="tech-tag">Figma</span>
-                    <span class="tech-tag">Tailwind</span>
-                  </div>
-                  <div class="d-flex gap-2 justify-content-center flex-wrap">
-                    <a
-                      href="portfolio-showcase.html"
-                      class="btn btn-demo btn-sm"
-                      >View Showcase</a
-                    >
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="about">
-      <div class="container-fluid px-3">
-        <h2>About Me</h2>
-        <div class="row g-4">
-          <div class="col-lg-6">
-            <p class="about-text">
-              I'm a front-end developer transitioning from two decades of retail
-              leadership into web design and development. My background in
-              managing teams, analyzing metrics, and solving complex problems
-              gives me a unique perspective on creating websites that work for
-              both users and businesses.
-            </p>
-            <p class="about-text">
-              Currently pursuing my Associate Degree in Front End Software
-              Development at Madison Area Technical College, I'm passionate
-              about building accessible, responsive websites that deliver
-              exceptional user experiences.
-            </p>
-          </div>
-          <div class="col-lg-6">
-            <div class="row g-3">
-              <div class="col-6">
-                <div class="stat-card">
-                  <div class="stat-number">20+</div>
-                  <div class="stat-label">Years Leadership</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="stat-card">
-                  <div class="stat-number">2026</div>
-                  <div class="stat-label">Expected Graduation</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="stat-card">
-                  <div class="stat-number">100%</div>
-                  <div class="stat-label">Dedicated</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="stat-card">
-                  <div class="stat-number">∞</div>
-                  <div class="stat-label">Passion for Code</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="skills">
-      <div class="container-fluid px-3">
-        <h2>Technical Skills</h2>
-        <div class="row g-4">
-          <div class="col-lg-4 col-md-6">
-            <div class="skill-category">
-              <h3>💻 Frontend</h3>
-              <ul>
-                <li>HTML5 & Semantic Markup</li>
-                <li>CSS3 & Responsive Design</li>
-                <li>JavaScript (ES6+)</li>
-                <li>TypeScript</li>
-                <li>React & Vue.js</li>
-                <li>Mobile-First Development</li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="skill-category">
-              <h3>🎨 Design & Tools</h3>
-              <ul>
-                <li>Figma & Sketch</li>
-                <li>UI/UX Principles</li>
-                <li>Wireframing & Prototyping</li>
-                <li>Accessibility (WCAG)</li>
-                <li>Cross-Browser Testing</li>
-                <li>Version Control (Git)</li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6">
-            <div class="skill-category">
-              <h3>⚙️ Backend & Database</h3>
-              <ul>
-                <li>MySQL & DynamoDB</li>
-                <li>AWS Cloud Services</li>
-                <li>RESTful APIs</li>
-                <li>Linux & CLI</li>
-                <li>Node.js Basics</li>
-                <li>Database Design</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact">
-      <div class="container-fluid px-3">
-        <h2>Let's Connect</h2>
-        <div class="row justify-content-center">
-          <div class="col-lg-6">
-            <p class="contact-intro">
-              I'm always interested in hearing about new projects and
-              opportunities. Feel free to reach out!
-            </p>
-
-            <div class="contact-item d-flex align-items-center gap-3 mb-3">
-              <div class="contact-icon">
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 24 24"
-                  fill="white"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-                  />
-                </svg>
-              </div>
-              <div class="contact-details">
-                <strong>Email</strong><br />
-                <a href="mailto:msroone@gmail.com">msroone@gmail.com</a>
-              </div>
-            </div>
-
-            <div class="contact-item d-flex align-items-center gap-3 mb-3">
-              <div class="contact-icon">
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 24 24"
-                  fill="white"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"
-                  />
-                </svg>
-              </div>
-              <div class="contact-details">
-                <strong>LinkedIn</strong><br />
-                <a
-                  href="https://www.linkedin.com/in/michael-rooney99"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >linkedin.com/in/michael-rooney99</a
-                >
-              </div>
-            </div>
-
-            <div class="contact-item d-flex align-items-center gap-3">
-              <div class="contact-icon">
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 24 24"
-                  fill="white"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
-                  />
-                </svg>
-              </div>
-              <div class="contact-details">
-                <strong>GitHub</strong><br />
-                <a
-                  href="https://github.com/MichaelRooney99"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >github.com/MichaelRooney99</a
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      <p>&copy; 2024 Michael Rooney. All rights reserved.</p>
-      <p>Built with Bootstrap, HTML, CSS, and a passion for clean code.</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JAVASCRIPT -->
+    <script src="js/main.js" defer></script>
   </body>
 </html>
