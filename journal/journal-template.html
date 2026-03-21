@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- ✏️ UPDATE: Page title -->
+    <title>ENTRY TITLE — Michael Rooney</title>
+    <!-- ✏️ UPDATE: Meta description (1-2 sentences, shown in search results) -->
+    <meta name="description" content="BRIEF DESCRIPTION OF THE ENTRY." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <span class="logo" aria-hidden="true">MR</span>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <!-- ✏️ UPDATE: datetime attribute (YYYY-MM-DD) and display date -->
+            <time datetime="YYYY-MM-DD">Month DD, YYYY</time>
+
+            <!-- ✏️ KEEP only the tags that apply, delete the rest -->
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+
+          <!-- ✏️ UPDATE: Entry title -->
+          <h1>Entry Title Here</h1>
+        </header>
+
+        <div class="prose">
+
+          <!--
+            ════════════════════════════════════════
+            WRITING GUIDE
+
+            BEFORE PUBLISHING — ask yourself:
+            ✓ No internal IPs or specific subnet info?
+            ✓ No device names or hostnames?
+            ✓ No VPN addresses or account details?
+            ✓ No credentials, tokens, or app passwords?
+            ✓ Concepts and lessons intact?
+
+            STRUCTURE THAT WORKS WELL:
+            - Open with what you were trying to do
+            - Describe what went wrong or what you discovered
+            - Explain the fix or the concept
+            - End with what you'd do differently / what you learned
+
+            CALLOUT BLOCK — for key lessons:
+            <p class="callout">Your insight here.</p>
+
+            CODE INLINE:
+            <code>tailscale status</code>
+
+            LIST:
+            <ul>
+              <li>Item one</li>
+              <li>Item two</li>
+            </ul>
+
+            TABLE (optional):
+            <table>
+              <thead><tr><th>Col 1</th><th>Col 2</th></tr></thead>
+              <tbody>
+                <tr><td>Row 1</td><td>Value</td></tr>
+              </tbody>
+            </table>
+            ════════════════════════════════════════
+          -->
+
+          <p>
+            Opening paragraph — what were you working on and why?
+          </p>
+
+          <h2>Section heading</h2>
+
+          <p>
+            Body content here.
+          </p>
+
+          <p class="callout">
+            Key lesson or observation worth highlighting.
+          </p>
+
+          <h2>What I'd do differently</h2>
+
+          <ul>
+            <li>Lesson one</li>
+            <li>Lesson two</li>
+            <li>Lesson three</li>
+          </ul>
+
+        </div>
+
+        <!-- ✏️ UPDATE: prev/next links. Use <span></span> for whichever end has no neighbor -->
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="YYYY-MM-DD.html">← Previous: Previous Entry Title</a>
+          <a href="YYYY-MM-DD.html">Next: Next Entry Title →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">© 2025 Michael Rooney</footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

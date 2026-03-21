@@ -68,3 +68,26 @@ if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
     });
   });
 }
+     // ── Tag filtering ──
+const filterBtns = document.querySelectorAll('.filter-btn');
+const entries    = document.querySelectorAll('.entry-list li');
+const noResults  = document.querySelector('.no-results');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    let visible = 0;
+    entries.forEach(entry => {
+      const tags = entry.dataset.tags || '';
+      const match = filter === 'all' || tags.includes(filter);
+      entry.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+
+    noResults.classList.toggle('visible', visible === 0);
+  });
+});

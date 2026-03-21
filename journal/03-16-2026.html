@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Fixing What I Broke — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A Proxmox firewall cleanup broke OPNsense. What happened, how I fixed it, and what I learned."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <span class="logo" aria-hidden="true">MR</span>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="2026-03-16">March 16, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Fixing What I Broke</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Earlier this year I was having persistent issues with my VPN mesh dropping connections.
+            I kept adding Proxmox firewall rules trying to fix it, got frustrated when nothing
+            worked, and eventually just cleared all the rules. Problem solved, right? Not quite.
+          </p>
+
+          <p>
+            I didn't touch the setup for a while after that. Today I opened my router's web GUI
+            and found the menu loaded but the entire content area was blank — just a black void
+            where the dashboard should be.
+          </p>
+
+          <h2>What was actually happening</h2>
+
+          <p>
+            My router VM loads its UI dynamically — the menu skeleton is static HTML but the
+            dashboard content comes from API calls the browser makes back to the router. When I
+            cleared the Proxmox firewall rules but left the Proxmox firewall enabled, it defaulted
+            to blocking everything. The API calls never returned. Menu loads, content doesn't.
+          </p>
+
+          <p class="callout">
+            Lesson: clearing firewall rules with the firewall still enabled is not the same as
+            disabling the firewall. It defaults to block, not allow.
+          </p>
+
+          <h2>The fix</h2>
+
+          <p>
+            I restored the network node VM from a weekly automated Proxmox snapshot. Took a few
+            minutes, everything came back clean. First thing I did afterward was export the router
+            config and commit it to a private GitHub repo — exactly the kind of thing I should
+            have been doing before making changes, not after things break.
+          </p>
+
+          <h2>Sorting out the VPN properly</h2>
+
+          <p>
+            With a working router again I went back to the original problem. The actual fix was
+            straightforward — one inbound firewall rule on the LAN interface of my router,
+            scoped to the VPN container's IP:
+          </p>
+
+          <ul>
+            <li>Protocol: UDP</li>
+            <li>Direction: inbound</li>
+            <li>Destination: VPN container (specific host, not the whole subnet)</li>
+            <li>Port: 41641 (direct peer connections)</li>
+          </ul>
+
+          <p>
+            The default LAN-to-any rules already covered outbound traffic. I only needed the one
+            inbound rule. After adding it, my desktop machine shows direct connections in the VPN
+            status output. My phone stays on relay through the provider's servers — that's carrier
+            NAT on the cellular side, not something fixable locally.
+          </p>
+
+          <h2>Exit node vs subnet routing</h2>
+
+          <p>
+            While troubleshooting I noticed the VPN was breaking my reverse proxy connections and
+            websockets whenever it was active on my desktop. The VPN container was configured as
+            an exit node and my desktop was using it — meaning all traffic, including traffic
+            destined for local services, was routing through the VPN even when I was sitting on
+            the same network.
+          </p>
+
+          <p>
+            Exit node routes all internet traffic through your home network. Useful on public WiFi,
+            counterproductive when you're already home. Subnet routing advertises your local network
+            to remote devices so they can reach it from anywhere. Those are two different features
+            and I was conflating them.
+          </p>
+
+          <h2>Deploying monitoring</h2>
+
+          <p>
+            With the network sorted I deployed Uptime Kuma as a container on my main cluster node.
+            It's proxied through my reverse proxy with SSL, Gmail SMTP notifications configured,
+            and all nodes and services now have monitors — grouped and color-coded by role.
+          </p>
+
+          <p>
+            Everything green within an hour. That's the first time I've had real monitoring on
+            this infrastructure rather than just assuming things are up.
+          </p>
+
+          <h2>What I'd do differently</h2>
+
+          <ul>
+            <li>Commit configs to version control before making changes, not after things break</li>
+            <li>Disable the hypervisor firewall on the network node entirely — the router VM handles actual firewall duties, the extra layer is redundant and caused this whole problem</li>
+            <li>Scope firewall rules to specific container IPs rather than broad network ranges</li>
+          </ul>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="2026-03-21.html">Next: CI/CD in the Real World →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">© 2025 Michael Rooney</footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
