@@ -4,11 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>CI/CD in the Real World — Michael Rooney</title>
-    <meta
-      name="description"
-      content="Mapping all eight CI/CD pipeline phases to actual homelab infrastructure for a coursework assignment."
-    />
+    <title>Home Lab Infrastructure — Michael Rooney</title>
+    <!-- ✏️ UPDATE: Meta description (1-2 sentences, shown in search results) -->
+    <meta name="description" content="A summary of my experiences building and maintaining a home lab infrastructure for learning and experimentation." />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -41,139 +39,68 @@
       <article>
         <header class="entry-header reveal">
           <div class="entry-meta">
+            <!-- ✏️ UPDATE: datetime attribute (YYYY-MM-DD) and display date -->
             <time datetime="2026-03-21">March 21, 2026</time>
+
+            <!-- ✏️ KEEP only the tags that apply, delete the rest -->
             <span class="tag tag-homelab">Homelab</span>
-            <span class="tag tag-learning">Learning</span>
           </div>
-          <h1>CI/CD in the Real World</h1>
+
+          <!-- ✏️ UPDATE: Entry title -->
+          <h1>Home Lab Infrastructure</h1>
         </header>
 
         <div class="prose">
 
           <p>
-            My front-end development coursework this week asked me to map an eight-phase CI/CD
-            pipeline to something real in my life. The example in the assignment was a podcast.
-            I used my homelab instead.
+            Just establishing my current home lab setup and infrastructure as a baseline for future entries on homelab projects and experiments. This is the environment I use for learning, testing, and building things related to front-end development, DevOps, and general IT skills.
           </p>
-
-          <p>
-            It turned out to be a better exercise than I expected — not because it made the
-            assignment easier, but because it forced me to articulate something I'd been doing
-            intuitively without a framework for it.
+            <p>All of my homelab infrastructure is currently running on four Proxmox nodes, which I use for virtualization and containerization experiments.</p>
+          <h2>Node (0): Network </h2>
+            <p>IP: *.*.*.2 
+           <br />
+           <ul>
+            <li>OPNsense VM: *.*.*.1</li>
+            <li>Tailscale LXC: *.*.*.4</li>
+            <li>Cloudflare DDNS LXC: *.*.*.61</li>
+            <li>NginX Proxy Manager LXC: *.*.*.231</li>
+          </ul>
           </p>
-
-          <h2>The pipeline mapped to infrastructure</h2>
-
-          <p>
-            Every service I deploy follows roughly the same cycle, even when I don't think of
-            it that way. Mapping it explicitly made the pattern visible:
-          </p>
-
-          <table class="pipeline-table">
-            <thead>
-              <tr>
-                <th>Phase</th>
-                <th>What it looks like in my lab</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Plan</td>
-                <td>Decide what to deploy, check resource availability across four Proxmox nodes, determine network placement</td>
-              </tr>
-              <tr>
-                <td>Code</td>
-                <td>Write config files, firewall rules, NPM proxy host entries — commit to Git before touching anything</td>
-              </tr>
-              <tr>
-                <td>Build</td>
-                <td>Provision the LXC or VM, apply configs, assign static IP on 10.10.10.0/24</td>
-              </tr>
-              <tr>
-                <td>Test</td>
-                <td>Access via internal IP first, then test through NPM proxy, then verify Tailscale remote access</td>
-              </tr>
-              <tr>
-                <td>Release</td>
-                <td>Commit finalized configs to GitHub, update documentation</td>
-              </tr>
-              <tr>
-                <td>Deploy</td>
-                <td>Set autostart on boot, enable NPM proxy host with SSL, add to Uptime Kuma</td>
-              </tr>
-              <tr>
-                <td>Operate</td>
-                <td>Monitor via Uptime Kuma, apply updates, watch Proxmox resource usage</td>
-              </tr>
-              <tr>
-                <td>Monitor</td>
-                <td>Review firewall logs, track uptime trends, evaluate whether the service is doing what I built it to do</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h2>The gap between the documented process and the real one</h2>
-
-          <p>
-            Writing this out exposed something uncomfortable: the process I documented is cleaner
-            than the process I actually follow. I don't always commit configs before making changes.
-            I don't always update documentation after deploying something. The monitoring step
-            listed Uptime Kuma as if it was already running — it wasn't, I deployed it the same day
-            I wrote the assignment.
-          </p>
+          <p class="callout">This is where my subnet is configured and where I manage all network-related services. The "start" of my network infrastructure.</p>
 
           <p class="callout">
-            Documenting what you intend to do is easy. Doing it consistently under pressure is the
-            actual skill.
+            Network Node is the heart of my homelab — it handles all routing, firewalling, and network services. It's also where I do most of my learning around networking concepts and tools.
           </p>
 
-          <h2>Foreseeable frustrations I wrote about</h2>
-
+        <h2>Node (1): Ankhh </h2>
+            <p>
+              IP: *.*.*.55
+              <br />
+             <ul>
+               <li>Uptime Kuma LXC: *.*.*.100</li>
+             </ul>
+              </p>
+             <p class="callout">
+            Clustered with Node (2) and Node (3) for compute resources. Primarily used for monitoring and uptime tracking with Uptime Kuma, but also serves as a general-purpose node for testing and experimentation.
+             </p>
+        <h2>Node (2): Dega </h2>
           <p>
-            The assignment also asked me to anticipate frustrations. A few I flagged:
+           IP: *.*.*.54
+           <br />
+           
           </p>
-
-          <ul>
-            <li>
-              <strong>Git habits.</strong> The hardest part isn't knowing version control exists —
-              it's building the reflex to commit before you start playing, not after something breaks.
-            </li>
-            <li>
-              <strong>Dependency chains.</strong> OPNsense and NPM are foundational infrastructure.
-              If either misbehaves, every downstream test and deploy phase blocks. You can't mock
-              your own router.
-            </li>
-            <li>
-              <strong>Long iteration cycles.</strong> A software CI/CD loop can run in minutes.
-              An infrastructure cycle — plan to monitor — might take a full weekend session.
-              That makes it easy to leave things half-finished.
-            </li>
-            <li>
-              <strong>Ansible and Uptime Kuma are still new.</strong> I know enough to know
-              what they're for. I don't know enough to use them without hitting walls. That's fine —
-              it's why I have a lab.
-            </li>
-          </ul>
-
-          <h2>What the assignment was actually teaching</h2>
-
+        <h2>Node (3): Murloc </h2>
           <p>
-            CI/CD isn't just a software deployment concept. It's a thinking pattern — iterative,
-            documented, testable, repeatable. The fact that it maps cleanly to infrastructure work,
-            homelab management, even personal projects, suggests it's a more general framework
-            than it first appears.
+           IP: *.*.*.56
+           <br />           
           </p>
-
-          <p>
-            I'll probably think about my homelab sessions differently now. Less "playing around"
-            and more "running a cycle."
-          </p>
-
+          
         </div>
+        
 
+        <!-- ✏️ UPDATE: prev/next links. Use <span></span> for whichever end has no neighbor -->
         <nav class="entry-nav" aria-label="Entry navigation">
-          <a href="2026-03-16.html">← Previous: Fixing What I Broke</a>
-          <span></span>
+          <a href="03-20-2026.html">← Previous: 03-20-2026 Entry</a>
         </nav>
       </article>
     </main>
