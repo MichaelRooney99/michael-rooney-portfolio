@@ -3,20 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <title>Journal — Michael Rooney</title>
-    <meta
-      name="description"
-      content="Ongoing notes on homelab infrastructure, front-end development, and the process of transitioning into tech."
-    />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
-      rel="stylesheet"
-    />
-
+    <meta name="description" content="Ongoing notes on homelab infrastructure, front-end development, and the process of transitioning into tech." />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
 
@@ -25,7 +13,7 @@
 
     <header>
       <nav class="nav" role="navigation" aria-label="Primary">
-        <span class="logo" aria-hidden="true">MR</span>
+        <span class="logo">MR</span>
         <ul>
           <li><a href="index.html#work">Work</a></li>
           <li><a href="index.html#about">About</a></li>
@@ -38,40 +26,31 @@
     <main id="main">
 
       <!-- HERO -->
-      <section class="hero journal-hero hero-load reveal" aria-labelledby="journal-heading">
+      <section class="hero journal-hero hero-load" aria-labelledby="journal-heading">
+        <span class="hero-eyebrow">Writing</span>
         <h1 id="journal-heading">Journal</h1>
         <p>
-          Notes on building, breaking, and learning — homelab infrastructure,
-          front-end development, certifications, and the ongoing process of
-          transitioning into tech.
+          Notes on building, breaking, and learning — homelab
+          infrastructure, front-end development, certifications,
+          and the process of transitioning into tech.
         </p>
       </section>
 
       <!-- FILTER BAR -->
       <div class="filter-bar reveal" role="group" aria-label="Filter entries by tag">
-        <button class="filter-btn active" data-filter="all">
-          <span>All</span>
-        </button>
-        <button class="filter-btn" data-filter="homelab">
-          <span>Homelab</span>
-        </button>
-        <button class="filter-btn" data-filter="learning">
-          <span>Learning</span>
-        </button>
-        <button class="filter-btn" data-filter="projects">
-          <span>Projects</span>
-        </button>
-        <button class="filter-btn" data-filter="certs">
-          <span>Certs</span>
-        </button>
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="homelab">Homelab</button>
+        <button class="filter-btn" data-filter="learning">Learning</button>
+        <button class="filter-btn" data-filter="projects">Projects</button>
+        <button class="filter-btn" data-filter="certs">Certs</button>
       </div>
 
       <!-- ENTRY LIST -->
       <section aria-label="Journal entries">
         <ol class="entry-list" reversed>
 
-          <li class="entry stagger" data-tags="homelab learning">
-            <a href="journal/2026-03-21.html" class="entry" aria-label="Read: CI/CD in the Real World — March 21 2026">
+          <li data-tags="homelab learning">
+            <a href="journal/03-21-2026.html" class="entry" aria-label="Read: CI/CD in the Real World — March 21 2026">
               <time class="entry-date" datetime="2026-03-21">Mar 21, 2026</time>
               <div class="entry-body">
                 <h2 class="entry-title">CI/CD in the Real World</h2>
@@ -86,13 +65,13 @@
             </a>
           </li>
 
-          <li class="entry stagger" data-tags="homelab">
-            <a href="journal/2026-03-16.html" class="entry" aria-label="Read: Fixing What I Broke — March 16 2026">
+          <li data-tags="homelab">
+            <a href="journal/03-16-2026.html" class="entry" aria-label="Read: Fixing What I Broke — March 16 2026">
               <time class="entry-date" datetime="2026-03-16">Mar 16, 2026</time>
               <div class="entry-body">
                 <h2 class="entry-title">Fixing What I Broke</h2>
                 <p class="entry-excerpt">
-                  A Proxmox firewall rule cleanup broke OPNsense's UI. Restored from backup, sorted out Tailscale firewall rules, deployed Uptime Kuma, and learned the difference between exit nodes and subnet routing the hard way.
+                  A firewall rule cleanup broke my router's web UI. Restored from backup, sorted out VPN firewall rules, deployed uptime monitoring, and learned the difference between exit nodes and subnet routing the hard way.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -102,41 +81,16 @@
           </li>
 
         </ol>
-
         <p class="no-results" aria-live="polite">No entries found for that filter.</p>
       </section>
 
     </main>
 
-    <footer role="contentinfo">© 2025 Michael Rooney</footer>
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
 
     <script src="js/main.js" defer></script>
-    <script>
-      // ── Tag filtering ──
-      const filterBtns = document.querySelectorAll('.filter-btn');
-      const entries    = document.querySelectorAll('.entry-list li');
-      const noResults  = document.querySelector('.no-results');
-
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const filter = btn.dataset.filter;
-
-          // Toggle active state
-          filterBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-
-          // Show/hide entries
-          let visible = 0;
-          entries.forEach(entry => {
-            const tags = entry.dataset.tags || '';
-            const match = filter === 'all' || tags.includes(filter);
-            entry.classList.toggle('hidden', !match);
-            if (match) visible++;
-          });
-
-          noResults.classList.toggle('visible', visible === 0);
-        });
-      });
-    </script>
   </body>
 </html>

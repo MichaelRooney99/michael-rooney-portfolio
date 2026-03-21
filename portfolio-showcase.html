@@ -3,86 +3,87 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <title>Portfolio Showcase — Michael Rooney</title>
-    <meta
-      name="description"
-      content="Selected work and project showcase by front-end developer Michael Rooney."
-    />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
-      rel="stylesheet"
-    />
-
+    <meta name="description" content="Selected work and project showcase by front-end developer Michael Rooney." />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
 
   <body>
-    <!-- Skip Link -->
     <a href="#main" class="skip-link">Skip to main content</a>
 
-    <!-- NAV -->
     <header>
       <nav class="nav" role="navigation" aria-label="Primary">
-        <span class="logo" aria-hidden="true">MR</span>
+        <span class="logo">MR</span>
         <ul>
           <li><a href="index.html#work">Work</a></li>
           <li><a href="index.html#about">About</a></li>
+          <li><a href="journal.html">Journal</a></li>
           <li><a href="index.html#contact">Contact</a></li>
         </ul>
       </nav>
     </header>
 
-    <!-- MAIN -->
     <main id="main">
+
       <!-- HERO -->
-      <section class="hero hero-load reveal" aria-labelledby="showcase-heading">
-        <h1 id="showcase-heading">Portfolio Showcase</h1>
+      <section class="hero hero-load" aria-labelledby="showcase-heading">
+        <span class="hero-eyebrow">Portfolio</span>
+        <h1 id="showcase-heading">
+          Selected<br />
+          Work
+        </h1>
         <p>
-          A curated selection of design and development work, presented with
-          clarity and intent.
+          A curated selection of design and development work,
+          presented with clarity and intent.
         </p>
       </section>
 
-      <!-- WORK GRID -->
-      <section class="work reveal" aria-labelledby="projects-heading">
-        <h2 id="projects-heading">Projects</h2>
+      <div class="divider reveal"></div>
 
-        <article class="project stagger">
-          <h3>Work Sample One</h3>
-          <p>
-            Description of the project goes here, focusing on problem, solution,
-            and outcome.
-          </p>
-          <a href="#" class="magnetic">View Project →</a>
-        </article>
+      <!-- SHOWCASE GRID -->
+      <section aria-labelledby="projects-heading">
+        <span class="section-label">Projects</span>
+        <h2 id="projects-heading" class="reveal">Work Samples</h2>
 
-        <article class="project stagger">
-          <h3>Work Sample Two</h3>
-          <p>
-            Description of the project goes here, focusing on problem, solution,
-            and outcome.
-          </p>
-          <a href="#" class="magnetic">View Project →</a>
-        </article>
+        <div class="showcase-grid stagger">
 
-        <article class="project stagger">
-          <h3>Work Sample Three</h3>
-          <p>
-            Description of the project goes here, focusing on problem, solution,
-            and outcome.
-          </p>
-          <a href="#" class="magnetic">View Project →</a>
-        </article>
+          <a href="#" class="showcase-card">
+            <span class="project-meta">Web Application</span>
+            <h3>Work Sample One</h3>
+            <p>
+              Description of the project — problem, solution, and outcome.
+            </p>
+            <span class="showcase-card-link">View Project ↗</span>
+          </a>
+
+          <a href="#" class="showcase-card">
+            <span class="project-meta">React / TypeScript</span>
+            <h3>Work Sample Two</h3>
+            <p>
+              Description of the project — problem, solution, and outcome.
+            </p>
+            <span class="showcase-card-link">View Project ↗</span>
+          </a>
+
+          <a href="#" class="showcase-card">
+            <span class="project-meta">UI Design</span>
+            <h3>Work Sample Three</h3>
+            <p>
+              Description of the project — problem, solution, and outcome.
+            </p>
+            <span class="showcase-card-link">View Project ↗</span>
+          </a>
+
+        </div>
       </section>
+
     </main>
 
-    <footer role="contentinfo">© 2025 Michael Rooney</footer>
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
 
-    <!-- External JS -->
     <script src="js/main.js" defer></script>
   </body>
 </html>
