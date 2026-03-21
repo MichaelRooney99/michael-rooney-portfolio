@@ -36,6 +36,8 @@ body {
 /* ─────────────────────────────────────────
    NAV
 ───────────────────────────────────────── */
+
+
 .nav {
   position: fixed;
   top: 0;
@@ -79,9 +81,16 @@ body {
 
 .logo {
   font-family: var(--serif);
-  font-size: 1.15rem;
-  color: var(--text);
+  font-size: 1.25rem;
+  color: var(--accent);
   letter-spacing: 0.02em;
+}
+
+a.logo {
+  
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: var(--accent);
 }
 
 /* ─────────────────────────────────────────
