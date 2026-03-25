@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rebuilding the Portfolio — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A full restyle of michaelrooney.dev — new typography, warm dark theme, and a public journal section."
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="2026-03-21">March 23, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Rebuilding the Portfolio</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The original portfolio was functional but felt generic — Inter font,
+            blue accent, standard dark background. It got the job done but didn't
+            have a point of view. This week I rebuilt the whole thing from scratch
+            while keeping all the existing content intact.
+          </p>
+
+          <h2>Design direction</h2>
+
+          <p>
+            The brief I gave myself was minimal but with strong motion, dark with
+            warm tones, and unexpected typography. I landed on DM Serif Display
+            for headings paired with DM Sans for body text. The serif gives the
+            site an editorial quality that feels more considered than the usual
+            developer portfolio aesthetic. The accent color shifted from blue to
+            a terracotta orange — warm, distinctive, not trying to look like
+            every other dark-mode site.
+          </p>
+
+          <p class="callout">
+            Choosing a typeface that surprises does more for a portfolio's
+            memorability than any amount of animation.
+          </p>
+
+          <h2>What changed structurally</h2>
+
+          <p>
+            The layout got more intentional — projects now use a three-column
+            grid with number, content, and a pill link. About and Skills sit
+            side by side. Contact became full-width rows with animated arrow
+            labels. The nav gets a subtle bottom border on scroll so it doesn't
+            feel disconnected from the content as you move through the page.
+          </p>
+
+          <p>
+            All styles were centralized into a single stylesheet with clear
+            section comments. The previous version had inline style blocks
+            scattered across individual HTML files which made maintenance messy.
+            Everything now inherits from one place.
+          </p>
+
+          <h2>Adding the Journal</h2>
+
+          <p>
+            The bigger addition was a public journal section — a place to write
+            about what I'm building and learning without it being a formal case
+            study. The index page has tag-based filtering across four categories:
+            Homelab, Learning, Projects, and Certs. Filtering is pure client-side
+            JavaScript with no framework or build step required.
+          </p>
+
+          <p>
+            Writing for a public audience, even a small one, forces a different
+            kind of clarity than private notes. You can't rely on shorthand or
+            assume context. That discipline is worth something even if nobody
+            reads it.
+          </p>
+
+          <h2>The security consideration</h2>
+
+          <p>
+            Early drafts of the homelab journal entries included specific internal
+            IP addresses, device names, and VPN configuration details. Publishing
+            that would have handed anyone reading it a detailed map of the network.
+            The fix was straightforward — sanitize IPs to generic references,
+            remove device names, keep the concepts and lessons. The value of the
+            writing is in what was learned, not the specific addresses involved.
+          </p>
+
+          <h2>What's next for the site</h2>
+
+          <ul>
+            <li>Add more journal entries as projects complete</li>
+            <li>Add homelab infrastructure section to About once the internship is secured</li>
+            <li>Update project list as coursework and personal projects accumulate</li>
+          </ul>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="03-21-2026.html">← Previous: CI/CD in the Real World</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
