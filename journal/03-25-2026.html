@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Building a Homelab Dashboard — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Setting up Homepage dashboard with live Proxmox stats, wildcard SSL, and the YAML config workflow that comes with it."
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="03-25-2026">March 25, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Building a Homelab Dashboard</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            I've had monitoring in place for a while via Uptime Kuma, but
+            monitoring tells you when things break — it doesn't give you a
+            clear picture of what's running and how to get to it. That's
+            what a dashboard is for. Today I deployed Homepage and it turned
+            out to be one of the more satisfying things I've set up.
+          </p>
+
+          <h2>Why Homepage</h2>
+
+          <p>
+            The homelab dashboard space has a few options — Homarr, Dasherr,
+            Flame — but Homepage kept coming up as the most actively maintained
+            and the most capable in terms of integrations. It also uses YAML
+            config files rather than a database, which means the entire
+            configuration lives in plain text that I can version control and
+            back up trivially. That felt like the right architectural choice.
+          </p>
+
+          <h2>The install process</h2>
+
+          <p>
+            Homepage runs as an LXC on my main cluster node. The installation
+            was straightforward — clone the repo, install dependencies, build.
+            The build step is memory hungry though. 512MB RAM caused the
+            process to max out and stall. Bumped it to 1GB temporarily, ran
+            the build successfully, dropped it back down. Homepage at runtime
+            uses well under 512MB.
+          </p>
+
+          <p class="callout">
+            Build requirements and runtime requirements are different things.
+            Always check both before sizing a container.
+          </p>
+
+          <h2>YAML configuration</h2>
+
+          <p>
+            Homepage is configured through four YAML files — services,
+            bookmarks, widgets, and settings. Services define the dashboard
+            cards grouped by category. Bookmarks define quick-link rows.
+            Widgets populate the top bar with system stats. Settings control
+            layout, theme, and access control.
+          </p>
+
+          <p>
+            YAML's indentation-sensitive syntax is unforgiving at first. A
+            single misaligned line breaks the whole config silently — Homepage
+            just renders nothing for that section rather than throwing an error
+            you can act on. The fix is methodical editing and checking the
+            result after every meaningful change.
+          </p>
+
+          <p>
+            It's worth noting that Ansible — which is next on my learning
+            roadmap — is almost entirely YAML. Time spent in Homepage's
+            config files is quietly building fluency I'll use constantly later.
+          </p>
+
+          <h2>Proxmox live stats</h2>
+
+          <p>
+            Homepage can pull live data from Proxmox via API tokens — VM and
+            container counts, CPU usage, memory usage per node. Setting this
+            up required creating a dedicated API token on each node through
+            the Proxmox web interface, then referencing those credentials in
+            the services config.
+          </p>
+
+          <p>
+            The network node pulled stats immediately. The cluster nodes
+            needed their own tokens created individually — they don't share
+            credentials across the cluster automatically. Once that was sorted,
+            all four nodes show live resource data on the dashboard.
+          </p>
+
+          <h2>Wildcard SSL and DNS</h2>
+
+          <p>
+            Homepage is proxied through NGINX Proxy Manager and accessible
+            at a subdomain with HTTPS. The SSL certificate is a wildcard
+            issued through Cloudflare, which means any new subdomain I add
+            gets HTTPS automatically without touching certificates again.
+            That's the right way to handle it — set it up once, never think
+            about it again.
+          </p>
+
+          <h2>What the dashboard actually does</h2>
+
+          <p>
+            At a glance I can see CPU and memory across all nodes, which
+            services are running where, and get one-click access to any
+            interface in the lab. It sounds simple but having everything
+            in one place changes how the lab feels to use — less context
+            switching, less remembering which IP does what.
+          </p>
+
+          <p>
+            It's also a forcing function for documentation. Every service
+            that goes on the dashboard gets a description and a category.
+            That discipline compounds.
+          </p>
+
+          <h2>What's next</h2>
+
+          <ul>
+            <li>Ansible for configuration management across nodes</li>
+            <li>Prometheus and Grafana for metrics and temperature monitoring</li>
+            <li>Network+ certification — study begins in earnest</li>
+          </ul>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="03-22-2026.html">← Previous: 03-22-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
