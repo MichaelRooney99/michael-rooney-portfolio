@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://michaelrooney.dev/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/portfolio-showcase.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/03-16-2026.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/03-21-2026.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/03-22-2026.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/03-25-2026.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/03-26-2026.html</loc>
+    <priority>0.6</priority>
+  </url>
+</urlset>
+```
+
+Add a new `<url>` block every time you publish a journal entry.
+
+---
+
+**Create a `robots.txt`** in your repo root:
+```
+User-agent: *
+Allow: /
+
+Sitemap: https://michaelrooney.dev/sitemap.xml
