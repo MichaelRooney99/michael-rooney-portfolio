@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Real Backups, Finally — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Deploying Proxmox Backup Server on a homelab node — datastores, deduplication, retention policies, and why backups matter before you need them."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Real Backups, Finally — Michael Rooney" />
+    <meta property="og:description" content="Deploying Proxmox Backup Server on a homelab node — datastores, deduplication, retention policies, and why backups matter before you need them." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/03-28-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Real Backups, Finally — Michael Rooney" />
+    <meta name="twitter:description" content="Deploying Proxmox Backup Server on a homelab node — datastores, deduplication, retention policies, and why backups matter before you need them." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/03-28-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="03-28-2026">March 28, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Real Backups, Finally</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            I've had automated Proxmox snapshots running for a while — weekly,
+            stored locally on each node. They've saved me at least once already
+            when a firewall misconfiguration broke my router's web interface.
+            But local snapshots stored on the same machine they're backing up
+            aren't really backups. They're convenience copies. If the node dies,
+            the snapshot dies with it.
+          </p>
+
+          <p>
+            Tonight I deployed Proxmox Backup Server and that problem is solved.
+          </p>
+
+          <h2>What Proxmox Backup Server actually is</h2>
+
+          <p>
+            PBS is a dedicated backup solution built by the same team that makes
+            Proxmox VE. It runs as a separate VM, exposes a datastore that your
+            Proxmox nodes can target, and handles deduplication, compression,
+            and retention policies automatically. The key difference from a
+            simple snapshot is that backups go to a separate machine — in my
+            case, a VM on a different node than the things being backed up.
+          </p>
+
+          <p class="callout">
+            A backup on the same machine as the original is not a backup.
+            It's a duplicate. The distinction matters when hardware fails.
+          </p>
+
+          <h2>The setup</h2>
+
+          <p>
+            PBS runs as a VM on my second cluster node with 2 cores, 4GB RAM,
+            and a 32GB OS disk. The actual backup storage is a separate 1.8TB
+            virtual disk attached to the same VM. Separating OS and data storage
+            is good practice — if PBS itself ever needs to be rebuilt, the
+            datastore disk survives independently.
+          </p>
+
+          <p>
+            The installer is straightforward — same Proxmox-style interface,
+            static IP, root password, done. The web UI runs on port 8007 and
+            looks nearly identical to the Proxmox VE interface. Once the
+            datastore disk was initialized with GPT and formatted as ext4, PBS
+            picked it up immediately.
+          </p>
+
+          <h2>Connecting the nodes</h2>
+
+          <p>
+            Each Proxmox node needs PBS added as a storage target. The process
+            is the same on all four — Datacenter → Storage → Add → Proxmox
+            Backup Server. You provide the PBS IP, credentials, datastore name,
+            and a fingerprint that verifies you're talking to the right server.
+            The fingerprint requirement is a nice security detail — it prevents
+            a misconfigured node from accidentally sending backups somewhere else.
+          </p>
+
+          <h2>Deduplication in practice</h2>
+
+          <p>
+            The first full backup of all four nodes ran in under a minute and
+            used 3.33GB on the datastore. That number sounds implausibly small
+            until you understand how deduplication works — PBS breaks backup
+            data into chunks and only stores unique chunks. If two VMs share
+            a base Debian install, those shared chunks are stored once. Every
+            subsequent backup only stores what actually changed since the last
+            one.
+          </p>
+
+          <p>
+            For a homelab running similar Debian-based containers across
+            multiple nodes, deduplication is extremely effective. The 3.33GB
+            figure will grow as configurations diverge, but it will always be
+            significantly smaller than storing full snapshots of everything.
+          </p>
+
+          <h2>Retention policy</h2>
+
+          <p>
+            The backup job is scheduled to run nightly at 2am with a retention
+            policy of 3 most recent, 7 daily, and 4 weekly backups. PBS prunes
+            automatically after each run — old backups outside the retention
+            window are removed and the freed space is reclaimed. No manual
+            cleanup required.
+          </p>
+
+          <p>
+            This is the kind of thing that sounds boring until you need to
+            restore something from three weeks ago and the backup actually
+            exists. The boring infrastructure is the important infrastructure.
+          </p>
+
+          <h2>What's next for backups</h2>
+
+          <p>
+            The 1TB SATA drive on the same node is still unused — a natural
+            candidate for a second PBS datastore or offsite sync when a NAS
+            gets added to the lab. The longer term goal is a dedicated NAS
+            with TrueNAS providing a third copy of critical data. Two copies
+            on separate nodes plus one on dedicated storage is a reasonable
+            homelab backup posture.
+          </p>
+
+          <p>
+            For now, nightly automated backups across all four nodes stored
+            on a dedicated VM with deduplication and automatic retention is
+            a significant improvement over where things were this morning.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="03-26-2026.html">← Previous: 03-26-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

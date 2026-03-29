@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Journal — Michael Rooney</title>
     <meta name="description" content="Ongoing notes on homelab infrastructure, front-end development, and the process of transitioning into tech." />
-    <link rel="stylesheet" href="css/styles.css" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Michael Rooney" />
     <meta property="og:type" content="website" />
@@ -17,6 +16,8 @@
     <meta name="twitter:title" content="Journal — Michael Rooney" />
     <meta name="twitter:description" content="Ongoing notes on homelab infrastructure, front-end development, and the process of transitioning into tech." />
   
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal.html" />
   </head>
 
   <body>
@@ -59,6 +60,20 @@
       <!-- ENTRY LIST -->
       <section aria-label="Journal entries">
         <ol class="entry-list" reversed>
+          <li data-tags="homelab">
+            <a href="journal/03-28-2026.html" class="entry" aria-label="Read: Real Backups, Finally — March 28 2026">
+              <time class="entry-date" datetime="03-28-2026">Mar 28, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Real Backups, Finally</h2>
+                <p class="entry-excerpt">
+                  Deploying Proxmox Backup Server on a dedicated VM — datastores, deduplication, retention policies, and why a snapshot on the same machine as the original isn't really a backup.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-homelab">Homelab</span>
+                </div>
+              </div>
+            </a>
+          </li>
           <li data-tags="certs learning">
             <a href="journal/03-26-2026.html" class="entry" aria-label="Read: 25 Certifications and a Full-Time Job — March 26 2026">
                 <time class="entry-date" datetime="03-26-2026">Mar 26, 2026</time>
@@ -161,7 +176,6 @@
     <footer role="contentinfo">
       <span>© 2025 Michael Rooney</span>
       <span>Front-End Developer</span>
-      <link rel="canonical" href="https://michaelrooney.dev/journal.html" />
     </footer>
 
     <script src="js/main.js" defer></script>
