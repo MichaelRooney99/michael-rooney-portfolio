@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Building a Homelab Kanban Board — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Installing Planka as a self-hosted Kanban board — managing homelab projects, cert progress, and internship prep in one place."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Building a Homelab Kanban Board — Michael Rooney" />
+    <meta property="og:description" content="Installing Planka as a self-hosted Kanban board — managing homelab projects, cert progress, and internship prep in one place." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-01-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Building a Homelab Kanban Board — Michael Rooney" />
+    <meta name="twitter:description" content="Installing Planka as a self-hosted Kanban board — managing homelab projects, cert progress, and internship prep in one place." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-01-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-01-2026">April 1, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Building a Homelab Kanban Board</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The homelab dashboard was showing a blank area next to the
+            monitoring section. Rather than fill it with something decorative
+            I started thinking about what would actually be useful there. A
+            calendar felt too tied to external accounts. What I actually needed
+            was a way to track the moving parts — homelab projects, cert
+            progress, internship conversations, coursework deadlines — without
+            switching between tools constantly.
+          </p>
+
+          <p>
+            The answer was a self-hosted Kanban board. Specifically Planka —
+            a clean, minimal, open source tool that does one thing well. No
+            bloat, no subscriptions, no data leaving the network.
+          </p>
+
+          <h2>Why Kanban makes sense right now</h2>
+
+          <p>
+            I'm balancing more parallel workstreams than at any point in this
+            transition. Network+ study, Google IT cert modules, portfolio
+            updates, homelab builds, KwikTrip internship conversations across
+            multiple departments, and regular coursework. Some of those are
+            active, some are blocked waiting on external factors, some are
+            done but undocumented.
+          </p>
+
+          <p>
+            A Kanban board with Backlog, In Progress, Blocked, and Done
+            columns maps directly to that reality. Each card gets a category,
+            a description, and sub-tasks. Moving a card from Blocked to In
+            Progress when a dependency resolves is more satisfying than
+            hunting through notes to remember where something was left.
+          </p>
+
+          <p class="callout">
+            The tool you'll actually use is better than the perfect tool
+            you keep meaning to set up. Planka took one evening to deploy.
+          </p>
+
+          <h2>The installation</h2>
+
+          <p>
+            Planka runs as an LXC on my third cluster node — Murloc — which
+            had been sitting nearly idle. The official installer script handles
+            Docker, PostgreSQL, and an internal NGINX reverse proxy
+            automatically. The whole process from blank LXC to running Planka
+            was under 30 minutes.
+          </p>
+
+          <p>
+            The installer sets up its own NGINX inside the container to handle
+            websocket routing for real-time updates. That created an
+            interesting challenge when routing through my external reverse
+            proxy — the two NGINX instances needed to cooperate rather than
+            conflict. Getting the websocket connection to work cleanly through
+            the proxy took some troubleshooting, which is its own lesson in
+            how layered proxying works in practice.
+          </p>
+
+          <h2>What goes on the board</h2>
+
+          <p>
+            The initial board structure I'm working with:
+          </p>
+
+          <ul>
+            <li><strong>Backlog</strong> — everything queued but not started. NAS build, Ansible, Prometheus/Grafana, remaining Google IT cert modules.</li>
+            <li><strong>In Progress</strong> — active work. Network+ study, current homelab session, portfolio journal entries.</li>
+            <li><strong>Blocked</strong> — waiting on something external. KwikTrip internship department responses, Network+ exam scheduling.</li>
+            <li><strong>Done</strong> — completed and documented. PBS deployment, Planka install, SEO pass on portfolio.</li>
+          </ul>
+
+          <p>
+            Each card links to the relevant Obsidian note or journal entry
+            where the detail lives. The board is the status view — the notes
+            are the documentation. They serve different purposes and work
+            better together than either does alone.
+          </p>
+
+          <h2>The bigger picture</h2>
+
+          <p>
+            Between Uptime Kuma for monitoring, Homepage for a live
+            infrastructure overview, Obsidian for documentation, and now
+            Planka for project tracking, the homelab has developed a
+            genuine operational layer on top of the infrastructure layer.
+            That's not something I planned deliberately — it emerged from
+            asking what's actually useful rather than what's technically
+            impressive.
+          </p>
+
+          <p>
+            That distinction feels important. The goal was never to run
+            the most complex homelab. It was to build something that teaches
+            real skills and solves real problems. A Kanban board I check
+            daily does more for the transition into tech than another service
+            running idle in a container.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="03-28-2026.html">← Previous: 03-28-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
