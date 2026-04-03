@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Building a Homelab Kanban Board — Michael Rooney</title>
+    <title>Planka, Persistence, and Layered Proxies — Michael Rooney</title>
     <meta
       name="description"
-      content="Installing Planka as a self-hosted Kanban board — managing homelab projects, cert progress, and internship prep in one place."
+      content="Two days troubleshooting Planka's websocket issue through a reverse proxy — what broke, what fixed it, and what the process taught me about layered NGINX configs."
     />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Michael Rooney" />
     <meta property="og:type" content="article" />
-    <meta property="og:title" content="Building a Homelab Kanban Board — Michael Rooney" />
-    <meta property="og:description" content="Installing Planka as a self-hosted Kanban board — managing homelab projects, cert progress, and internship prep in one place." />
+    <meta property="og:title" content="Planka, Persistence, and Layered Proxies — Michael Rooney" />
+    <meta property="og:description" content="Two days troubleshooting Planka's websocket issue through a reverse proxy — what broke, what fixed it, and what the process taught me about layered NGINX configs." />
     <meta property="og:url" content="https://michaelrooney.dev/journal/04-01-2026.html" />
     <meta property="og:site_name" content="Michael Rooney" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Building a Homelab Kanban Board — Michael Rooney" />
-    <meta name="twitter:description" content="Installing Planka as a self-hosted Kanban board — managing homelab projects, cert progress, and internship prep in one place." />
+    <meta name="twitter:title" content="Planka, Persistence, and Layered Proxies — Michael Rooney" />
+    <meta name="twitter:description" content="Two days troubleshooting Planka's websocket issue through a reverse proxy — what broke, what fixed it, and what the process taught me about layered NGINX configs." />
     <link rel="canonical" href="https://michaelrooney.dev/journal/04-01-2026.html" />
     <link rel="stylesheet" href="../css/styles.css" />
   </head>
@@ -46,116 +46,127 @@
             <time datetime="04-01-2026">April 1, 2026</time>
             <span class="tag tag-homelab">Homelab</span>
           </div>
-          <h1>Building a Homelab Kanban Board</h1>
+          <h1>Planka, Persistence, and Layered Proxies</h1>
         </header>
 
         <div class="prose">
 
           <p>
-            The homelab dashboard was showing a blank area next to the
-            monitoring section. Rather than fill it with something decorative
-            I started thinking about what would actually be useful there. A
-            calendar felt too tied to external accounts. What I actually needed
-            was a way to track the moving parts — homelab projects, cert
-            progress, internship conversations, coursework deadlines — without
-            switching between tools constantly.
+            I spent two days troubleshooting a websocket issue with Planka
+            that turned out to be one of the more instructive problems I've
+            hit in the homelab. Not because the fix was complicated — it
+            wasn't — but because the path to finding it required understanding
+            exactly how traffic flows through a layered proxy setup.
+          </p>
+
+          <h2>What was happening</h2>
+
+          <p>
+            Planka's official installer sets up its own NGINX instance inside
+            the container to handle websocket routing. My external reverse
+            proxy — NGINX Proxy Manager — sits in front of that. Two NGINX
+            instances in the path, each with their own configuration, each
+            expecting to handle certain headers.
           </p>
 
           <p>
-            The answer was a self-hosted Kanban board. Specifically Planka —
-            a clean, minimal, open source tool that does one thing well. No
-            bloat, no subscriptions, no data leaving the network.
-          </p>
-
-          <h2>Why Kanban makes sense right now</h2>
-
-          <p>
-            I'm balancing more parallel workstreams than at any point in this
-            transition. Network+ study, Google IT cert modules, portfolio
-            updates, homelab builds, internship conversations across
-            multiple departments, and regular coursework. Some of those are
-            active, some are blocked waiting on external factors, some are
-            done but undocumented.
-          </p>
-
-          <p>
-            A Kanban board with Backlog, In Progress, Blocked, and Done
-            columns maps directly to that reality. Each card gets a category,
-            a description, and sub-tasks. Moving a card from Blocked to In
-            Progress when a dependency resolves is more satisfying than
-            hunting through notes to remember where something was left.
+            The symptom was a spinning loading screen after login. The browser
+            console showed websocket connection failures on the
+            <code>socket.io</code> path. Traffic was reaching the container
+            but the websocket upgrade wasn't completing successfully through
+            the proxy chain.
           </p>
 
           <p class="callout">
-            The tool you'll actually use is better than the perfect tool
-            you keep meaning to set up. Planka took one evening to deploy.
+            When something works directly by IP but fails through a proxy,
+            the proxy is almost always modifying or dropping something the
+            application depends on. The question is what.
           </p>
 
-          <h2>The installation</h2>
+          <h2>What I tried</h2>
 
           <p>
-            Planka runs as an LXC on my third cluster node — Murloc — which
-            had been sitting nearly idle. The official installer script handles
-            Docker, PostgreSQL, and an internal NGINX reverse proxy
-            automatically. The whole process from blank LXC to running Planka
-            was under 30 minutes.
-          </p>
-
-          <p>
-            The installer sets up its own NGINX inside the container to handle
-            websocket routing for real-time updates. That created an
-            interesting challenge when routing through my external reverse
-            proxy — the two NGINX instances needed to cooperate rather than
-            conflict. Getting the websocket connection to work cleanly through
-            the proxy took some troubleshooting, which is its own lesson in
-            how layered proxying works in practice.
-          </p>
-
-          <h2>What goes on the board</h2>
-
-          <p>
-            The initial board structure I'm working with:
-          </p>
-
-          <ul>
-            <li><strong>Backlog</strong> — everything queued but not started. NAS build, Ansible, Prometheus/Grafana, remaining Google IT cert modules.</li>
-            <li><strong>In Progress</strong> — active work. Network+ study, current homelab session, portfolio journal entries.</li>
-            <li><strong>Blocked</strong> — waiting on something external. KwikTrip internship department responses, Network+ exam scheduling.</li>
-            <li><strong>Done</strong> — completed and documented. PBS deployment, Planka install, SEO pass on portfolio.</li>
-          </ul>
-
-          <p>
-            Each card links to the relevant Obsidian note or journal entry
-            where the detail lives. The board is the status view — the notes
-            are the documentation. They serve different purposes and work
-            better together than either does alone.
-          </p>
-
-          <h2>The bigger picture</h2>
-
-          <p>
-            Between Uptime Kuma for monitoring, Homepage for a live
-            infrastructure overview, Obsidian for documentation, and now
-            Planka for project tracking, the homelab has developed a
-            genuine operational layer on top of the infrastructure layer.
-            That's not something I planned deliberately — it emerged from
-            asking what's actually useful rather than what's technically
-            impressive.
+            The standard websocket proxy headers — <code>Upgrade</code>,
+            <code>Connection upgrade</code>, <code>proxy_http_version 1.1</code>
+            — are the first thing to check. I added those to NPM's advanced
+            config. Still spinning. The internal NGINX already had those
+            headers configured, so adding them again at the NPM layer was
+            creating conflicts rather than solving anything.
           </p>
 
           <p>
-            That distinction feels important. The goal was never to run
-            the most complex homelab. It was to build something that teaches
-            real skills and solves real problems. A Kanban board I check
-            daily does more for the transition into tech than another service
-            running idle in a container.
+            I checked the BASE_URL setting in Planka's environment config —
+            it was set to HTTP while the site was being served over HTTPS.
+            Updated it. Still spinning. Deleted the proxy host and recreated
+            it from scratch. Checked ports, checked the internal NGINX
+            default server block that was intercepting traffic before the
+            Planka server block. Each fix resolved one layer and revealed
+            the next.
+          </p>
+
+          <h2>What fixed it</h2>
+
+          <p>
+            The resolution came from understanding the internal NGINX
+            configuration fully and then configuring NPM to pass traffic
+            through cleanly rather than trying to handle websockets itself.
+            The internal NGINX already had correct socket.io routing — NPM
+            just needed to get out of its way rather than duplicate the work.
+          </p>
+
+          <p>
+            Once that mental model clicked the fix was straightforward.
+            Two days of frustration, ten minutes of actual configuration
+            change. That ratio is familiar by now.
+          </p>
+
+          <h2>Vikunja as a comparison point</h2>
+
+          <p>
+            While working through the Planka issue I also deployed Vikunja —
+            a more fully featured task manager with Kanban support. The
+            contrast was immediate. Vikunja required no special proxy
+            configuration whatsoever. Standard NPM setup, wildcard SSL,
+            done. No internal proxy layer to navigate.
+          </p>
+
+          <p>
+            Both tools are now running. Planka is clean and minimal —
+            pure Kanban with a card-based interface that feels fast. Vikunja
+            has more structure — projects, subtasks, due dates, and a
+            Homepage widget that shows tasks in progress, overdue items, and
+            upcoming deadlines directly on the dashboard.
+          </p>
+
+          <p>
+            Which one I actually use consistently will tell me more about
+            what I need than any feature comparison. That's the real
+            evaluation criteria for self-hosted tools.
+          </p>
+
+          <h2>What the whole process taught me</h2>
+
+          <p>
+            Troubleshooting layered proxy issues requires being able to
+            isolate each layer independently. Direct IP access confirms the
+            application is running. Internal curl confirms the container's
+            own proxy is working. Browser dev tools confirm what the client
+            is actually receiving. Each layer has its own diagnostic surface
+            and you have to work through them in order rather than guessing.
+          </p>
+
+          <p>
+            That systematic approach — eliminate variables one at a time,
+            confirm each layer before moving to the next — is the same
+            methodology that applies to any network troubleshooting. The
+            specific technology changes. The approach doesn't.
           </p>
 
         </div>
 
         <nav class="entry-nav" aria-label="Entry navigation">
           <a href="03-28-2026.html">← Previous: 03-28-2026 Entry</a>
-          <span></span>
+          <a href="04-02-2026.html">Next: 04-02-2026 Entry →</a>
         </nav>
       </article>
     </main>
