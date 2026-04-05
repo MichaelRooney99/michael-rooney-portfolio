@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Studying With Something at Stake — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Focused Network+ study with a real deadline — a conversation with a networking manager at my employer, and what two weeks of preparation actually looks like."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Studying With Something at Stake — Michael Rooney" />
+    <meta property="og:description" content="Focused Network+ study with a real deadline — a conversation with a networking manager at my employer, and what two weeks of preparation actually looks like." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-05-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Studying With Something at Stake — Michael Rooney" />
+    <meta name="twitter:description" content="Focused Network+ study with a real deadline — a conversation with a networking manager at my employer, and what two weeks of preparation actually looks like." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-05-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-05-2026">April 5, 2026</time>
+            <span class="tag tag-certs">Certs</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Studying With Something at Stake</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            I have roughly two weeks before a conversation with a network
+            engineering manager at my employer. The email came last week —
+            introduced, professional, open-ended. The timing works out to
+            mid-April. That window feels both generous and short depending
+            on the hour.
+          </p>
+
+          <p>
+            The most useful thing I can do with that time is study.
+            Specifically Network+ — the CompTIA certification that
+            formalizes the networking knowledge I've been building
+            hands-on for the past several months. A network engineering
+            manager will notice if you can speak intelligently about
+            subnetting, VLANs, routing protocols, and firewall concepts.
+            I can do that. The cert makes it verifiable.
+          </p>
+
+          <h2>How I'm studying</h2>
+
+          <p>
+            Professor Messer's free Network+ video series is the primary
+            resource. His explanations are clear, his coverage of the
+            N10-009 objectives is thorough, and the pace works well for
+            someone who already has practical context for most of the
+            material. I run through videos during lower-attention tasks
+            and reinforce with practice questions afterward.
+          </p>
+
+          <p>
+            Practice exams are the real diagnostic tool. Taking timed
+            exams and reviewing every wrong answer carefully is more
+            valuable than passive re-reading. The domains where I'm
+            weakest become obvious quickly and that's where the remaining
+            study time goes.
+          </p>
+
+          <h2>Where the homelab connects</h2>
+
+          <p>
+            A significant portion of the Network+ objectives map directly
+            to things I've already implemented. Subnetting — I manage a
+            segmented local network with static assignments across a dozen
+            services. Firewall rules — I've written and debugged rules
+            for VPN traffic, websocket connections, and inbound and
+            outbound filtering. DNS — I run a local resolver with custom
+            host overrides for every internal domain. VPNs — I have a
+            mesh network running direct and relay connections across
+            multiple device types.
+          </p>
+
+          <p>
+            The gap is in the formal vocabulary and in areas the homelab
+            doesn't naturally exercise — routing protocols, wireless
+            standards, and security concepts that require enterprise scale
+            to encounter organically. Structured study fills those in.
+          </p>
+
+          <p class="callout">
+            Practical experience without vocabulary is hard to communicate.
+            Vocabulary without practical experience is hard to trust.
+            The combination is the sweet spot.
+          </p>
+
+          <h2>The homelab cleanup</h2>
+
+          <p>
+            While keeping the study focus I also did some infrastructure
+            housekeeping. I'd been running two Kanban tools in parallel
+            to evaluate which one fit my workflow better. The decision
+            was clear after a few days — one had a clean native integration
+            with my dashboard and required no special proxy configuration.
+            The other fought the setup every step of the way. Removed the
+            losing one, released the resources back to the pool, updated
+            monitoring and DNS accordingly.
+          </p>
+
+          <p>
+            That kind of cleanup is worth doing deliberately rather than
+            letting unused services accumulate. Every running container
+            is something to maintain, monitor, and back up. If it's not
+            being used it's just overhead.
+          </p>
+
+          <h2>What the next ten days look like</h2>
+
+          <p>
+            Work obligations mid-month mean study happens in the margins
+            — lunch breaks, after the family is settled, the half hour
+            before a shift starts. The professional conversation happens
+            in the second half of the month. Network+ exam scheduling
+            comes after that depending on how things develop.
+          </p>
+
+          <p>
+            The goal isn't to be perfect before that conversation. The
+            goal is to be clearly someone who is actively working toward
+            this and has the evidence to prove it. That's achievable.
+            That's the plan.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="04-02-2026.html">← Previous: 04-02-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
