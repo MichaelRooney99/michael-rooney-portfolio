@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Upgrading a Node the Right Way — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Swapping out a Proxmox cluster node for faster hardware — live VM migration, hardware replacement, and what the process teaches about infrastructure resilience."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Upgrading a Node the Right Way — Michael Rooney" />
+    <meta property="og:description" content="Swapping out a Proxmox cluster node for faster hardware — live VM migration, hardware replacement, and what the process teaches about infrastructure resilience." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-09-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Upgrading a Node the Right Way — Michael Rooney" />
+    <meta name="twitter:description" content="Swapping out a Proxmox cluster node for faster hardware — live VM migration, hardware replacement, and what the process teaches about infrastructure resilience." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-09-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-09-2026">April 9, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Upgrading a Node the Right Way</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            One of my cluster nodes had been causing intermittent monitoring
+            alerts for a while — services on it would go briefly unreachable,
+            a reboot would clear it, and it would be fine for a few days
+            before repeating. The root cause was never definitively confirmed
+            but the slow NVMe drive was the leading suspect. Write latency
+            under load can cause VM stability issues that look like network
+            or application problems on the surface.
+          </p>
+
+          <p>
+            I had a replacement unit available — same form factor, faster
+            storage, doubled RAM. The question was how to swap the hardware
+            without losing the services running on that node.
+          </p>
+
+          <h2>The migration approach</h2>
+
+          <p>
+            The node in question runs the backup server for the entire
+            cluster — the worst possible service to have go down during
+            a hardware swap. The right move was to migrate that VM to
+            another node first, perform the hardware replacement, then
+            migrate it back.
+          </p>
+
+          <p>
+            Proxmox makes live VM migration straightforward through the
+            web interface. Select the VM, choose a target node, confirm.
+            The VM moves while running with only a brief network
+            interruption. The backup server came up cleanly on the
+            temporary host and I ran a manual backup job to confirm
+            everything was working before touching any hardware.
+          </p>
+
+          <p class="callout">
+            Never do maintenance on the node that hosts your backups
+            without first confirming your backups are current and
+            accessible from somewhere else.
+          </p>
+
+          <h2>The hardware swap</h2>
+
+          <p>
+            Removing the old node from the cluster, installing Proxmox
+            on the new hardware, and rejoining it to the cluster is a
+            clean process when done in the right order. The key detail
+            is that the new machine needs to be configured with the same
+            hostname and IP before joining — the cluster recognizes nodes
+            by identity, not just by address.
+          </p>
+
+          <p>
+            One gotcha: the new hardware has a different network adapter
+            MAC address. My router assigns static IPs by MAC, so the new
+            machine came up on a DHCP address rather than its expected
+            static IP. DNS resolution failed, package updates failed,
+            everything looked broken until the MAC was registered with
+            the correct static assignment. Five minute fix once identified,
+            confusing until it was.
+          </p>
+
+          <h2>What changed</h2>
+
+          <p>
+            The replacement unit has a significantly faster NVMe — the
+            difference in sequential write speed is substantial. RAM
+            doubled from 16GB to 32GB, bringing it in line with the
+            primary cluster node. The old SATA drive carried over since
+            it was fine and had no performance complaints.
+          </p>
+
+          <p>
+            The old NVMe went into a USB enclosure as a cold spare.
+            I briefly considered adding it as a second backup datastore
+            but the performance over USB made that impractical for nightly
+            automated jobs. It's shelved and available if something
+            catastrophic happens to the current storage.
+          </p>
+
+          <h2>The outcome</h2>
+
+          <p>
+            The monitoring alerts stopped immediately after the swap.
+            All four cluster nodes are green. The backup server ran
+            its first nightly job on the new hardware without issues.
+            Current datastore usage sits well under one percent of
+            available capacity — the upgrade added headroom alongside
+            the stability fix.
+          </p>
+
+          <p>
+            The process itself was a useful exercise in infrastructure
+            thinking. Having a three node cluster meant there was always
+            somewhere to migrate a VM during maintenance. Having current
+            backups meant there was a fallback if migration failed.
+            Having a documented IP scheme meant the new node's network
+            issue was diagnosable in minutes rather than hours.
+            The infrastructure investments compound.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="04-05-2026.html">← Previous: 04-05-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
