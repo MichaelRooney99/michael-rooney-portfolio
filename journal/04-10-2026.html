@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Network Segmentation — VLANs in the Homelab — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Implementing VLAN segmentation with OPNsense and a managed switch — the concept, the configuration, and why network isolation matters."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Network Segmentation — VLANs in the Homelab — Michael Rooney" />
+    <meta property="og:description" content="Implementing VLAN segmentation with OPNsense and a managed switch — the concept, the configuration, and why network isolation matters." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-10-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Network Segmentation — VLANs in the Homelab — Michael Rooney" />
+    <meta name="twitter:description" content="Implementing VLAN segmentation with OPNsense and a managed switch — the concept, the configuration, and why network isolation matters." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-10-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-10-2026">April 10, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Network Segmentation — VLANs in the Homelab</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Today I implemented VLAN segmentation in the homelab. It's one
+            of those topics that comes up constantly in networking
+            conversations — on certification exams, in job descriptions,
+            in enterprise architecture discussions. I've understood the
+            concept for a while. Now I've actually built it.
+          </p>
+
+          <h2>What a VLAN actually is</h2>
+
+          <p>
+            A Virtual LAN is a way to divide a single physical network
+            into multiple logically separate networks. Devices on different
+            VLANs can share the same physical switch and cabling but can't
+            talk to each other directly — traffic between VLANs has to go
+            through a router, where firewall rules control what's allowed.
+          </p>
+
+          <p>
+            The practical value is isolation. A device on your IoT network
+            can't reach your servers even if they're plugged into the same
+            switch. A guest WiFi network can reach the internet but not
+            your NAS. A lab environment can be completely separated from
+            production. You get the physical simplicity of one network
+            with the security boundaries of many.
+          </p>
+
+          <h2>The physical setup</h2>
+
+          <p>
+            The homelab already had an unused network port on the router
+            VM and an 8-port managed switch that had been waiting for
+            exactly this purpose. Managed switches are what make VLANs
+            possible at the physical layer — they understand VLAN tags
+            and can route traffic to the right logical network based on
+            which port a device is plugged into.
+          </p>
+
+          <p>
+            The switch connects to the router on one port — the trunk port.
+            A trunk port carries traffic for multiple VLANs simultaneously,
+            with each frame tagged to identify which VLAN it belongs to.
+            The router receives tagged frames, strips the tags, and routes
+            the traffic through the appropriate virtual interface.
+          </p>
+
+          <h2>Tagged vs untagged — where it gets interesting</h2>
+
+          <p>
+            This distinction tripped me up initially. Tagged traffic carries
+            a VLAN identifier in the frame header. Untagged traffic has no
+            tag — it belongs to whatever VLAN the switch port is configured
+            to assign by default, called the native VLAN or PVID.
+          </p>
+
+          <p>
+            Access ports — where end devices plug in — send and receive
+            untagged traffic. The device doesn't need to know anything
+            about VLANs. It just sends frames and the switch handles the
+            tagging. Trunk ports between switches and routers carry tagged
+            traffic so both sides know which VLAN each frame belongs to.
+          </p>
+
+          <p class="callout">
+            A device doesn't need to be VLAN-aware to be on a VLAN.
+            The switch handles the segmentation transparently.
+            That's what makes it powerful.
+          </p>
+
+          <h2>The OPNsense configuration</h2>
+
+          <p>
+            On the router side, each VLAN gets its own virtual interface
+            with its own subnet, its own DHCP server, and its own firewall
+            rules. VLAN 20 — the isolation network — sits on
+            a separate subnet from the main network. The firewall has two
+            rules: block traffic destined for the main network, allow
+            everything else. Order matters — the block rule has to come
+            first or the allow-all rule catches it before the block can fire.
+          </p>
+
+          <h2>Testing the isolation</h2>
+
+          <p>
+            A spare machine plugged into the VLAN 20 port on the switch
+            received an IP address on the isolated subnet automatically
+            via DHCP — no configuration on the machine itself. Internet
+            access worked. Attempting to ping devices on the main network
+            failed as expected. The firewall rule was working.
+          </p>
+
+          <p>
+            That test result — internet works, main LAN unreachable — is
+            exactly what proper network segmentation looks like. A device
+            on that port gets connectivity but no visibility into the rest
+            of the infrastructure.
+          </p>
+
+          <h2>Why this matters beyond the homelab</h2>
+
+          <p>
+            VLANs are foundational to enterprise networking. Every
+            organization of any size uses them — separating corporate
+            devices from guest WiFi, isolating servers from workstations,
+            segmenting IoT devices from sensitive data. The specific
+            implementation varies but the concepts are identical to what
+            I built today.
+          </p>
+
+          <p>
+            Being able to say I've configured VLAN segmentation on a
+            managed switch with firewall-enforced inter-VLAN routing
+            is meaningfully different from being able to describe it
+            from a textbook. The conversation I have coming up with
+            a network engineering team feels a little more grounded
+            now than it did yesterday.
+          </p>
+
+          <h2>What's next for the network</h2>
+
+          <p>
+            The current setup has one isolated VLAN and the main network.
+            The natural expansion is adding more VLANs for different
+            purposes — a dedicated management VLAN for infrastructure
+            devices, potentially a guest network, IoT devices as they
+            get added. The trunk port is already configured to carry
+            additional VLANs — adding a new one is additive, not
+            a rebuild.
+          </p>
+
+          <p>
+            There's also a cleaner topology to work toward where the
+            trunk port carries the main network as the native untagged
+            VLAN, eliminating the need for a separate management uplink
+            on the switch. That's a future configuration once I'm more
+            comfortable with how OPNsense handles bridged interfaces.
+            For now the working segmentation is the win.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="04-09-2026.html">← Previous: 04-09-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
