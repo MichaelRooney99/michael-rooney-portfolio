@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A Tour of the Homelab — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A visual walkthrough of a four-node Proxmox homelab — network architecture, infrastructure services, monitoring, and backups."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="A Tour of the Homelab — Michael Rooney" />
+    <meta property="og:description" content="A visual walkthrough of a four-node Proxmox homelab — network architecture, infrastructure services, monitoring, and backups." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-11-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="A Tour of the Homelab — Michael Rooney" />
+    <meta name="twitter:description" content="A visual walkthrough of a four-node Proxmox homelab — network architecture, infrastructure services, monitoring, and backups." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-11-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      .tour-figure {
+        margin: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .tour-figure img {
+        width: 100%;
+        border-radius: 0.35rem;
+        border: 1px solid var(--border);
+        display: block;
+      }
+
+      .tour-figure figcaption {
+        font-size: 0.78rem;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+        font-style: italic;
+      }
+
+      .tour-section {
+        margin: 3rem 0 1rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .tour-section h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.85rem;
+        letter-spacing: 0.02em;
+        color: var(--text);
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="2026-04-10">April 10, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>A Tour of the Homelab</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            This is a visual walkthrough of the homelab I've been building
+            and documenting over the past several months. It started as a
+            way to gain hands-on experience with infrastructure concepts
+            while transitioning into a tech career. It's grown into something
+            I'm genuinely proud of — a functional, monitored, documented
+            stack running on four repurposed mini PCs.
+          </p>
+
+          <p>
+            Every service here was deployed, configured, broken, fixed,
+            and documented by hand. The journal entries linked throughout
+            this site tell that story in detail. This page is the visual
+            overview.
+          </p>
+
+          <!-- NETWORK DIAGRAM -->
+          <div class="tour-section">
+            <h2>Network Architecture</h2>
+            <p>
+              Four Lenovo ThinkCentre M920Q mini PCs running Proxmox
+              Virtualization Environment. One standalone node handles all
+              network services. Three form a cluster for workloads and
+              storage. A managed switch extends the network with VLAN
+              segmentation for traffic isolation.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/homelab-network-diagram.png"
+                alt="Network architecture diagram showing four Proxmox nodes, OPNsense router, managed switch, and VLAN segmentation"
+                width="800"
+                height="500"
+              />
+              <figcaption>
+                Network architecture — ISP router → OPNsense VM →
+                main LAN (*.*.10.0/24) and VLAN trunk to managed switch
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- PROXMOX -->
+          <div class="tour-section">
+            <h2>Proxmox Cluster</h2>
+            <p>
+              Three of the four nodes form a Proxmox VE cluster — Ankhh
+              (32GB RAM, primary workload node), Dega (32GB RAM, backup
+              and storage), and Murloc (16GB RAM, productivity services).
+              The fourth node runs standalone handling network
+              infrastructure exclusively.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/proxmox-cluster.png"
+                alt="Proxmox web interface showing three nodes and their resource usage"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                Proxmox cluster view — three nodes, resource usage,
+                and running VMs and containers
+              </figcaption>
+            </figure>
+            <figure class="tour-figure">
+              <img
+                src="../img/proxmox-network-node.png"
+                alt="Proxmox web interface showing the network node and its resource usage"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                Proxmox network node view — single node, resource usage,
+                and running services
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- OPNSENSE -->
+          <div class="tour-section">
+            <h2>OPNsense — Router and Firewall</h2>
+            <p>
+              OPNsense runs as a VM on the network node with direct NIC
+                and running VMs and containers
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- OPNSENSE -->
+          <div class="tour-section">
+            <h2>OPNsense — Router and Firewall</h2>
+            <p>
+              OPNsense runs as a VM on the network node with direct NIC
+              passthrough. It handles routing, firewall rules, DHCP,
+              and local DNS resolution via Unbound. All inter-VLAN
+              traffic is routed and filtered here — devices on the
+              isolated VLAN can reach the internet but are blocked
+              from the main network by explicit firewall rules.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/opnsense-dashboard.png"
+                alt="OPNsense dashboard showing interfaces, gateway status, and system information"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                OPNsense dashboard — interface status, gateway,
+                and system health
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- HOMEPAGE -->
+          <div class="tour-section">
+            <h2>Homepage Dashboard</h2>
+            <p>
+              Homepage provides a single pane of glass for the entire
+              infrastructure. Live stats pull directly from Proxmox nodes
+              via API tokens — VM counts, CPU usage, memory usage per node.
+              Network services, monitoring tools, backup status, and
+              productivity apps are all accessible from one place.
+              Configured entirely via YAML files, no database required.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/homepage-dashboard.png"
+                alt="Homepage dashboard showing Proxmox node stats, network services, monitoring, and storage sections"
+                width="800"
+                height="350"
+              />
+              <figcaption>
+                Homepage dashboard — live infrastructure overview
+                with grouped service tiles and system stats
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- UPTIME KUMA -->
+          <div class="tour-section">
+            <h2>Uptime Kuma — Monitoring</h2>
+            <p>
+              Uptime Kuma monitors every service in the stack with
+              configurable intervals and Gmail SMTP alerts. Monitors
+              are organized by node group and tagged by role —
+              infrastructure, services, and Proxmox nodes. When
+              something goes down an email arrives within a minute.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/uptime-kuma.png"
+                alt="Uptime Kuma dashboard showing all monitors grouped by node with uptime percentages"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                Uptime Kuma — monitors grouped by node,
+                color-coded by service type
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- PBS -->
+          <div class="tour-section">
+            <h2>Proxmox Backup Server</h2>
+            <p>
+              Proxmox Backup Server runs as a VM on Dega with a dedicated
+              1.8TB datastore on a fast NVMe. All four nodes back up
+              nightly at 2am with deduplication enabled — the entire
+              cluster's backup footprint is a fraction of what traditional
+              snapshots would require. Retention policy keeps three recent,
+              seven daily, and four weekly backups automatically.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/pbs-dashboard.png"
+                alt="Proxmox Backup Server dashboard showing datastore usage, recent backup tasks, and task summary"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                Proxmox Backup Server — datastore usage,
+                recent tasks, and backup job summary
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- VIKUNJA -->
+          <div class="tour-section">
+            <h2>Vikunja — Task Management</h2>
+            <p>
+              Vikunja keeps the work organized — homelab projects,
+              certification study milestones, career goals, and
+              coursework deadlines all in one place. A native Homepage
+              widget surfaces active tasks, overdue items, and upcoming
+              deadlines directly on the dashboard without opening a
+              separate app.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/vikunja.png"
+                alt="Vikunja Kanban board showing project lists with tasks in Backlog, In Progress, Blocked, and Done columns"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                Vikunja — Kanban board with homelab and
+                career project tracking
+              </figcaption>
+            </figure>
+          </div>
+
+          <!-- VLAN -->
+          <div class="tour-section">
+            <h2>VLAN Segmentation</h2>
+            <p>
+              A managed switch extends the network with VLAN support.
+              The trunk port carries tagged traffic for multiple VLANs
+              to OPNsense which handles inter-VLAN routing and firewall
+              enforcement. Devices on isolated VLANs get internet access
+              but cannot reach the main infrastructure network — enforced
+              at the firewall layer, not just the switch layer.
+            </p>
+            <figure class="tour-figure">
+              <img
+                src="../img/vlan-firewall-rules.png"
+                alt="OPNsense firewall rules showing VLAN 20 block rule to main LAN and allow rule to internet"
+                width="800"
+                height="250"
+              />
+              <figcaption>
+                OPNsense VLAN firewall rules — block to main LAN,
+                allow to internet, in that order
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="tour-section">
+            <h2>What's next</h2>
+            <p>
+              The roadmap includes Ansible for configuration management
+              across all nodes, Prometheus and Grafana for metrics and
+              temperature monitoring, a dedicated NAS for media storage
+              and backup redundancy, and additional VLAN segments as
+              the network grows. The infrastructure investments compound
+              — each piece makes the next one easier to build and maintain.
+            </p>
+          </div>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="04-10-2026.html">← Previous: Network Segmentation</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
