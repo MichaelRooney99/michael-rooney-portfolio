@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering the Power Stack — Michael Rooney</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="logo">MR</a>
+        </header>
+
+        <main>
+            <a href="../journal.html" class="back-link">← Back to Journal</a>
+
+            <article>
+                <header class="entry-header">
+                    <div class="entry-meta">
+                        <time datetime="2026-04-16">April 16, 2026</time>
+                        <span class="tag">Homelab</span>
+                    </div>
+                    <h1>Mastering the Power Stack</h1>
+                </header>
+
+                <div class="prose">
+                    <p>In the journey of homelabbing, there comes a point where the software stack feels solid, but the physical foundation remains a "best effort" endeavor. Up until today, my power management strategy was reactive. If the power flickered, I hoped the UPS held; if it stayed out, I sprinted to the basement. Today, that changed.</p>
+
+                    <h2>The Migration: From Dega to Ankhh</h2>
+                    <p>For a long time, the physical USB connection for my CyberPower SX950U was tied to Dega (Node 2). While it worked, it felt architecturally displaced. Dega is my backup and storage node—heavy on data but secondary in the cluster's logical hierarchy. I wanted the heartbeat of my power stack to reside on Ankhh (Node 1), my primary workload node.</p>
+
+                    <p>The move was more than just swapping a cable. It required a full re-evaluation of my Network UPS Tools (NUT) architecture. By moving the USB to Ankhh, I positioned the UPS master at the center of the cluster, allowing for cleaner telemetry and a more direct logical flow for the shutdown signals that keep my data safe.</p>
+
+                    <div class="callout">
+                        Physical placement of infrastructure sensors should mirror their logical importance. If Node 1 is the brain, it needs to be the first to know when the heart stops.
+                    </div>
+
+                    <h2>Deploying peaNUT</h2>
+                    <p>With the physical move complete, I deployed <strong>peaNUT</strong> as an LXC on Ankhh. I recycled the 10.10.10.103 IP address—a slot previously occupied by Planka. This was a deliberate choice to keep the IP allocation table lean and organized.</p>
+
+                    <p>The deployment involved passing the raw USB device (Bus 001 Device 003) from the Proxmox host into the unprivileged container. This required some careful cgroup2 mapping in the Proxmox configuration to ensure the container had read/write permissions to the hardware without compromising security.</p>
+
+                    <h2>The Result: A Single Pane of Glass</h2>
+                    <p>The reward for this effort is more than just a safer shutdown procedure. By integrating peaNUT with my Homepage dashboard, I now have real-time visibility into battery charge, current load, and—most importantly—estimated runtime. Watching the wattage shift as services spin up or down adds a new layer of understanding to how my hardware actually breathes.</p>
+
+                    <p>Ankhh now stands as the Master, and the remaining nodes—Dega, Murloc, and the standalone Network Node—operate as Slaves. When the power dips, the lab now has a unified voice. It knows when to stay up, and it knows exactly when to say goodbye.</p>
+                </div>
+            </article>
+        </main>
+    </div>
+    <script src="../main.js"></script>
+</body>
+</html>
