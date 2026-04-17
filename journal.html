@@ -37,7 +37,6 @@
 
     <main id="main">
 
-      <!-- HERO -->
       <section class="hero journal-hero hero-load" aria-labelledby="journal-heading">
         <span class="hero-eyebrow">Writing</span>
         <h1 id="journal-heading">Journal</h1>
@@ -48,7 +47,6 @@
         </p>
       </section>
 
-      <!-- FILTER BAR -->
       <div class="filter-bar reveal" role="group" aria-label="Filter entries by tag">
         <button class="filter-btn active" data-filter="all">All</button>
         <button class="filter-btn" data-filter="homelab">Homelab</button>
@@ -57,9 +55,22 @@
         <button class="filter-btn" data-filter="certs">Certs</button>
       </div>
 
-      <!-- ENTRY LIST -->
       <section aria-label="Journal entries">
         <ol class="entry-list" reversed>
+          <li data-tags="homelab">
+            <a href="journal/04-16-2026.html" class="entry" aria-label="Read: Chasing Ghosts, Finding Watts — April 16 2026">
+              <time class="entry-date" datetime="2026-04-16">Apr 16, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Chasing Ghosts, Finding Watts</h2>
+                <p class="entry-excerpt">
+                  A long afternoon chasing phantom reboots — ruling out thermals, memory, power, and firmware — only to end up with full UPS monitoring, a live power dashboard, and the knowledge that four Proxmox nodes idle at 65 watts.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-homelab">Homelab</span>
+                </div>
+              </div>
+            </a>
+          </li>
           <li data-tags="homelab">
             <a href="journal/04-11-2026.html" class="entry" aria-label="Read: A Tour of the Homelab — April 11 2026">
               <time class="entry-date" datetime="04-11-2026">Apr 11, 2026</time>

@@ -1,54 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mastering the Power Stack — Michael Rooney</title>
-    <link rel="stylesheet" href="../styles.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <a href="../index.html" class="logo">MR</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chasing Ghosts, Finding Watts — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A long afternoon chasing phantom reboots on a Proxmox node — ruling out everything, finding nothing definitive, and accidentally building out full UPS monitoring along the way."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Chasing Ghosts, Finding Watts — Michael Rooney" />
+    <meta property="og:description" content="A long afternoon chasing phantom reboots on a Proxmox node — ruling out everything, finding nothing definitive, and accidentally building out full UPS monitoring along the way." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-16-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Chasing Ghosts, Finding Watts — Michael Rooney" />
+    <meta name="twitter:description" content="A long afternoon chasing phantom reboots on a Proxmox node — ruling out everything, finding nothing definitive, and accidentally building out full UPS monitoring along the way." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-16-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="2026-04-16">April 16, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Chasing Ghosts, Finding Watts</h1>
         </header>
 
-        <main>
-            <a href="../journal.html" class="back-link">← Back to Journal</a>
+        <div class="prose">
 
-            <article>
-                <header class="entry-header">
-                    <div class="entry-meta">
-                        <time datetime="2026-04-16">April 16, 2026</time>
-                        <span class="tag">Homelab</span>
-                    </div>
-                    <h1>Mastering the Power Stack</h1>
-                </header>
+          <p>
+            Today was one of those sessions where you go in with a simple
+            goal, pull on a thread, and three hours later you're somewhere
+            you didn't expect — with something better than what you set
+            out to build, and still no clean answer to the original question.
+          </p>
 
-                <div class="prose">
-                    <p>In the journey of homelabbing, there comes a point where the software stack feels solid, but the physical foundation remains a "best effort" endeavor. Up until today, my power management strategy was reactive. If the power flickered, I hoped the UPS held; if it stayed out, I sprinted to the basement. Today, that changed.</p>
+          <p>
+            The starting point was the backup server. It had been randomly
+            unreachable for extended periods — the dashboard would show it
+            red, backups would fail, and then it would come back on its own
+            or after I noticed and poked at it. Annoying. The kind of thing
+            you can ignore for a day or two before it becomes the thing
+            you have to sit down and actually fix.
+          </p>
 
-                    <h2>The Migration: From Dega to Ankhh</h2>
-                    <p>For a long time, the physical USB connection for my CyberPower SX950U was tied to Dega (Node 2). While it worked, it felt architecturally displaced. Dega is my backup and storage node—heavy on data but secondary in the cluster's logical hierarchy. I wanted the heartbeat of my power stack to reside on Ankhh (Node 1), my primary workload node.</p>
+          <h2>The first answer was easy</h2>
 
-                    <p>The move was more than just swapping a cable. It required a full re-evaluation of my Network UPS Tools (NUT) architecture. By moving the USB to Ankhh, I positioned the UPS master at the center of the cluster, allowing for cleaner telemetry and a more direct logical flow for the shutdown signals that keep my data safe.</p>
+          <p>
+            The backup server runs as a VM on one of my cluster nodes.
+            When I dug into the task logs, the pattern was immediate — the
+            VM wasn't crashing, the node was rebooting. Every outage
+            corresponded to a reboot event on the host. The backup VM
+            wasn't set to auto-start, so when the node came back up,
+            the VM just sat there stopped until someone manually started it.
+          </p>
 
-                    <div class="callout">
-                        Physical placement of infrastructure sensors should mirror their logical importance. If Node 1 is the brain, it needs to be the first to know when the heart stops.
-                    </div>
+          <p>
+            That part was a one-liner to fix. Auto-start on boot, done.
+            The backup server will come back up automatically now regardless
+            of why the node reboots. Problem solved at the surface. Then
+            I made the mistake of looking at why the node was rebooting.
+          </p>
 
-                    <h2>Deploying peaNUT</h2>
-                    <p>With the physical move complete, I deployed <strong>peaNUT</strong> as an LXC on Ankhh. I recycled the 10.10.10.103 IP address—a slot previously occupied by Planka. This was a deliberate choice to keep the IP allocation table lean and organized.</p>
+          <h2>Everything that wasn't the problem</h2>
 
-                    <p>The deployment involved passing the raw USB device (Bus 001 Device 003) from the Proxmox host into the unprivileged container. This required some careful cgroup2 mapping in the Proxmox configuration to ensure the container had read/write permissions to the hardware without compromising security.</p>
+          <p>
+            I went through the standard checklist. Thermals — fine, mid-40s
+            under load, well within spec for a small form factor machine.
+            Memory — 28GB free, swap untouched, no OOM events in the logs.
+            Kernel panics — none. Machine check errors — none. Hardware
+            watchdog misfiring — not active. Rogue cron jobs — nothing
+            unusual. Power — the node is on a brand new UPS I'd just
+            picked up, so simple power sags were unlikely.
+          </p>
 
-                    <h2>The Result: A Single Pane of Glass</h2>
-                    <p>The reward for this effort is more than just a safer shutdown procedure. By integrating peaNUT with my Homepage dashboard, I now have real-time visibility into battery charge, current load, and—most importantly—estimated runtime. Watching the wattage shift as services spin up or down adds a new layer of understanding to how my hardware actually breathes.</p>
+          <p>
+            I did find one thing that needed cleaning up — a custom monitor
+            service that had been created during an earlier debugging session.
+            It was broken from the start due to a quoting error that systemd
+            flagged on every boot, and instead of running live diagnostics,
+            it was just endlessly echoing a hardcoded snapshot of data from
+            weeks ago into log files. It was doing nothing useful and
+            generating noise. Disabled and removed.
+          </p>
 
-                    <p>Ankhh now stands as the Master, and the remaining nodes—Dega, Murloc, and the standalone Network Node—operate as Slaves. When the power dips, the lab now has a unified voice. It knows when to stay up, and it knows exactly when to say goodbye.</p>
-                </div>
-            </article>
-        </main>
-    </div>
-    <script src="../main.js"></script>
-</body>
+          <p>
+            But that wasn't causing the reboots either.
+          </p>
+
+          <h2>The reboots that weren't reboots</h2>
+
+          <p>
+            When I finally pulled the full shutdown logs from before each
+            reboot event, the picture got clearer and more frustrating at
+            the same time. The shutdowns were clean. Fully ordered, graceful,
+            every service stopping in sequence — the kind of shutdown you
+            only see when something deliberately told the OS to shut down.
+            No crash, no panic, no watchdog timeout. Just a clean exit.
+          </p>
+
+          <p>
+            Going further back through the reboot history, most of the
+            clustering events — multiple reboots in a single day — lined
+            up with dates I'd been actively working on the node. My own
+            debugging sessions. The node wasn't randomly rebooting. I was
+            rebooting it and apparently forgetting I'd done it, or not
+            connecting the dots when reviewing history later.
+          </p>
+
+          <p class="callout">
+            Ruling out hardware, software, power, and firmware as causes
+            is genuinely useful — even when the answer turns out to be
+            "it was you the whole time."
+          </p>
+
+          <p>
+            There's one reboot that doesn't fit that pattern cleanly —
+            a poweroff event late in the session today that happened while
+            I was actively trying to SSH into the node. The logs show a
+            clean poweroff target, not a reboot target, triggered by
+            something that issued a shutdown command. The node came back
+            on its own, which points to either the UPS or the hardware
+            cycling it. I was in the middle of reconfiguring the UPS
+            monitoring service at the time, which is a plausible culprit.
+            The root cause on that one is still open.
+          </p>
+
+          <h2>UPS monitoring — the actual win today</h2>
+
+          <p>
+            Since I was already deep in the node's configuration and had
+            just picked up a new UPS, it made sense to finally get proper
+            power monitoring set up. The UPS has a USB port for data — plug
+            it in, install Network UPS Tools, and you get live telemetry
+            on battery charge, runtime, load, and input voltage.
+          </p>
+
+          <p>
+            I ended up building out a full NUT architecture across the
+            cluster. One node acts as the master — it has the USB connection
+            to the UPS and runs the NUT server, exposing power data on the
+            network. Every other node runs a NUT client that connects to
+            the master and can trigger a graceful shutdown if the UPS battery
+            gets critically low. The whole cluster will shut itself down in
+            an orderly way during a sustained power outage rather than just
+            dying when the battery runs out.
+          </p>
+
+          <p>
+            On top of that I deployed PeaNUT — a clean web UI for NUT that
+            lives in its own LXC on one of the cluster nodes. It connects
+            to the NUT server and gives a proper dashboard view of UPS
+            health, load history, and battery status. That's now proxied
+            behind a domain with SSL like everything else in the lab, and
+            there's a live widget on the homelab dashboard pulling the same
+            data.
+          </p>
+
+          <h2>65 watts</h2>
+
+          <p>
+            Once everything was connected and reading, I had something I
+            didn't have before — actual power draw data for the whole
+            homelab. The UPS is reporting around 65 to 70 watts of total
+            load across all four nodes, the switch, and whatever else is
+            on that circuit.
+          </p>
+
+          <p>
+            That number is lower than I expected. Four mini PCs running
+            Proxmox continuously, a managed switch, a UPS, and a handful
+            of always-on services — under 70 watts. For context that's
+            roughly what a single bright incandescent bulb used to draw.
+            The efficiency of modern small form factor hardware running
+            low-power processors is genuinely impressive once you see
+            the actual number.
+          </p>
+
+          <p>
+            It also means the UPS has a lot of headroom. At current load,
+            runtime on battery is well over 50 minutes. That's enough to
+            ride out almost any realistic power event without a graceful
+            shutdown ever being necessary.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            The backup server auto-start is fixed. Power monitoring is
+            live across the cluster. PeaNUT is deployed and integrated
+            into the dashboard. The cluster is in better shape than it
+            was this morning in every measurable way.
+          </p>
+
+          <p>
+            The mystery reboot is still a mystery. There's a communication
+            gap somewhere between the monitoring stack and the backup
+            service — something occasionally drops the connection in a way
+            that looks like an outage without leaving clean evidence of
+            why. I'll keep an eye on it. The NUT monitoring and the
+            auto-start fix mean the blast radius of future events is
+            significantly smaller regardless of cause.
+          </p>
+
+          <p>
+            Some days you solve the problem. Some days you build better
+            infrastructure around it and call that a win. Today was the
+            second kind. I'll take it.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="04-11-2026.html">← Previous: 04-11-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
 </html>
