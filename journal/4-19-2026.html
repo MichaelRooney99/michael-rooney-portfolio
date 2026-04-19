@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monitoring Every Node — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Installing Glances on four Proxmox nodes, wiring its REST API into the Homepage dashboard, and the pip dependency conflict that made it more interesting than expected."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Monitoring Every Node — Michael Rooney" />
+    <meta property="og:description" content="Installing Glances on four Proxmox nodes, wiring its REST API into the Homepage dashboard, and the pip dependency conflict that made it more interesting than expected." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-19-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/homepage-4-19-2026.png" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Monitoring Every Node — Michael Rooney" />
+    <meta name="twitter:description" content="Installing Glances on four Proxmox nodes, wiring its REST API into the Homepage dashboard, and the pip dependency conflict that made it more interesting than expected." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/homepage-4-19-2026.png" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-19-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      .prose figure {
+        margin: 2.5rem 0;
+      }
+
+      .prose figure img {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        display: block;
+      }
+
+      .prose figcaption {
+        margin-top: 0.65rem;
+        font-size: 0.8rem;
+        color: var(--text-muted, #888);
+        text-align: center;
+        letter-spacing: 0.01em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-19-2026">April 19, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Monitoring Every Node</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The Homepage dashboard has had Proxmox widget tiles for each
+            cluster node since I first set it up — VM count, LXC count,
+            CPU percentage, memory usage. Useful, but surface-level.
+            What it hasn't had is temperature data or a live graph of
+            anything. Today I fixed that.
+          </p>
+
+          <p>
+            Glances is a Python-based system monitoring tool that exposes
+            a REST API when run in web server mode. Homepage has a native
+            widget for it. The idea is straightforward: run Glances as a
+            service on each node, point Homepage at each one, get live
+            CPU temps and sparkline graphs on every tile. The execution
+            was a little more interesting.
+          </p>
+
+          <h2>Installation across four nodes</h2>
+
+          <p>
+            The install command is the same on each node — pip3 install
+            glances with the fastapi and uvicorn extras for the REST API
+            backend. In practice, Glances 4.5.3 doesn't actually bundle
+            those extras, so the first install succeeds but leaves you
+            with a service that starts cleanly and refuses all connections.
+            The systemd unit showed active, the curl showed nothing.
+          </p>
+
+          <p>
+            The fix is installing FastAPI and Uvicorn separately afterward.
+            On Debian 12 that introduces a second problem — pip can't
+            uninstall the system-managed copy of typing-extensions cleanly,
+            so the install errors out before it finishes. The workaround
+            is the <code>--ignore-installed</code> flag, which tells pip
+            to install the version it needs alongside the system copy
+            rather than trying to replace it. Not elegant, but it works,
+            and the alternative — a full virtual environment — is more
+            infrastructure to maintain across four machines.
+          </p>
+
+          <p class="callout">
+            When a service starts successfully but refuses connections,
+            the most likely explanation is a missing dependency, not a
+            firewall rule. Check the journal before checking the firewall.
+          </p>
+
+          <h2>The systemd service</h2>
+
+          <p>
+            Each node gets an identical unit file. Glances runs in web
+            mode with the UI disabled — the REST API is all Homepage needs,
+            and the full web interface is redundant overhead when you
+            already have a dashboard. Port 61208 is the default and
+            there's no reason to change it. The service is enabled and
+            starts on boot.
+          </p>
+
+          <p>
+            Confirming it works is a single curl call against the CPU
+            endpoint. If you get JSON back, the API is up. If you get
+            a connection refused, something in the dependency chain
+            didn't land correctly and the journal will tell you what.
+          </p>
+
+          <h2>Wiring it into Homepage</h2>
+
+          <p>
+            Homepage's Glances widget takes a URL, a version, and a
+            metric. The version field is where I hit the next snag.
+            Glances 4.x changed its API structure significantly from v3.
+            Homepage's widget was built against the older format, and
+            without explicitly setting <code>version: 4</code> in the
+            config, it requests the wrong endpoint and throws a JavaScript
+            error about a missing percpu property. The fix is one line
+            in the YAML. The error message gives you nothing useful to
+            go on — it took a moment to connect the dots.
+          </p>
+
+          <p>
+            Once that was sorted, the metric I wanted was
+            <code>sensor:Package id 0</code> — the CPU package temperature
+            from lm-sensors. Combined with <code>chart: true</code>, each
+            node tile now shows a live sparkline and a current temperature
+            in Celsius. The Proxmox widget stays above it for VM and LXC
+            counts. Both widgets poll independently so neither blocks the
+            other from loading.
+          </p>
+
+          <h2>A configuration mistake worth documenting</h2>
+
+          <p>
+            While cleaning up the YAML I noticed the Ankhh tile had been
+            pointing at the wrong IP for both its Proxmox widget and its
+            Glances widget — it was using Network's address instead of its
+            own. The dashboard had been showing identical temperature
+            readings for both nodes without me catching it. They share
+            hardware so the numbers were close enough to look plausible.
+            Fixed now, but it's a reminder that configuration files don't
+            validate themselves. The dashboard looked correct. It wasn't.
+          </p>
+
+          <p class="callout">
+            If two monitoring tiles show suspiciously similar numbers,
+            check that they're actually pointing at different targets.
+          </p>
+
+          <h2>What the dashboard shows now</h2>
+
+          <p>
+            Four node tiles, each with VM and LXC counts from Proxmox,
+            CPU percentage and memory from the Proxmox API, CPU package
+            temperature from Glances, and a live temperature graph that
+            updates every 2.5 seconds.
+          </p>
+
+          <figure>
+            <a href="../img/homepage-4-19-2026.png" target="_blank" rel="noopener noreferrer">
+            <img
+              src="../img/homepage-4-19-2026.png"
+              alt="Homepage dashboard showing all four Proxmox node tiles with live CPU temperature readings and sparkline graphs — Network at 41°C, Ankhh at 57°C, Dega at 42°C, and Murloc at 49°C"
+              width="800"
+              height="300"
+              loading="lazy"
+            /></a>
+            <figcaption>
+              The Hypervisors section after today's changes — each node tile
+              now shows a live temperature reading and sparkline alongside
+              the existing Proxmox VM and LXC counts.
+            </figcaption>
+          </figure>
+
+          <p>
+            The temperatures at idle — 41°C and 57°C on the two busier
+            nodes, 42°C and 49°C on the lighter ones — are well within
+            range and give a useful baseline to compare against when
+            something is actually running hard. The Glances defaults flag
+            warnings at 94°C and critical at 100°C, which I've since
+            tightened to 80°C and 90°C via a config file on each node.
+            More useful for catching a cooling problem before it becomes
+            a stability problem.
+          </p>
+
+          <h2>The broader point</h2>
+
+          <p>
+            A dashboard that only shows you what Proxmox already knows
+            about itself is a convenience, not a monitoring system.
+            Adding an independent agent on each node means the dashboard
+            can surface information Proxmox doesn't expose directly —
+            thermals, disk I/O, network throughput, process-level detail
+            — without depending on the Proxmox API for all of it.
+          </p>
+
+          <p>
+            It's also a more transferable pattern. Glances running as a
+            systemd service on a Linux host, exposing metrics over HTTP,
+            consumed by a dashboard — that's the same shape as most
+            real monitoring stacks, just at homelab scale. Prometheus
+            and Grafana follow the same model with more moving parts.
+            Understanding the pattern at this level makes the larger
+            version less intimidating.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="04-16-2026.html">← Previous: 04-16-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
