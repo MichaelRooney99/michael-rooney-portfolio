@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The VM That Wouldn't Start — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A Proxmox kernel update, a stopped OPNsense VM, a stale ISO reference, and why physical console access is worth more than you think."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The VM That Wouldn't Start — Michael Rooney" />
+    <meta property="og:description" content="A Proxmox kernel update, a stopped OPNsense VM, a stale ISO reference, and why physical console access is worth more than you think." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-23-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The VM That Wouldn't Start — Michael Rooney" />
+    <meta name="twitter:description" content="A Proxmox kernel update, a stopped OPNsense VM, a stale ISO reference, and why physical console access is worth more than you think." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-23-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-23-2026">April 23, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>The VM That Wouldn't Start</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            I ran a Proxmox update on the Network node — the one that
+            hosts OPNsense and acts as the gateway for my entire subnet.
+            The update included a kernel bump. The node rebooted. And then
+            everything on that network went dark.
+          </p>
+
+          <p>
+            SSH was gone. The Proxmox web UI was unreachable. Every device
+            on the 10.10.10.0/24 subnet had no gateway. The whole thing
+            had just quietly stopped working, and from the outside there
+            was no way in.
+          </p>
+
+          <h2>Physical console to the rescue</h2>
+
+          <p>
+            The only path back in was a monitor and keyboard plugged
+            directly into the node. No IPMI, no out-of-band management —
+            just the old-fashioned way. Once I was in at the console,
+            the first instinct was to check whether the kernel update
+            had renamed network interfaces. That's a common failure mode
+            after a kernel change on Debian-based systems: udev decides
+            your NICs have new names, your bridge config still references
+            the old ones, and nothing comes up.
+          </p>
+
+          <p>
+            That wasn't it. The interfaces were all present and named
+            correctly. vmbr0 was up. vmbr1 was up. vmbr2 was down, but
+            its member NIC was showing NO-CARRIER — which usually means
+            the upstream device isn't talking. Plausible, but not the
+            root cause.
+          </p>
+
+          <p>
+            The real answer was one command away.
+          </p>
+
+          <pre><code>qm list</code></pre>
+
+          <p>
+            OPNsense — VMID 100, the VM responsible for routing all traffic
+            on the subnet — was stopped. Not crashed. Not in an error state.
+            Just stopped, sitting there, doing nothing, because something
+            had prevented it from starting after the reboot.
+          </p>
+
+          <h2>The stale ISO problem</h2>
+
+          <p>
+            OPNsense has <code>onboot: 1</code> set, so it should have
+            come up automatically. I tried starting it manually to see
+            what would happen.
+          </p>
+
+          <pre><code>qm start 100
+volume 'local:iso/OPNsense-26.1-dvd-amd64.iso' does not exist</code></pre>
+
+          <p>
+            There it was. The VM config had a CD-ROM drive attached —
+            <code>ide2</code> — pointing at an ISO that no longer existed
+            in local storage. At some point the ISO had been cleaned up
+            or removed, but nobody told the VM config. Proxmox saw a
+            missing volume and refused to start the VM entirely. No warning
+            on the previous boot, no fallback, just a silent failure and
+            a stopped VM.
+          </p>
+
+          <p class="callout">
+            A missing ISO reference in a VM config is a hard blocker.
+            Proxmox will not start the VM, and the error only surfaces
+            when you actually try — not on boot, not in the UI's VM list,
+            nowhere obvious.
+          </p>
+
+          <p>
+            The fix was straightforward once the cause was clear.
+            Detach the CD-ROM drive by pointing it at nothing:
+          </p>
+
+          <pre><code>qm set 100 --ide2 none,media=cdrom
+qm start 100</code></pre>
+
+          <p>
+            OPNsense came up. The subnet came back. SSH started working
+            again. The whole outage resolved in about thirty seconds once
+            I knew what I was looking for.
+          </p>
+
+          <h2>What the interface output was actually telling me</h2>
+
+          <p>
+            Looking back at the <code>ip link show</code> output from
+            when I first got into the console, the picture was there if
+            you knew how to read it. vmbr2 was down because its member
+            NIC had NO-CARRIER — but NO-CARRIER on a NIC bridged to a
+            VM's virtual interface doesn't mean a cable is unplugged.
+            It means the VM on the other end of that virtual link isn't
+            running. OPNsense wasn't up, so the vNIC wasn't up, so the
+            bridge had no carrier. The interface output was a symptom,
+            not the cause.
+          </p>
+
+          <h2>The structural problem this exposed</h2>
+
+          <p>
+            The more uncomfortable realization here is the architecture.
+            The Proxmox management interface — the thing I use to SSH
+            into the node and access the web UI — sits on the same
+            subnet that OPNsense is responsible for routing. When OPNsense
+            is down, that management path is gone too. I can't get into
+            Proxmox to fix OPNsense without first fixing OPNsense.
+          </p>
+
+          <p>
+            That's a circular dependency, and it only resolves if you
+            have physical access or out-of-band management. Today I had
+            physical access. The right long-term answer is IPMI or a
+            dedicated management interface that doesn't depend on any VM
+            being up. That's on the to-do list now.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            Everything is back up. OPNsense is running. The stale ISO
+            reference is gone. I've added an audit of all VM configs for
+            dangling volume references to the list — this is exactly the
+            kind of silent misconfiguration that only surfaces at the
+            worst possible moment.
+          </p>
+
+          <p>
+            The lesson isn't subtle: after any kernel update that forces
+            a reboot, verify that every <code>onboot</code> VM actually
+            came up before you walk away from the terminal. Proxmox will
+            tell you a VM is stopped. It won't always tell you why.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="04-19-2026.html">← Previous: 04-19-2026 Entry</a>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
