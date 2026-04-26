@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Restructuring the Infrastructure — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Moving the backup server to dedicated bare metal, replacing a cluster node, adding UPS monitoring and temperature visibility — a significant infrastructure milestone."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Restructuring the Infrastructure — Michael Rooney" />
+    <meta property="og:description" content="Moving the backup server to dedicated bare metal, replacing a cluster node, adding UPS monitoring and temperature visibility — a significant infrastructure milestone." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-25-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Restructuring the Infrastructure — Michael Rooney" />
+    <meta name="twitter:description" content="Moving the backup server to dedicated bare metal, replacing a cluster node, adding UPS monitoring and temperature visibility — a significant infrastructure milestone." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-25-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-25-2026">April 25, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Restructuring the Infrastructure</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The homelab grew again this week — not in terms of services,
+            but in terms of architectural maturity. Three significant
+            changes happened in close succession: the backup server moved
+            to dedicated bare metal, a cluster node was replaced, and
+            power and temperature monitoring came online across the
+            entire stack. The lab now has five nodes, a UPS watching
+            over all of them, and live temperature visibility per node
+            on the dashboard.
+          </p>
+
+          <h2>Backup server — VM to bare metal</h2>
+
+          <p>
+            Proxmox Backup Server had been running as a VM on one of
+            the cluster nodes since it was first deployed. That worked
+            but it was architecturally compromised — the backup system
+            was dependent on the health of the node it was protecting.
+            If that node had a serious problem, the backups might not
+            be accessible at the exact moment they were needed most.
+          </p>
+
+          <p>
+            Moving PBS to its own dedicated M920Q running bare metal
+            eliminates that dependency entirely. The backup server now
+            has no relationship to the cluster nodes beyond receiving
+            their backup jobs. It boots independently, manages its own
+            datastore, and stays up regardless of what happens on
+            the cluster. That's what a backup system should look like.
+          </p>
+
+          <p class="callout">
+            A backup solution that depends on the infrastructure it's
+            backing up is not a backup solution. It's a false sense
+            of security.
+          </p>
+
+          <h2>Cluster node replacement</h2>
+
+          <p>
+            One of the cluster nodes had been experiencing persistent
+            random reboots that resisted every diagnosis attempt —
+            power management changes, sleep target masking, corosync
+            tuning, memory checks. The reboots were random, daytime,
+            and left clean shutdown entries in the logs suggesting the
+            kernel was initiating them rather than crashing. The machine
+            was replaced with a newer unit.
+          </p>
+
+          <p>
+            The replacement process followed the same migration pattern
+            as previous hardware swaps — migrate workloads off the
+            affected node, remove it from the cluster, install fresh
+            on new hardware, rejoin. The new node came up clean, joined
+            the cluster without issues, and has been stable since.
+            The old hardware is retained as a spare.
+          </p>
+
+          <h2>UPS monitoring — peaNUT</h2>
+
+          <p>
+            A CyberPower UPS has been protecting the lab hardware for
+            a while but without software integration it was just a
+            battery — no visibility into load or runtime, no automated
+            shutdown if power failed. Network UPS Tools (NUT) changes
+            that. A master NUT server running as a container receives
+            data from the UPS via USB passthrough and broadcasts status
+            to all nodes as slaves.
+          </p>
+
+          <p>
+            The shutdown logic is what matters: when battery drops to
+            20% or five minutes of runtime remain, NUT broadcasts a
+            forced shutdown signal to every node simultaneously. The
+            cluster gracefully shuts down before the UPS runs out of
+            power. No data corruption, no interrupted backup jobs,
+            no filesystem damage. This is the kind of thing that only
+            matters once — but when it matters, it matters completely.
+          </p>
+
+          <h2>Temperature monitoring — Glances</h2>
+
+          <p>
+            Glances is a Python-based monitoring agent that exposes
+            a REST API on each node. The Homepage dashboard consumes
+            that API to display live CPU package temperature per node
+            alongside the existing CPU and memory stats from Proxmox.
+            Installed on all five nodes, configured with warning and
+            critical thresholds in a shared config file.
+          </p>
+
+          <p>
+            Idle temperatures across the nodes range from 43°C to 57°C
+            — all within normal range for mini PCs with no active
+            cooling beyond their stock fans. Having baseline numbers
+            documented means any future temperature anomaly is
+            immediately recognizable as abnormal rather than ambiguous.
+          </p>
+
+          <h2>What the lab looks like now</h2>
+
+          <p>
+            Five nodes. Four in a cluster handling workloads, one
+            standalone handling dedicated backups. A UPS monitoring
+            all of them with automated shutdown. Temperature visibility
+            on every node. Nightly staged backups with deduplication
+            and retention policies. All services monitored by Uptime
+            Kuma with email alerts. Everything documented in a local
+            wiki with a public journal alongside it.
+          </p>
+
+          <p>
+            It started as a way to learn by doing. It's become something
+            I'd be comfortable describing in a professional conversation
+            about infrastructure — not because it's enterprise scale,
+            but because the thinking behind it is sound. Redundancy,
+            monitoring, documentation, and graceful failure handling
+            aren't concepts I've read about. They're decisions I've
+            made and implemented and tested.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="04-23-2026.html">← Previous: 04-23-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

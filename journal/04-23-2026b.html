@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Never Locked Out Again — Michael Rooney</title>
+    <meta
+      name="description"
+      content="After getting locked out of a Proxmox node tonight, I fixed the structural problem — migrating the Tailscale exit node out of OPNsense's failure domain and installing Tailscale directly on the host for permanent out-of-band access."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Never Locked Out Again — Michael Rooney" />
+    <meta property="og:description" content="After getting locked out of a Proxmox node tonight, I fixed the structural problem — migrating the Tailscale exit node out of OPNsense's failure domain and installing Tailscale directly on the host for permanent out-of-band access." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-23-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Never Locked Out Again — Michael Rooney" />
+    <meta name="twitter:description" content="After getting locked out of a Proxmox node tonight, I fixed the structural problem — migrating the Tailscale exit node out of OPNsense's failure domain and installing Tailscale directly on the host for permanent out-of-band access." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-23-2026b.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-23-2026">April 23, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+          </div>
+          <h1>Never Locked Out Again</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Earlier tonight a Proxmox update stopped OPNsense and took
+            the entire subnet dark with it. I got back in through a monitor
+            and keyboard plugged directly into the machine. It worked, but
+            it shouldn't have to be that way — especially for something
+            that could just as easily happen at 2am or when I'm not home.
+          </p>
+
+          <p>
+            Once the network was back up I sat down and fixed the
+            structural problem. The goal was simple: make sure that if
+            OPNsense ever stops again, I have a remote path back into
+            the Proxmox host that doesn't depend on OPNsense being up.
+          </p>
+
+          <h2>The failure domain problem</h2>
+
+          <p>
+            I already run Tailscale in the homelab — there's an LXC on
+            the Network node that acts as an exit node for the Tailnet.
+            The obvious instinct is to use that for remote access. The
+            problem is that the Tailscale LXC was sitting on the same
+            node as OPNsense, getting its routing through OPNsense like
+            everything else on the subnet. When OPNsense goes down, the
+            Tailscale LXC loses its network path at the same moment I
+            lose SSH access. They're in the same failure domain — one
+            event takes both out simultaneously.
+          </p>
+
+          <p class="callout">
+            A backup access method that fails at the same time as the
+            thing it's backing up isn't a backup. It's an illusion of
+            one.
+          </p>
+
+          <p>
+            The fix has two parts: move the Tailscale exit node to a
+            different node, and install Tailscale directly on the
+            Proxmox host itself.
+          </p>
+
+          <h2>Migrating the exit node</h2>
+
+          <p>
+            Since the Network node is standalone and not part of the
+            cluster, there's no live migration available for its LXCs.
+            The process is backup and restore — straightforward, just
+            not instantaneous.
+          </p>
+
+          <p>
+            I backed up the Tailscale LXC to Proxmox Backup Server
+            on Dega, then restored it as a new container on Ankhh —
+            the primary cluster node. The restored container came up
+            with the same IP, the same TUN device passthrough, the
+            same auth credentials, and the same exit node advertisement.
+            Everything carried over from the backup cleanly.
+          </p>
+
+          <p>
+            One snag during startup: the restored container initially
+            showed offline in <code>tailscale status</code>. The cause
+            was the old LXC still running on Node 0 — two instances
+            sharing the same Tailscale identity were conflicting.
+            Stopping the old one resolved it immediately. The new
+            container came up clean and has been stable since.
+          </p>
+
+          <p>
+            The old LXC is sitting stopped on Node 0 with auto-start
+            disabled. I'll leave it there for a few days as a fallback
+            before removing it.
+          </p>
+
+          <h2>Tailscale on the host</h2>
+
+          <p>
+            Moving the exit node to Ankhh solves the exit node's
+            resilience, but it doesn't give me direct access to the
+            Network node specifically. For that, I installed Tailscale
+            directly on the Proxmox host — not in a container, on the
+            host itself.
+          </p>
+
+          <pre><code>curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up --hostname=proxmox-network</code></pre>
+
+          <p>
+            The host install runs as a systemd service and starts on
+            boot. It doesn't advertise an exit node or any subnet
+            routes — its only job is to give the host a stable
+            Tailscale IP address that's reachable from anywhere
+            on the Tailnet regardless of what's happening on the LAN.
+          </p>
+
+          <p>
+            The next time OPNsense stops and takes the subnet with it,
+            recovery looks like this from any device on the Tailnet:
+          </p>
+
+          <pre><code>ssh root@proxmox-network</code></pre>
+
+          <p>
+            That's it. That connection routes entirely through Tailscale's
+            network, bypasses 10.10.10.0/24 completely, and lands
+            directly on the Proxmox host. From there I can start
+            OPNsense, fix whatever broke, and be done — without
+            touching a keyboard plugged into the machine.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            The Tailscale exit node is on Ankhh, outside OPNsense's
+            failure domain. The Network node has a permanent out-of-band
+            management path via Tailscale on the host. Physical console
+            access is still there as a last resort, but it's no longer
+            the first resort.
+          </p>
+
+          <p>
+            Tonight started with a lockout and ended with infrastructure
+            that's meaningfully harder to get locked out of. That's
+            a reasonable outcome for a few hours of frustration.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="04-23-2026.html">← Previous: 04-23-2026 Entry</a>
+          <a href="04-25-2026.html">Next: 04-25-2026 Entry →</a>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
