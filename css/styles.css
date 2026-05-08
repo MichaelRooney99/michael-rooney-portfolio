@@ -928,7 +928,60 @@ button:focus-visible {
     text-align: center;
   }
 }
+/* ─────────────────────────────────────────
+   5. SKILLS TABLE (Integrated Update)
+───────────────────────────────────────── */
+.skills-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2.5rem 0;
+  border: 1px solid var(--border);
+}
 
+.skills-table th {
+  background: var(--bg-raised);
+  color: var(--accent);
+  text-align: left;
+  padding: 1rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.skills-table td {
+  padding: 1.2rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.skills-table tr:hover td {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .skills-table thead {
+        display: none; /* Hide headers on small screens */
+    }
+    .skills-table td {
+        display: block;
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+    .skills-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+}
 /* ─────────────────────────────────────────
    REDUCED MOTION
 ───────────────────────────────────────── */

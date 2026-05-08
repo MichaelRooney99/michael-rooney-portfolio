@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metrics, Finally — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Standing up Prometheus and Grafana across the homelab, debugging a peaNUT UPS integration running on dummy data, learning why USB HID and LXC containers don't get along, and wiring everything into Homepage."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Metrics, Finally — Michael Rooney" />
+    <meta property="og:description" content="Standing up Prometheus and Grafana across the homelab, debugging a peaNUT UPS integration that turned out to be running on dummy data, and learning why USB HID devices and LXC containers don't get along." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/04-30-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Metrics, Finally — Michael Rooney" />
+    <meta name="twitter:description" content="Standing up Prometheus and Grafana across the homelab, debugging a peaNUT UPS integration that turned out to be running on dummy data, and learning why USB HID devices and LXC containers don't get along." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/04-30-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="04-30-2026">April 30, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Metrics, Finally</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Today was the day Prometheus and Grafana finally came online
+            across the entire lab. It's been on the roadmap since the
+            infrastructure writeup in April — listed right there under
+            future work, waiting. The plan was straightforward: stand up
+            a Docker host on Shasta, deploy the observability stack, wire
+            up exporters on all five nodes, and have dashboards showing
+            real data by end of day.
+          </p>
+
+          <p>
+            The straightforward part took about an hour. The rest of the
+            day was a masterclass in how assumptions compound.
+          </p>
+
+          <h2>The stack</h2>
+
+          <p>
+            Shasta had been sitting mostly idle since replacing the old
+            Dega node — 32GB of RAM and a 1TB NVMe doing essentially
+            nothing. The right move was a privileged Debian LXC with
+            Docker inside it, managed by Portainer. Docker-in-LXC
+            requires nesting and keyctl enabled, and the LXC has to be
+            privileged. Everything else in the lab runs unprivileged, but
+            this is an acceptable tradeoff for a workload node on a
+            trusted network.
+          </p>
+
+          <p>
+            The monitoring stack itself is four containers in a single
+            Compose project: Prometheus, Grafana, pve_exporter for
+            Proxmox API metrics, and nut_exporter for UPS data. Prometheus
+            scrapes everything on a 30-second interval and stores 30 days
+            of history. Grafana sits on top and queries it. The whole
+            thing is managed through Portainer and exposed at
+            <code>grafana.michaelrooney.dev</code> via NPM.
+          </p>
+
+          <p>
+            Getting node_exporter running on all five Proxmox hosts was
+            the smoothest part of the day — download the binary, write a
+            systemd unit, enable it, verify with curl. Fifteen minutes
+            across five nodes. All five appeared green in Prometheus
+            targets within the first scrape.
+          </p>
+
+          <h2>The bind mount trap</h2>
+
+          <p>
+            The first real friction came from Docker's behavior around
+            bind mounts. When you specify a bind mount in a Compose file
+            and the source file doesn't exist on the host yet, Docker
+            doesn't error. It creates a directory at that path instead,
+            then fails when it tries to mount that directory onto a file
+            inside the container.
+          </p>
+
+          <pre><code>unable to start container process: error mounting
+"/data/compose/5/prometheus.yml" to rootfs at
+"/etc/prometheus/prometheus.yml": not a directory</code></pre>
+
+          <p>
+            The fix is simple once you know it: create the config files
+            on the host before deploying the stack. But it also requires
+            a full stack delete and redeploy — not just a restart — to
+            clear the stale directory artifacts Docker has already
+            written. A partial redeploy reuses the bad container state.
+          </p>
+
+          <h2>pve_exporter and permissions</h2>
+
+          <p>
+            Getting pve_exporter working against the Proxmox API took
+            two rounds of debugging. The first issue was a path mismatch —
+            the current image defaults to <code>/etc/prometheus/pve.yml</code>
+            rather than <code>/etc/pve.yml</code>. Fixed with a command
+            override in the Compose file.
+          </p>
+
+          <p>
+            The second was permissions. I created a <code>prometheus@pve</code>
+            user and assigned the built-in PVEAuditor role, which seemed
+            like the right call — read-only access, no ability to modify
+            anything. But pve_exporter also reads LXC configuration data,
+            which requires <code>VM.Config.Options</code>. PVEAuditor
+            doesn't include it. The result was a 403 on every scrape of
+            the Ankhh node, which runs the most LXCs.
+          </p>
+
+          <p>
+            The fix was a custom role — PrometheusMonitor — with the
+            exact privilege set needed and nothing more. One clean ACL
+            entry at the root path, propagated down. After that, all four
+            Proxmox nodes showed green.
+          </p>
+
+          <h2>peaNUT was lying to me</h2>
+
+          <p>
+            This is the part of the day I didn't expect. The UPS
+            integration — connecting nut_exporter to the NUT server
+            running in the peaNUT LXC — kept returning 503. When I
+            looked more carefully at what was actually running inside
+            that container, the picture got uncomfortable.
+          </p>
+
+          <p>
+            peaNUT's <code>ups.conf</code>:
+          </p>
+
+          <pre><code>[ups]
+    driver = dummy-ups
+    port = dummy.seq
+    desc = "CPS Test"
+[dummy2]
+    driver = dummy-ups
+    port = dummy2.dev
+[dummy3]
+    driver = dummy-ups
+    port = dummy3.dev
+[dummy4]
+    driver = dummy-ups
+    port = dummy4.dev</code></pre>
+
+          <p>
+            Dummy UPS devices. Simulation files. The peaNUT web UI had
+            been showing data — numbers that looked plausible, a status
+            indicator that said things were fine — but none of it was
+            real. It had been running in demo mode since it was first
+            deployed, and nothing about the UI made that obvious.
+          </p>
+
+          <p class="callout">
+            A monitoring tool showing fake data is worse than no
+            monitoring tool. It creates the impression of visibility
+            where none exists.
+          </p>
+
+          <p>
+            The real CyberPower UPS was connected via USB passthrough to
+            the LXC, but the software was never configured to use it.
+            The fix should have been straightforward — update
+            <code>ups.conf</code> to point at the real device and restart.
+            What followed instead was several hours of USB debugging.
+          </p>
+
+          <h2>USB HID and LXC containers</h2>
+
+          <p>
+            USB HID devices cannot be claimed from inside an LXC
+            container. This is a kernel-level restriction. It doesn't
+            matter whether the LXC is privileged or unprivileged. It
+            doesn't matter whether the device has world-readable
+            permissions. It doesn't matter whether you pass through
+            the specific device node, a symlink, or the entire USB bus.
+            When libusb tries to claim the HID interface, the kernel
+            returns <code>Entity not found</code> and the driver fails.
+          </p>
+
+          <p>
+            I worked through the full list before arriving at this
+            conclusion: device passthrough via Proxmox's UI, full bus
+            mount via raw LXC config entries, making the LXC privileged,
+            a udev symlink for a stable device path, manually unbinding
+            the host driver. Each approach got a little further — the
+            device became visible, permissions looked correct — but the
+            claim step always failed.
+          </p>
+
+          <p>
+            The right answer was to stop trying to make the LXC work and
+            install NUT directly on the Ankhh Proxmox host. The host has
+            unrestricted USB access. NUT running there as a netserver
+            exposes port 3493 to the rest of the network. peaNUT connects
+            to it remotely. nut_exporter scrapes it. The UPS data flows
+            everywhere it needs to go.
+          </p>
+
+          <pre><code>upsc cyberpower@localhost
+battery.charge: 100
+battery.runtime: 3075
+ups.load: 13
+ups.status: OL</code></pre>
+
+          <p>
+            Real data. The UPS is online, battery at 100%, load at 13%,
+            51 minutes of runtime. That's what the dashboard should have
+            been showing all along.
+          </p>
+
+          <h2>Building the dashboard</h2>
+
+          <p>
+            The community NUT dashboard for Grafana (ID 14371) uses a
+            legacy metric naming convention — <code>network_ups_tools_*</code>
+            — that the current nut_exporter doesn't emit. The exporter
+            now uses a <code>nut_*</code> prefix. The dashboard showed
+            nothing.
+          </p>
+
+          <p>
+            Rather than hunting for an updated community version, I built
+            the dashboard from scratch. It turns out this is more
+            instructive than importing someone else's work. You have to
+            query Prometheus directly, understand what metrics are
+            available, and make explicit decisions about what to show and
+            how. The result is a dashboard I understand completely —
+            every panel is a query I wrote, showing data I verified.
+          </p>
+
+          <h2>Wiring it into Homepage</h2>
+
+          <p>
+            With the stack running, the last step was adding tiles to the
+            Homepage dashboard for Prometheus, Portainer, and Grafana.
+            Prometheus and Portainer came up without issue. Grafana was
+            its own small adventure.
+          </p>
+
+          <p>
+            The Homepage Grafana widget hits <code>/api/admin/stats</code>
+            to show dashboard count, datasource count, and alert totals.
+            That endpoint requires Grafana server administrator permissions —
+            and as it turns out, service account tokens cannot be granted
+            server admin permissions in Grafana. The API flat out refuses them
+            regardless of what role the service account has. The only thing
+            that works is basic auth with a user account that has the Grafana
+            Admin flag set.
+          </p>
+
+          <p>
+            Once that was sorted, a missing <code>url:</code> field in the
+            widget config caused an "Unexpected error" with no other
+            indication of what was wrong. One line added, tile working.
+            It's the kind of thing that takes longer to debug than it takes
+            to fix.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            All ten Prometheus targets are green. Five node_exporter
+            instances reporting host metrics across every node. Four
+            Proxmox API scrapes covering the cluster and the network node.
+            One UPS reporting real battery, load, and runtime data for
+            the first time. Grafana, Portainer, and Prometheus all have
+            Homepage tiles showing live stats.
+          </p>
+
+          <p>
+            The lab has had monitoring infrastructure for a while —
+            Uptime Kuma for availability, Glances feeding the Homepage
+            dashboard with live stats. What it didn't have was a time-series
+            record of how things behave over time. Now it does. The next
+            time something behaves strangely, there will be historical
+            data to compare against. The next time the UPS absorbs a
+            power event, there will be a graph showing exactly what
+            happened to load and runtime.
+          </p>
+
+          <p>
+            The unexpected finding — that peaNUT had been running on
+            dummy data — is the thing I'll remember longest from today.
+            It's a reminder that a tool reporting status is not the same
+            as a tool reporting accurate status. Verification matters,
+            especially for monitoring.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="04-29-2026.html">← Previous: 04-29-2026 Entry</a>          
+          <a href="05-02-2026.html">Next: 05-02-2026 Entry →</a>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

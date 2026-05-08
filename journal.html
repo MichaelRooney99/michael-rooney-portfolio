@@ -57,13 +57,95 @@
 
       <section aria-label="Journal entries">
         <ol class="entry-list" reversed>
+
+                <li data-tags="homelab projects learning">
+        <a href="journal/05-07-2026.html" class="entry" aria-label="Read: Automation Infrastructure — May 7 2026">
+          <time class="entry-date" datetime="05-07-2026">May 7, 2026</time>
+          <div class="entry-body">
+            <h2 class="entry-title">Automation Infrastructure</h2>
+            <p class="entry-excerpt">
+              Ansible is now a permanent part of the lab. A dedicated control node on Shasta, six active playbooks, Vault-encrypted secrets, and an audit run that confirmed the drift was real — an ongoing project with more to come.
+            </p>
+            <div class="entry-tags">
+              <span class="tag tag-homelab">Homelab</span>
+              <span class="tag tag-projects">Projects</span>
+              <span class="tag tag-learning">Learning</span>
+            </div>
+          </div>
+        </a>
+      </li>
+          <li data-tags="homelab learning">
+            <a href="journal/05-03-2026.html" class="entry" aria-label="Read: Configuration as Code — May 3 2026">
+              <time class="entry-date" datetime="05-03-2026">May 3, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Configuration as Code</h2>
+                <p class="entry-excerpt">
+                  Standing up an Ansible LXC, writing the first real playbooks for baseline packages and node_exporter, and using an audit run 
+                  to surface NUT config drift that prompted a full standardization pass across all five nodes.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-homelab">Homelab</span>
+                  <span class="tag tag-learning">Learning</span>
+                  <span class="tag tag-projects">Projects</span>                  
+                </div>
+              </div>
+            </a>
+          </li>
+          <li data-tags="homelab learning">
+            <a href="journal/05-02-2026.html" class="entry" aria-label="Read: Proactive Alerts — May 2 2026">
+              <time class="entry-date" datetime="05-02-2026">May 2, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Proactive Alerts</h2>
+                <p class="entry-excerpt">
+                  Moving beyond passive dashboards to a proactive alerting system — configuring SMTP with Gmail App Passwords, enriching Prometheus 
+                  metrics with friendly labels, and writing custom PromQL to monitor node vitality and UPS battery health.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-homelab">Homelab</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li data-tags="homelab learning">
+            <a href="journal/04-30-2026.html" class="entry" aria-label="Read: Metrics, Finally — April 30 2026">
+              <time class="entry-date" datetime="04-30-2026">Apr 30, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Metrics, Finally</h2>
+                <p class="entry-excerpt">
+                  Standing up Prometheus and Grafana across the homelab, discovering peaNUT had been running on dummy UPS data since day one, learning
+                   why USB HID and LXC containers fundamentally don't get along, and wiring everything into Homepage.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-homelab">Homelab</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li data-tags="learning">
+            <a href="journal/04-29-2026.html" class="entry" aria-label="Read: The Call — April 29 2026">
+              <time class="entry-date" datetime="04-29-2026">Apr 29, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">The Call</h2>
+                <p class="entry-excerpt">
+                  The networking conversation I'd been building toward for months finally happened — what the team does, what certifications matter, 
+                  what the path in looks like, and where to point the energy next.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
           <li data-tags="homelab">
               <a href="journal/04-25-2026.html" class="entry" aria-label="Read: Restructuring the Infrastructure — April 25 2026">
                 <time class="entry-date" datetime="04-25-2026">Apr 25, 2026</time>
                 <div class="entry-body">
                   <h2 class="entry-title">Restructuring the Infrastructure</h2>
                   <p class="entry-excerpt">
-                    Backup server moved to dedicated bare metal, a cluster node replaced, UPS monitoring with automated shutdown, and live temperature visibility across all five nodes.
+                    Backup server moved to dedicated bare metal, a cluster node replaced, UPS monitoring with automated shutdown, and live temperature 
+                    visibility across all five nodes.
                   </p>
                   <div class="entry-tags">
                     <span class="tag tag-homelab">Homelab</span>
@@ -78,7 +160,8 @@
                 <div class="entry-body">
                   <h2 class="entry-title">Never Locked Out Again</h2>
                   <p class="entry-excerpt">
-                    After getting locked out by a stopped OPNsense VM, I fixed the structural problem — migrating the Tailscale exit node out of OPNsense's failure domain and installing Tailscale directly on the Proxmox host for permanent out-of-band access.
+                    After getting locked out by a stopped OPNsense VM, I fixed the structural problem — migrating the Tailscale exit node out of OPNsense's 
+                    failure domain and installing Tailscale directly on the Proxmox host for permanent out-of-band access.
                   </p>
                   <div class="entry-tags">
                     <span class="tag tag-homelab">Homelab</span>
@@ -92,7 +175,8 @@
                 <div class="entry-body">
                   <h2 class="entry-title">The VM That Wouldn't Start</h2>
                   <p class="entry-excerpt">
-                    A Proxmox kernel update, a stopped OPNsense VM, and the stale ISO reference that silently blocked auto-start — taking down an entire subnet until physical console access sorted it out.
+                    A Proxmox kernel update, a stopped OPNsense VM, and the stale ISO reference that silently blocked auto-start — taking down an entire
+                     subnet until physical console access sorted it out.
                   </p>
                   <div class="entry-tags">
                     <span class="tag tag-homelab">Homelab</span>
@@ -106,7 +190,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Monitoring Every Node</h2>
                 <p class="entry-excerpt">
-                  Installing Glances on four Proxmox nodes, wiring its REST API into the Homepage dashboard, and the pip dependency conflict that made it more interesting than expected.
+                  Installing Glances on four Proxmox nodes, wiring its REST API into the Homepage dashboard, and the pip dependency conflict that made 
+                  it more interesting than expected.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -120,7 +205,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Chasing Ghosts, Finding Watts</h2>
                 <p class="entry-excerpt">
-                  A long afternoon chasing phantom reboots — ruling out thermals, memory, power, and firmware — only to end up with full UPS monitoring, a live power dashboard, and the knowledge that four Proxmox nodes idle at 65 watts.
+                  A long afternoon chasing phantom reboots — ruling out thermals, memory, power, and firmware — only to end up with full UPS monitoring,
+                   a live power dashboard, and the knowledge that four Proxmox nodes idle at 65 watts.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -134,7 +220,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">A Tour of the Homelab</h2>
                 <p class="entry-excerpt">
-                  A visual walkthrough of a four-node Proxmox homelab — network architecture, OPNsense routing, VLAN segmentation, monitoring, backups, and the dashboard that ties it all together.
+                  A visual walkthrough of a four-node Proxmox homelab — network architecture, OPNsense routing, VLAN segmentation, monitoring, backups,
+                   and the dashboard that ties it all together.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -148,7 +235,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Network Segmentation — VLANs in the Homelab</h2>
                 <p class="entry-excerpt">
-                  Implementing VLAN segmentation with a managed switch and OPNsense — tagged vs untagged traffic, trunk ports, firewall-enforced isolation, and why this one matters beyond the homelab.
+                  Implementing VLAN segmentation with a managed switch and OPNsense — tagged vs untagged traffic, trunk ports, firewall-enforced isolation,
+                   and why this one matters beyond the homelab.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -163,7 +251,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Upgrading a Node the Right Way</h2>
                 <p class="entry-excerpt">
-                  Swapping out a Proxmox cluster node for faster hardware — live VM migration, a MAC address gotcha, and what the process teaches about building infrastructure that can maintain itself.
+                  Swapping out a Proxmox cluster node for faster hardware — live VM migration, a MAC address gotcha, and what the process teaches about building
+                   infrastructure that can maintain itself.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -208,7 +297,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Planka, Persistence, and Layered Proxies</h2>
                 <p class="entry-excerpt">
-                  Two days troubleshooting a websocket issue through a reverse proxy — what broke, what fixed it, and what the process taught me about working through layered NGINX configurations systematically.
+                  Two days troubleshooting a websocket issue through a reverse proxy — what broke, what fixed it, and what the process taught me about working
+                   through layered NGINX configurations systematically.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -222,7 +312,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Real Backups, Finally</h2>
                 <p class="entry-excerpt">
-                  Deploying Proxmox Backup Server on a dedicated VM — datastores, deduplication, retention policies, and why a snapshot on the same machine as the original isn't really a backup.
+                  Deploying Proxmox Backup Server on a dedicated VM — datastores, deduplication, retention policies, and why a snapshot on the same machine
+                   as the original isn't really a backup.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -236,7 +327,8 @@
                 <div class="entry-body">
                   <h2 class="entry-title">25 Certifications and a Full-Time Job</h2>
                   <p class="entry-excerpt">
-                    Six months of self-directed learning across infrastructure, development, design, and project management — built around a full-time job, a family, and not enough sleep.
+                    Six months of self-directed learning across infrastructure, development, design, and project management — built around a full-time job,
+                     a family, and not enough sleep.
                   </p>
                   <div class="entry-tags">
                     <span class="tag tag-certs">Certs</span>
@@ -251,7 +343,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Building a Homelab Dashboard</h2>
                 <p class="entry-excerpt">
-                  Deploying Homepage on a Proxmox LXC — YAML config, live node stats via API tokens, wildcard SSL, and what the process taught me about configuration management.
+                  Deploying Homepage on a Proxmox LXC — YAML config, live node stats via API tokens, wildcard SSL, and what the process taught me about 
+                  configuration management.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -266,7 +359,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Rebuilding the Portfolio</h2>
                 <p class="entry-excerpt">
-                  A full restyle of michaelrooney.dev — new typography, warm dark theme, and a public journal section built around what I'm actually learning and building.
+                  A full restyle of michaelrooney.dev — new typography, warm dark theme, and a public journal section built around what I'm actually 
+                  learning and building.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-projects">Projects</span>
@@ -282,7 +376,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">My Home Lab Infrastructure</h2>
                 <p class="entry-excerpt">
-                    a quick overview of my current home lab setup and infrastructure, which is running on four Proxmox nodes that I use for learning, testing, and building things related to front-end development, DevOps, and general IT skills.
+                    a quick overview of my current home lab setup and infrastructure, which is running on four Proxmox nodes that I use for learning, 
+                    testing, and building things related to front-end development, DevOps, and general IT skills.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -298,7 +393,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">CI/CD in the Real World</h2>
                 <p class="entry-excerpt">
-                  Mapped all eight CI/CD pipeline phases to my actual homelab infrastructure for a coursework assignment. Turns out running four Proxmox nodes is a better example than a podcast.
+                  Mapped all eight CI/CD pipeline phases to my actual homelab infrastructure for a coursework assignment. Turns out running four Proxmox 
+                  nodes is a better example than a podcast.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>
@@ -314,7 +410,8 @@
               <div class="entry-body">
                 <h2 class="entry-title">Fixing What I Broke</h2>
                 <p class="entry-excerpt">
-                  A firewall rule cleanup broke my router's web UI. Restored from backup, sorted out VPN firewall rules, deployed uptime monitoring, and learned the difference between exit nodes and subnet routing the hard way.
+                  A firewall rule cleanup broke my router's web UI. Restored from backup, sorted out VPN firewall rules, deployed uptime monitoring, and 
+                  learned the difference between exit nodes and subnet routing the hard way.
                 </p>
                 <div class="entry-tags">
                   <span class="tag tag-homelab">Homelab</span>

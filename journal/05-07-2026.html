@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Automation Infrastructure — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Standing up Ansible as a permanent part of the homelab — control node, inventory, vault, and the first playbooks enforcing consistent state across all five nodes."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Automation Infrastructure — Michael Rooney" />
+    <meta property="og:description" content="Standing up Ansible as a permanent part of the homelab — control node, inventory, vault, and the first playbooks enforcing consistent state across all five nodes." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-07-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Automation Infrastructure — Michael Rooney" />
+    <meta name="twitter:description" content="Standing up Ansible as a permanent part of the homelab — control node, inventory, vault, and the first playbooks enforcing consistent state across all five nodes." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-07-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-07-2026">May 7, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Automation Infrastructure</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Ansible is now a permanent part of the homelab rather than
+            an item on a roadmap. A dedicated LXC on Shasta at
+            <code>10.10.10.106</code> acts as the control node — 2 cores,
+            2GB of RAM, 16GB of disk. Its only job is to hold the
+            playbooks and SSH out to the other five nodes. This entry
+            is less a single session writeup and more a record of
+            where the project stands: what's built, what was harder
+            than expected, and what comes next.
+          </p>
+
+          <h2>Why this exists</h2>
+
+          <p>
+            The honest reason is that the lab had accumulated drift.
+            Not dramatic drift — nobody was running a wildly different
+            software version or missing a critical package entirely.
+            It was the quieter kind: <code>POLLFREQ</code> values in
+            NUT configs that didn't match between nodes, notification
+            flags present on some hosts and missing on others, a
+            <code>FINALDELAY</code> on PBS that differed from
+            everything else. The kind of thing that happens when you
+            configure five machines by hand over the course of several
+            weeks, copying and editing config snippets each time,
+            under varying amounts of deadline pressure.
+          </p>
+
+          <p>
+            The solution to drift isn't being more careful. It's
+            removing the conditions that allow drift to accumulate —
+            which means encoding the desired state somewhere that can
+            be checked and enforced automatically.
+          </p>
+
+          <h2>Getting started was the hard part</h2>
+
+          <p>
+            The Ansible concepts — inventory, playbooks, idempotency,
+            handlers — are not complicated. The friction was
+            environmental. Getting <code>ansible.cfg</code> to load
+            correctly, getting the vault password file in the right
+            place, understanding why the inventory parser was silently
+            rejecting a syntactically valid YAML file because the
+            file didn't actually exist yet. None of these are
+            deep problems. All of them cost time before the cause
+            was clear.
+          </p>
+
+          <p class="callout">
+            The gap between "I understand how Ansible works" and
+            "Ansible is actually working" is entirely environmental.
+            The tool itself is straightforward. Getting the control
+            node, SSH keys, sudoers entries, config file, vault
+            password, and inventory all correct simultaneously takes
+            longer than reading about any of them.
+          </p>
+
+          <p>
+            The thing that broke the most invisibly was the inventory
+            file not existing at the path <code>ansible.cfg</code>
+            expected. Ansible's error message — "unable to parse as
+            an inventory source" — is the same whether the file is
+            malformed or simply absent. Running
+            <code>cat inventory/hosts.yml</code> before assuming
+            the YAML was the problem would have saved twenty minutes.
+          </p>
+
+          <h2>The playbooks</h2>
+
+          <p>
+            Six playbooks are active. An audit playbook that collects
+            the current state of every service across all five nodes
+            and prints a structured report — read-only, safe to run
+            at any time, the first thing to run after any change.
+            A baseline playbook that ensures the same set of packages
+            is installed on every node and that lm-sensors has been
+            configured. A node_exporter playbook that checks the
+            installed version against a pinned target and only
+            downloads and reinstalls if they differ. A rolling update
+            playbook that runs <code>apt upgrade</code> one node at
+            a time with <code>serial: 1</code> so the cluster is
+            never being patched simultaneously.
+          </p>
+
+          <p>
+            The two NUT playbooks are the most consequential.
+            One manages the full server configuration on Ankhh — all
+            four config files, both services, and a live verification
+            at the end that <code>upsc</code> returns real data before
+            the play finishes. The other manages the secondary
+            configuration on the four slave nodes: Node 0, Shasta,
+            Murloc, and PBS. Each slave's play ends by querying
+            the UPS through Ankhh and confirming it returns
+            <code>OL</code>. If it doesn't, the play fails rather
+            than silently leaving a node in an unmonitored state.
+          </p>
+
+          <h2>What Ansible revealed</h2>
+
+          <p>
+            Writing a playbook for an existing configuration forces
+            you to understand it at a level that configuring it by
+            hand doesn't require. When you write the task that
+            deploys <code>upsmon.conf</code>, you have to know
+            what every field on the MONITOR line means. The power
+            value. The credential names. The <code>primary</code>
+            versus <code>secondary</code> distinction that NUT
+            renamed in version 2.8 — which Debian 12 ships — but
+            which still appears as <code>master</code> and
+            <code>slave</code> in most of the documentation online.
+          </p>
+
+          <p>
+            Running the audit playbook against the existing nodes
+            before touching anything is what surfaced the
+            inconsistencies. That's the point of the audit — not
+            to find catastrophes, but to find the quiet differences
+            that only matter when something goes wrong and you're
+            trying to reason about what the system should look like.
+          </p>
+
+          <h2>Vault</h2>
+
+          <p>
+            The NUT playbooks need the upsmon passwords. Those can't
+            live in plaintext in a file that gets committed to a
+            repository. Ansible Vault handles this — AES-256
+            encryption, decrypted transparently at playbook runtime
+            using a password stored in <code>~/.vault_pass</code>
+            on the control node. The encrypted file is safe to commit.
+            The password file is in <code>.gitignore</code> and
+            lives only on the control node and in a password manager.
+          </p>
+
+          <p>
+            The first time you forget to create the vault password
+            file before running a playbook, Ansible errors with a
+            message about the vault password file not being found.
+            The second time it happens you check for the file first.
+            That's roughly how all of this goes.
+          </p>
+
+          <h2>What's still in progress</h2>
+
+          <p>
+            The standardization playbook — a single play that runs
+            baseline packages and NUT config together across the
+            whole fleet — is partially written but paused. Writing
+            it exposed a decision that needs to be made first:
+            whether node_exporter comes from apt or from a pinned
+            binary downloaded directly from GitHub. The apt package
+            on Debian 12 is version 1.5.x. The pinned version in
+            the node_exporter playbook is 1.8.1. Running both
+            approaches on different nodes is exactly the kind of
+            drift Ansible is supposed to prevent. That decision
+            gets made before the combined playbook gets finished.
+          </p>
+
+          <p>
+            After that: a Glances standardization playbook, refactoring
+            the longer playbooks into proper roles once the structure
+            is stable enough to warrant it, and a nightly cron on
+            the control node that runs the audit automatically and
+            logs the output. The audit-on-a-schedule idea is
+            particularly useful — it means drift gets caught
+            without anyone having to remember to look.
+          </p>
+
+          <h2>The larger point</h2>
+
+          <p>
+            The conversation with the network engineering manager
+            back in April was direct about automation being a team
+            priority — moving from reactive firefighting to proactive
+            response to network events. Ansible is the tool that
+            lives in that space. Building playbooks in a homelab
+            environment to manage configuration across five nodes
+            is smaller in scale than managing hundreds of store
+            locations, but the thinking is identical. Desired state.
+            Idempotent operations. Version-controlled configuration.
+            Changes that are testable before they're applied.
+          </p>
+
+          <p>
+            This is the part of the homelab that's most directly
+            connected to where I'm trying to go professionally.
+            It's also the part that's most obviously unfinished —
+            which means there's more to write about here.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-03-2026.html">← Previous: 05-03-2026 Entry</a>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

@@ -19,6 +19,8 @@
     
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="canonical" href="https://michaelrooney.dev" />
+
+    <script src="https://unpkg.com/lucide@latest"></script>
   </head>
 
   <body>
@@ -39,18 +41,19 @@
     <main id="main">
 
       <!-- HERO -->
-      <section class="hero hero-load" aria-labelledby="hero-heading">
-        <span class="hero-eyebrow">Front-End Developer</span>
-        <h1 id="hero-heading">
-          Crafting clear,<br />
-          modern web<br />
-          experiences.
-        </h1>
-        <p>
-          Based in the U.S. — focused on responsive interfaces,
-          accessibility, and design-driven development.
-        </p>
-      </section>
+<section class="hero hero-load" aria-labelledby="hero-heading">
+  <span class="hero-eyebrow">20+ Years of Systems & Leadership</span>
+  <h1 id="hero-heading">
+    Operational Engineer & Front-End Developer
+  </h1>
+  <p>
+    Blending two decades of leadership with a deep-dive into systems architecture and front-end design. 
+    I build accessible interfaces powered by resilient, self-hosted infrastructure.
+  </p>
+  <div class="hero-buttons">
+    <a href="journal.html" class="project-link magnetic">Read the Journal</a>
+  </div>
+</section>
 
       
       <div class="divider reveal"></div>
@@ -151,62 +154,80 @@
             <div class="divider reveal"></div>
       <div class="divider reveal"></div>
 
-      <!-- ABOUT + SKILLS -->
-      <section id="about" aria-labelledby="about-heading">
-        <span class="section-label">Background</span>
-        <div class="about stagger">
-          <div class="about-text">
-            <h2 id="about-heading">About</h2>
-            <p>
-              I'm a front-end developer transitioning from 20+ years
-              of leadership into design-focused software development.
-            </p>
-            <p>
-              My background in operations and metrics informs how I
-              build interfaces: clear, efficient, and purposeful.
-            </p>
-          </div>
-          <div class="skills" aria-labelledby="skills-heading">
-            <h2 id="skills-heading">Capabilities</h2>
-            <ul>
-              <li>HTML, CSS, JavaScript (ES6+), TypeScript</li>
-              <li>React &amp; Angular</li>
-              <li>Responsive &amp; mobile-first design</li>
-              <li>Accessibility (WCAG 2.2)</li>
-              <li>Git &amp; modern workflows</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-      
+      <!-- About Section -->
+<section id="about" class="container">
+    <h2>About Me</h2>
+    
+    <div class="about-content">
+        <p>
+    With over <strong>20 years of leadership experience</strong>, I have built my career on optimizing complex operations and guiding teams through data-driven decision-making. My transition into software development is an evolution of this expertise, merging a veteran's perspective on project management with a deep focus on building resilient, user-centered digital systems.
+</p>
 
-      <!-- CONTACT -->
-      <section id="contact" aria-labelledby="contact-heading">
-        <span class="section-label">Get In Touch</span>
-        <h2 id="contact-heading" class="reveal">Contact</h2>
-        <nav class="contact-links stagger" aria-label="Contact links">
-          <a href="mailto:msroone@gmail.com">
-            Email Michael Rooney
-            <span>↗</span>
-          </a>
-          <a
-            href="https://www.linkedin.com/in/michael-rooney99"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            LinkedIn
-            <span>↗</span>
-          </a>
-          <a
-            href="https://github.com/MichaelRooney99"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+<p>
+    While my professional focus is on <strong>Front-End Development</strong>, my technical curiosity extends to the hardware level. I manage a five-node Proxmox cluster where I architect environments utilizing virtualization, automated power management, and secure networking. This allows me to engineer interfaces that are not only responsive and accessible but deeply informed by the infrastructure they inhabit.
+</p>
+    </div>
+
+    <h3>Technical Ecosystem</h3>
+    <div class="table-responsive">
+        <table class="skills-table">
+            <thead>
+                <tr>
+                    <th>Front-End Development</th>
+                    <th>Systems & Infrastructure</th>
+                    <th>Leadership & Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>React, Angular, & TypeScript</td>
+                    <td>Proxmox Virtualization</td>
+                    <td>20+ Years Leadership</td>
+                </tr>
+                <tr>
+                    <td>HTML5, CSS3 (Sass), & JS</td>
+                    <td>Linux CLI & Server Management</td>
+                    <td>Team Recruitment & Growth</td>
+                </tr>
+                <tr>
+                    <td>Mobile-First / Responsive Design</td>
+                    <td>Tailscale Networking</td>
+                    <td>Data-Driven Decision Making</td>
+                </tr>
+                <tr>
+                    <td>Figma & UI/UX Design</td>
+                    <td>Prometheus & Grafana Observability</td>
+                    <td>Compliance & Safety Standards</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <blockquote>
+        "I don't just build apps; I engineer solutions designed to last."
+    </blockquote>
+</section>
+
+     <!-- CONTACT SECTION -->
+<section id="contact" class="container reveal">
+    <span class="section-label">Get in Touch</span>
+    <h2>Let's Connect</h2>
+    
+    <div class="contact-links">
+        <a href="mailto:michael@michaelrooney.dev" class="magnetic">
+            Email
+            <span>michael@michaelrooney.dev</span>
+        </a>
+        <a href="https://github.com/MichaelRooney99" target="_blank" class="magnetic">
             GitHub
-            <span>↗</span>
-          </a>
-        </nav>
-      </section>
+            <span>@MichaelRooney99</span>
+        </a>
+        <a href="https://www.linkedin.com/in/michael-rooney99/" target="_blank" class="magnetic">
+            LinkedIn
+            <span>Professional Profile</span>
+        </a>
+    </div>
+</section>
 
     </main>
 

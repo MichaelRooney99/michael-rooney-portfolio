@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Proactive Alerts — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Implementing a production-grade alerting stack in Grafana, configuring SMTP with Gmail App Passwords, and utilizing custom Prometheus labels for human-readable monitoring."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Proactive Alerts — Michael Rooney" />
+    <meta property="og:description" content="Moving beyond passive dashboards to a proactive alerting system for Proxmox and UPS infrastructure." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-02-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-02-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-02-2026">May 2, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Proactive Alerts</h1>
+        </header>
+
+        <div class="prose">
+          <p>
+            With the metrics infrastructure finally stable, today was about 
+            turning that data into action. A dashboard is only useful if you're 
+            looking at it; an alert finds you when you aren't. I moved the 
+            lab into a proactive state by wiring Grafana into Gmail and 
+            writing custom PromQL to watch the most critical parts of the stack.
+          </p>
+
+          <h2>Data Enrichment</h2>
+          <p>
+            The first task was fixing the "cryptic IP" problem. While I know 
+            my subnet mapping by heart, alert emails shouldn't require a 
+            lookup table. I updated the <code>prometheus.yml</code> to include 
+            <code>friendly_name</code> labels for every target. Now, instead of 
+            an alert for <code>10.10.10.57</code>, I get a notification for 
+            <strong>Node-02-Shasta</strong>.
+          </p>
+
+          <h2>The SMTP Hurdle</h2>
+          <p>
+            Configuring Grafana to send mail from a Docker container 
+            running in an LXC turned out to be a lesson in environment 
+            variable priority. I opted to pass the SMTP configuration 
+            directly through the Docker Compose file rather than 
+            modifying the <code>grafana.ini</code>.
+          </p>
+          <p>
+            Because I use 2FA on my Google account, a standard password 
+            was out of the question. Generating a 16-character 
+            <strong>App Password</strong> was the key to getting the 
+            test notification to finally turn green.
+          </p>
+
+          <h2>Logic in Code</h2>
+          <p>
+            I skipped the Grafana "Builder" UI in favor of writing direct 
+            PromQL. It's cleaner and more predictable. I stood up three 
+            primary alert rules:
+          </p>
+          <ul>
+            <li><strong>Node Vitality:</strong> Watching for <code>up == 0</code> across the node_exporter job.</li>
+            <li><strong>Power Loss:</strong> Triggering on <code>nut_ups_status == 2</code> (On Battery).</li>
+            <li><strong>Shutdown Imminent:</strong> A critical alert when <code>nut_battery_runtime</code> drops below 300 seconds.</li>
+          </ul>
+
+          <p class="callout">
+            One major realization: Prometheus queries that return "No Data" 
+            for an alert like <code>up == 0</code> are exactly what you 
+            want to see. It means the condition for failure hasn't been met.
+          </p>
+
+          <h2>Final Polish</h2>
+          <p>
+            To avoid "alert fatigue" from minor network blips, I 
+            implemented a 2-minute "Pending" period. The system waits 
+            to ensure a node is actually down before buzzing my phone. 
+            The lab now feels less like a collection of parts and more 
+            like a managed environment.
+          </p>
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="04-30-2026.html">← Previous: 04-30-2026 Entry</a>          
+          <a href="05-03-2026.html">Next: 05-03-2026 Entry →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

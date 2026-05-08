@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configuration as Code — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Standing up an Ansible LXC, writing the first real playbooks, and using the process to audit NUT configs that turned out to have enough inconsistencies to warrant a full standardization pass."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Configuration as Code — Michael Rooney" />
+    <meta property="og:description" content="Standing up an Ansible LXC, writing the first real playbooks, and using the process to audit NUT configs that turned out to have enough inconsistencies to warrant a full standardization pass." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-03-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Configuration as Code — Michael Rooney" />
+    <meta name="twitter:description" content="Standing up an Ansible LXC, writing the first real playbooks, and using the process to audit NUT configs that turned out to have enough inconsistencies to warrant a full standardization pass." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-03-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-03-2026">May 3, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Configuration as Code</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Ansible has been on the roadmap since the conversation with
+            the network engineering manager — the one where automation
+            came up as a team priority and I mentally moved it from
+            "eventually" to "now." Today was the day I actually sat
+            down and built it out. A new LXC, a real inventory, the
+            first working playbooks. But the more interesting outcome
+            was what the process surfaced: five nodes I thought were
+            consistently configured, and a NUT setup that turned out
+            to have enough drift between nodes to warrant tearing it
+            down and rebuilding it from a single source of truth.
+          </p>
+
+          <h2>The control node</h2>
+
+          <p>
+            Ansible is agentless — it connects over SSH and runs tasks
+            remotely. All you need is one place to run it from. I
+            provisioned a small Debian LXC on Ankhh at
+            <code>10.10.10.106</code>: one core, 512MB of RAM, 8GB
+            of disk. It barely uses any of that. Its only job is to
+            hold the playbooks and SSH out to the other nodes.
+          </p>
+
+          <p>
+            Rather than use root for remote connections, I created a
+            dedicated <code>ansible</code> user on each Proxmox host
+            with passwordless sudo, then generated an ed25519 key pair
+            on the control node and distributed the public key across
+            all five hosts. The first real Ansible command — 
+            <code>ansible all -m ping</code> — returned green across
+            the board on the first try, which felt like an unusually
+            clean start.
+          </p>
+
+          <h2>Inventory and group vars</h2>
+
+          <p>
+            The inventory is a YAML file that describes all five nodes,
+            their IPs, and how they're grouped. Groups matter because
+            they let you scope playbooks precisely — run something
+            against <code>proxmox_nodes</code> to hit everything, or
+            against <code>nut_slaves</code> to hit only the four nodes
+            that aren't the NUT master. The grouping maps directly to
+            the real topology rather than being an arbitrary
+            organizational convenience.
+          </p>
+
+          <p>
+            Variables shared across all nodes live in
+            <code>group_vars/all.yml</code>: the NUT server address,
+            shutdown thresholds, the node_exporter version to pin,
+            the common package list. The idea is that changing
+            <code>node_exporter_version</code> in one file and running
+            the playbook is enough to update every node. No more
+            SSHing into five machines individually, no more wondering
+            whether they all ended up the same.
+          </p>
+
+          <h2>The first playbooks</h2>
+
+          <p>
+            I wrote four to start. A baseline playbook that ensures
+            the same set of packages is present on every node —
+            <code>lm-sensors</code>, <code>nut-client</code>,
+            <code>curl</code>, <code>htop</code>, the fundamentals
+            that should exist everywhere but had somehow drifted.
+            A node_exporter playbook that checks the installed version
+            against a pinned target, downloads and installs only if
+            they don't match, and enforces an identical systemd unit
+            across all five hosts. An audit playbook that collects
+            the state of every service I care about — version numbers,
+            active/inactive, installed or not — and prints a summary
+            per node without touching anything. And a rolling update
+            playbook that runs <code>apt upgrade</code> one node at
+            a time with <code>serial: 1</code> so the cluster is
+            never being patched simultaneously.
+          </p>
+
+          <p>
+            The audit playbook was the most immediately useful. Running
+            it against the existing infrastructure before touching
+            anything is how I found out the nodes weren't as consistent
+            as I'd assumed.
+          </p>
+
+          <h2>What the audit found</h2>
+
+          <p>
+            The discrepancies weren't dramatic. Nobody was running a
+            wildly different NUT version or missing a package entirely.
+            It was the smaller things — <code>POLLFREQ</code> values
+            that didn't match between nodes, notification flags that
+            were present on some hosts and absent on others, a
+            <code>FINALDELAY</code> that was set differently on PBS
+            than everywhere else. The kind of thing that happens when
+            you configure five machines by hand over the course of
+            several weeks, copying and editing config snippets each time.
+          </p>
+
+          <p class="callout">
+            Configuration drift is almost never dramatic. It accumulates
+            in small decisions made under time pressure — a value that
+            seemed fine at the time, a flag that got added to one node
+            but not the others. The audit doesn't find catastrophes.
+            It finds the quiet inconsistencies that only matter when
+            something goes wrong.
+          </p>
+
+          <p>
+            Once I started looking at the NUT configs carefully, I also
+            noticed something more fundamental. The <code>MONITOR</code>
+            line on the slave nodes was using the old NUT terminology —
+            <code>master</code> and <code>slave</code> on the type
+            field — rather than the current <code>primary</code> and
+            <code>secondary</code> that NUT adopted in version 2.8.
+            Debian 12 ships 2.8.x. Everything was still functioning
+            because NUT maintains backward compatibility during the
+            transition, but running a mix of old and new terminology
+            across five nodes with no clear reason why felt like
+            exactly the kind of thing Ansible exists to prevent.
+          </p>
+
+          <h2>Rebuilding NUT from a single source</h2>
+
+          <p>
+            Rather than patch individual files, I mapped out the correct
+            config for every node from scratch and encoded it into two
+            playbooks. One for Ankhh, which runs the full NUT server —
+            <code>upsd</code>, the <code>usbhid-ups</code> driver,
+            and its own <code>upsmon</code> as primary. One for
+            everything else, which runs only <code>nut-client</code>
+            and connects to Ankhh as a secondary. The distinction
+            matters more than it might look.
+          </p>
+
+          <p>
+            Ankhh gets four config files. The other four nodes get two.
+            The one that most people configure wrong — or inconsistently —
+            is the <code>MONITOR</code> line in <code>upsmon.conf</code>.
+            It contains the power value: <code>1</code> for the primary,
+            <code>0</code> for all secondaries. That number isn't
+            cosmetic. A power value of <code>1</code> gives a node
+            the authority to issue a forced shutdown broadcast to every
+            connected client when it decides the UPS condition is
+            critical. The wrong value on the wrong node, and the
+            shutdown logic doesn't behave the way you expect it to
+            when it actually matters.
+          </p>
+
+          <pre><code>MONITOR cyberpower@10.10.10.55:3493 0 upsmon_slave [password] secondary</code></pre>
+
+          <p>
+            The credentials are stored in an Ansible Vault-encrypted
+            file — the first time I've used Vault in practice rather
+            than just reading about it. The playbook references
+            <code>{{ vault_upsmon_slave_password }}</code> and the
+            actual value never appears in plaintext anywhere in the
+            repository. Small thing, right practice.
+          </p>
+
+          <h2>Running order</h2>
+
+          <p>
+            The master playbook runs first against Ankhh, brings
+            <code>nut-server</code> up, and verifies that upsd is
+            listening on port 3493 and that
+            <code>upsc cyberpower@localhost</code> returns real data
+            before the play ends. Only then does the slave playbook
+            run against the other four. The final task on each slave
+            queries <code>upsc cyberpower@10.10.10.55</code> and
+            prints what it sees — a concrete confirmation that the
+            node can reach the master and is monitoring the right UPS
+            with the right credentials.
+          </p>
+
+          <pre><code>ansible ankhh -m command -a "upsc cyberpower@localhost ups.status"
+ankhh | CHANGED | rc=0 >>
+OL</code></pre>
+
+          <p>
+            All five nodes came up clean. The shutdown thresholds are
+            consistent — 20% battery or 300 seconds of runtime
+            remaining, matching what was always intended but not
+            always enforced. The notification flags are identical
+            across every node. The terminology is standardized on
+            <code>primary</code> and <code>secondary</code> throughout.
+          </p>
+
+          <h2>What Ansible actually teaches you</h2>
+
+          <p>
+            Something becomes clear pretty quickly when you start
+            writing playbooks: the exercise of encoding a configuration
+            into a playbook forces you to understand it at a different
+            level than configuring it by hand does. When you write
+            the task that sets the <code>MONITOR</code> line, you have
+            to know exactly what every field means. When you write the
+            handler that restarts <code>nut-monitor</code> only when
+            the config file actually changed, you have to understand
+            the dependency between the config and the service. The
+            playbook is documentation that also runs.
+          </p>
+
+          <p class="callout">
+            Running a playbook in <code>--check --diff</code> mode
+            against a node you've configured by hand is one of the
+            more honest things you can do as a homelab operator.
+            It shows you exactly what you said the config should be
+            versus what it actually is. The diff is the audit.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            The Ansible LXC is running. The inventory covers all five
+            nodes. The first real playbooks — baseline packages,
+            node_exporter, NUT master and slave configs, rolling
+            updates — are tested and committed. The next additions are
+            Glances standardization across all nodes, and eventually
+            refactoring the longer playbooks into proper roles once
+            the structure is clear enough to warrant it.
+          </p>
+
+          <p>
+            The broader point is that the homelab now has a control
+            plane for its own configuration. Changes get made in the
+            playbooks, applied through Ansible, and the nodes converge
+            to the declared state. The alternative — SSHing into each
+            machine individually, editing files, trying to remember
+            what you changed and where — was how the NUT drift
+            happened in the first place.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-02-2026.html">← Previous: 05-02-2026 Entry</a>          
+          <a href="05-07-2026.html">Next: 05-07-2026 Entry →</a>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
