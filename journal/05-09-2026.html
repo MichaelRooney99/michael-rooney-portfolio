@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Two More Eyes — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Deploying Zabbix for infrastructure state monitoring and Homelable for interactive topology visualization — plus the PostgreSQL loopback issue that took longer to find than it should have."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Two More Eyes — Michael Rooney" />
+    <meta property="og:description" content="Deploying Zabbix for infrastructure state monitoring and Homelable for interactive topology visualization — plus the PostgreSQL loopback issue that took longer to find than it should have." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-09-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Two More Eyes — Michael Rooney" />
+    <meta name="twitter:description" content="Deploying Zabbix for infrastructure state monitoring and Homelable for interactive topology visualization — plus the PostgreSQL loopback issue that took longer to find than it should have." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-09-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-09-2026">May 9, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Two More Eyes</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The monitoring stack has been adding layers. Prometheus watches 
+            metrics over time. Grafana turns those metrics into dashboards 
+            and alerts. But there's a category of visibility neither of them 
+            handles well: the current state of hardware and network gear that 
+            doesn't speak Prometheus at all. This week I added two tools that 
+            fill different gaps — Zabbix for infrastructure state and SNMP 
+            polling, and Homelable for an interactive map of what's actually 
+            sitting in the rack.
+          </p>
+
+          <h2>Why Zabbix alongside Prometheus</h2>
+
+          <p>
+            The honest answer is that Prometheus is a metrics system. It 
+            tracks what happened and when. What it doesn't do naturally is 
+            model the current state of a device — is this switch port up or 
+            down, is this service responding, has this threshold been crossed 
+            and stayed crossed. Zabbix is built around exactly that model: 
+            triggers, not queries. You define a condition, and Zabbix watches 
+            it continuously and alerts when the state changes.
+          </p>
+
+          <p>
+            The more practical reason is the Netgear GS308EP. The switch 
+            recently replaced the unmanaged GS108L — it has SNMP v2c support, 
+            PoE, and actual port-level visibility. Prometheus has no native 
+            way to poll SNMP. Zabbix does, out of the box, with a built-in 
+            template for Netgear gear. That alone justified the deployment.
+          </p>
+
+          <h2>Deploying on Shasta</h2>
+
+          <p>
+            Zabbix went into a new LXC on Shasta — 2 cores, 2GB of RAM, 
+            32GB of disk, Debian 12. The stack is Zabbix Server 7 with a 
+            PostgreSQL 17 backend and a PHP-FPM frontend served through 
+            Apache. Installing the packages from the official Zabbix repo 
+            is straightforward. Getting the web wizard to complete was not.
+          </p>
+
+          <p>
+            The setup failed at the database connection step. PostgreSQL 
+            was running — <code>systemctl status postgresql</code> confirmed 
+            it, and I could connect locally with <code>psql -U zabbix</code> 
+            without any issue. But the web wizard consistently returned a 
+            connection error.
+          </p>
+
+          <p class="callout">
+            The cause was a loopback ambiguity I've now seen twice: the 
+            system was resolving <code>localhost</code> to <code>::1</code> 
+            (IPv6), but the PostgreSQL listener in the LXC environment was 
+            binding to <code>127.0.0.1</code> (IPv4) first. The fix was 
+            one line — setting the DB host explicitly to 
+            <code>127.0.0.1</code> in the Zabbix config rather than 
+            <code>localhost</code> — but finding it required reading through 
+            the PHP-FPM error log rather than trusting the wizard's generic 
+            error message.
+          </p>
+
+          <p>
+            After that, the wizard completed, and Zabbix Agent 2 went onto 
+            each Proxmox host. The SNMP template for the GS308EP took about 
+            ten minutes to configure — community string, correct OID tree, 
+            and the interface items mapped to the right ports. Seeing 
+            per-port traffic counters show up in Zabbix for the first time 
+            after months of running an unmanaged switch felt like a meaningful 
+            step up.
+          </p>
+
+          <h2>What Zabbix actually watches</h2>
+
+          <p>
+            The initial monitoring scope is three things. The Netgear 
+            GS308EP via SNMP — port state, traffic, PoE draw. The Proxmox 
+            cluster nodes via Zabbix Agent 2 — availability, load, disk, 
+            memory. And OPNsense, where I'm working out the right approach 
+            between its SNMP export and its API. Zabbix and Prometheus 
+            overlap on the Proxmox nodes deliberately; having two independent 
+            views of the same hosts means a problem in one monitoring system 
+            doesn't leave me blind.
+          </p>
+
+          <h2>Homelable on Murloc</h2>
+
+          <p>
+            The second deployment was Homelable — an interactive topology 
+            tool that uses active <code>nmap</code> scanning to discover 
+            live devices on the subnet and lets you arrange them on a canvas 
+            that maps to the physical rack. I'd been wanting something like 
+            this for a while. Network diagrams in a wiki are useful but 
+            static. A tool that actually scans and shows what's present is 
+            something different.
+          </p>
+
+          <p>
+            It went onto Murloc at <code>10.10.10.107</code>. The catch 
+            is that <code>nmap</code> in its default scanning modes needs raw 
+            socket access, which a standard unprivileged LXC blocks. The 
+            solution is enabling nesting in the LXC options — it grants the 
+            container the capability it needs without making the container 
+            fully privileged. Discovery scope is set to 
+            <code>10.10.10.0/24</code> only; the IoT VLAN stays isolated.
+          </p>
+
+          <h2>The switch upgrade</h2>
+
+          <p>
+            The GS308EP replaced the GS108L, which was completely unmanaged — 
+            no SNMP, no port visibility, no VLANs beyond what the trunk port 
+            implied. The new switch is managed, supports SNMP v2c, has PoE 
+            on four ports, and handles port-based VLANs properly. The 
+            physical wiring stayed the same. The difference is that the 
+            switch is now a monitored part of the infrastructure rather than 
+            a black box in the middle of it.
+          </p>
+
+          <p>
+            It's a small change in the rack. It's a significant change in 
+            what I can see.
+          </p>
+
+          <h2>Where the observability stack stands</h2>
+
+          <p>
+            At this point the lab has more monitoring than most small 
+            businesses bother to run. Prometheus scrapes metrics from all 
+            five nodes every 15 seconds. Grafana turns that into dashboards 
+            and fires alerts to email when something goes wrong. Zabbix 
+            watches infrastructure state and polls the switch via SNMP. 
+            Homelable shows the topology. Uptime Kuma tracks external 
+            reachability. The gap that remains is tying it together — a 
+            single place to go when something breaks rather than five 
+            separate tools to check. That's a project for later. For now, 
+            the visibility is there.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-07-2026.html">← Previous: 05-07-2026 Entry</a>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
