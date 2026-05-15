@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>One Place for Secrets — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Deploying Vaultwarden as a self-hosted password manager — working through a Node 0 networking dead end, landing on Murloc, and using the existing Tailscale exit node for resilient access."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="One Place for Secrets — Michael Rooney" />
+    <meta property="og:description" content="Deploying Vaultwarden as a self-hosted password manager — working through a Node 0 networking dead end, landing on Murloc, and using the existing Tailscale exit node for resilient access." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-14-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="One Place for Secrets — Michael Rooney" />
+    <meta name="twitter:description" content="Deploying Vaultwarden as a self-hosted password manager — working through a Node 0 networking dead end, landing on Murloc, and using the existing Tailscale exit node for resilient access." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-14-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-14-2026">May 14, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>One Place for Secrets</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The credential problem compounds quietly. One Proxmox node 
+            is manageable. Five nodes, a backup server, a router, a 
+            reverse proxy, a monitoring stack, and a handful of 
+            services each with their own accounts — and suddenly 
+            there's no good answer to where any of it lives. The 
+            browser password manager was doing work it wasn't designed 
+            for. Today I fixed that by standing up Vaultwarden: a 
+            self-hosted, Bitwarden-compatible password manager that 
+            puts everything in one place I actually control.
+          </p>
+
+          <h2>Why self-hosted</h2>
+
+          <p>
+            The homelab credentials specifically don't belong in a 
+            cloud service. They're internal service accounts, API 
+            tokens, Ansible Vault passwords — things that only make 
+            sense in the context of the lab itself and shouldn't leave 
+            it. Vaultwarden is a single Rust binary that implements 
+            the full Bitwarden server API. The official Bitwarden 
+            clients — browser extensions, mobile apps — connect to it 
+            directly, so the user experience is identical to the cloud 
+            product. The data stays local.
+          </p>
+
+          <h2>The Node 0 dead end</h2>
+
+          <p>
+            The initial plan was a dedicated management LXC on Node 0 — 
+            the idea being that Node 0 is already the out-of-band node 
+            with its own Tailscale host install, so putting 
+            security-critical services there made architectural sense. 
+            The LXC came up, Tailscale registered, Vaultwarden started 
+            clean. The problem appeared when trying to wire it through 
+            NPM: the NPM LXC and the new LXC are both on Node 0, both 
+            on the same bridge, but NPM couldn't reach Vaultwarden at 
+            all. Ping between the two LXCs showed 100% packet loss.
+          </p>
+
+          <p>
+            The diagnosis took a while. The bridge config was correct. 
+            The IP was set. The firewall was disabled. ARP resolved the 
+            MAC address cleanly. But ICMP went nowhere. The root cause 
+            is specific to Node 0's setup: the NIC is passed through to 
+            OPNsense, which means all inter-LXC traffic that isn't 
+            on the same host hairpins through OPNsense and back. The 
+            Node 0 host itself becomes unreachable from its own LXCs 
+            because the return path doesn't exist in the same way it 
+            does on the cluster nodes.
+          </p>
+
+          <p class="callout">
+            The LXCs on Node 0 can reach the rest of the network fine 
+            — they route through OPNsense like everything else. What 
+            they can't do reliably is reach each other or the Node 0 
+            host directly. It's a consequence of the NIC passthrough 
+            architecture, not a misconfiguration. The right answer 
+            wasn't to fight it.
+          </p>
+
+          <h2>Moving to Murloc</h2>
+
+          <p>
+            Rather than add a second Tailscale node and a dedicated 
+            management LXC to work around the Node 0 limitation, I 
+            took the simpler path: spin up the LXC on Murloc instead, 
+            where the networking is straightforward, and use the 
+            Tailscale exit node that's already running on Ankhh for 
+            resilient access. The exit node advertises the entire 
+            <code>10.10.10.0/24</code> subnet to all Tailscale 
+            devices. That means Vaultwarden at 
+            <code>10.10.10.109</code> is reachable through Tailscale 
+            from anywhere, even if OPNsense or NPM is the thing 
+            that's broken — which is exactly the failure scenario 
+            where you most need access to your passwords.
+          </p>
+
+          <h2>Installation</h2>
+
+          <p>
+            Vaultwarden 1.36.0 dropped prebuilt binary releases. The 
+            project switched to distributing via Docker image only — 
+            a reasonable choice for most deployments, but this LXC 
+            doesn't run Docker and I didn't want to add it just for 
+            an extraction step. The solution is a script called 
+            <code>docker-image-extract</code> that pulls and unpacks 
+            Docker image layers without a Docker daemon. It downloads 
+            the alpine image, extracts the layers, and drops the 
+            Vaultwarden binary and web vault into an output directory. 
+            From there it's a straightforward copy into 
+            <code>/opt/vaultwarden</code>, a dedicated service user, 
+            and a systemd unit.
+          </p>
+
+          <p>
+            The service came up clean on the first start — 5.5MB of 
+            memory, version 1.36.0, listening on 
+            <code>0.0.0.0:8080</code>. NPM proxies 
+            <code>vault.michaelrooney.dev</code> to it with the 
+            existing wildcard cert. Signups are disabled after account 
+            creation so the registration endpoint is closed.
+          </p>
+
+          <h2>Access paths</h2>
+
+          <p>
+            The vault is reachable three ways. Through the NPM domain 
+            for normal use. Directly on the LAN IP for when NPM is the 
+            problem. And through Tailscale for when OPNsense itself is 
+            down — the exit node on Ankhh keeps the subnet routed 
+            remotely as long as Ankhh and Murloc are up, which covers 
+            the scenarios that actually matter. The one credential 
+            that lives nowhere in the vault is the master password. 
+            That one is written down.
+          </p>
+
+          <h2>The broader point</h2>
+
+          <p>
+            The Firefox import handled the personal credentials. The 
+            homelab service accounts, API tokens, and infrastructure 
+            passwords are going in manually — organized into folders 
+            by category so they're findable when something breaks at 
+            an inconvenient time. The goal isn't just having a password 
+            manager. It's having one that's reachable precisely when 
+            the rest of the stack isn't.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-09-2026.html">← Previous: 05-09-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
