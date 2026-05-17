@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Overdue Housekeeping — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Splitting the project list into a dedicated portfolio showcase, wiring up new coursework projects, stripping the sitemap back to basics, and consolidating a scattered local repo structure."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Overdue Housekeeping — Michael Rooney" />
+    <meta property="og:description" content="Splitting the project list into a dedicated portfolio showcase, wiring up new coursework projects, stripping the sitemap back to basics, and consolidating a scattered local repo structure." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-16-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Overdue Housekeeping — Michael Rooney" />
+    <meta name="twitter:description" content="Splitting the project list into a dedicated portfolio showcase, wiring up new coursework projects, stripping the sitemap back to basics, and consolidating a scattered local repo structure." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-16-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-16-2026">May 16, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Overdue Housekeeping</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Not every session involves standing up a new service or debugging 
+            something that broke at midnight. Sometimes it's the quieter work — 
+            the things that have been sitting on the list long enough that they 
+            start to feel like background noise. Today was that kind of session. 
+            The portfolio project list had gotten long enough to feel unwieldy, 
+            several coursework projects had no public home yet, the sitemap had 
+            a stale entry, and the local repo structure had been scattered across 
+            a few directories for longer than I'd like to admit.
+          </p>
+
+          <h2>A dedicated portfolio page</h2>
+
+          <p>
+            The homepage work section was never designed to be a full project 
+            list. It was always meant to be a teaser — two or three entries and 
+            a link to somewhere more complete. But it had gradually absorbed 
+            every project as they were added, and it was starting to feel like 
+            a wall before you got to the journal or the about section.
+          </p>
+
+          <p>
+            The fix was finishing something I'd already started.
+            <code>portfolio-showcase.html</code> had been scaffolded for a while 
+            with placeholder content. Today it got wired up properly — all four 
+            current projects using the same <code>.project</code> article pattern 
+            as the rest of the site, so no new CSS was needed. The homepage work 
+            section is now trimmed to two teaser entries and a "See Full Portfolio" 
+            banner that mirrors the existing journal banner. Same component, 
+            different destination.
+          </p>
+
+          <p>
+            The nav Work link now points directly to 
+            <code>portfolio-showcase.html</code> rather than anchoring to 
+            <code>#work</code> on the homepage. On the showcase page the Work 
+            link carries the active state. Small things, but they matter for 
+            communicating where you are.
+          </p>
+
+          <h2>New projects added</h2>
+
+          <p>
+            Three coursework projects that had been sitting unlinked finally made 
+            it in. Two were for a Willow Gardens community garden concept — a 
+            fictional multi-page site built once with Bootstrap 5 and once rebuilt 
+            from scratch with Tailwind CSS. The point of doing it twice was the 
+            comparison: component-based styling versus utility-first, same design 
+            goals, different mental models. Both are multi-page sites with 
+            accessible navigation, a plot application form with validation, 
+            resource listings, and gardening tips.
+          </p>
+
+          <p>
+            The third was a Star Wars Faves app built collaboratively with 
+            classmates as part of a front-end course. It pulls live character 
+            data from the Star Wars API, manages checkbox state with Angular 
+            signals, and posts selected favorites to a Microsoft Teams channel 
+            via a Power Automate webhook. Each student implemented their own 
+            component on the same routing structure — a useful exercise in 
+            working within a shared codebase without stepping on each other.
+          </p>
+
+          <p>
+            None of these got a middle-man detail page. The view project links 
+            go straight to the deployed GitHub Pages URLs. An extra click to 
+            read a description of something you could just be looking at doesn't 
+            serve anyone.
+          </p>
+
+          <h2>Sitemap cleanup</h2>
+
+          <p>
+            The sitemap had a stale entry for 
+            <code>/work/quickbites-kiosk.html</code> — a detail page removed 
+            a while back when the project link was changed to go directly to 
+            the live site. That got pulled. I also briefly went down the road 
+            of adding <code>lastmod</code> dates to every entry before 
+            remembering that Google has largely ignored that field for years 
+            unless it's accurate and consistently maintained — a stale or 
+            estimated date is actively worse than omitting it. Stripped it back 
+            out. The sitemap is now just <code>loc</code> and 
+            <code>priority</code>, which is all it ever needed to be.
+          </p>
+
+          <p>
+            The showcase page was already listed from when it was first 
+            scaffolded, so no new entries were needed there. External GitHub 
+            Pages deployments don't go in the sitemap — those are separate 
+            domains that get indexed on their own.
+          </p>
+
+          <h2>Local repo organization</h2>
+
+          <p>
+            More administrative than technical, but worth putting in writing: 
+            the local directory structure for project repos got consolidated. 
+            They had accumulated across a few different locations over time — 
+            some in one folder, some in another, no consistent logic to any 
+            of it — and it had gotten hard to find things quickly.
+          </p>
+
+          <p>
+            The reassuring thing about Git is that moving a local directory 
+            doesn't affect the remote at all. The <code>.git</code> folder 
+            travels with the directory, and the remote connection lives inside 
+            it. Push and pull work exactly the same from the new location. The 
+            only things that needed updating were VS Code's recent projects 
+            list and a couple of terminal aliases pointing at old paths.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            The portfolio is in a cleaner state than it's been in a while. 
+            The Willow Gardens Tailwind version still needs a deployed URL 
+            before it's fully wired up, and the homepage hero copy could 
+            use a pass now that the work section has changed shape. Beyond 
+            that, the focus goes back to Network+ prep — the site maintenance 
+            was genuinely overdue, but it doesn't move the cert needle, and 
+            that's where the energy needs to be.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-14-2026.html">← Previous: 05-14-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
