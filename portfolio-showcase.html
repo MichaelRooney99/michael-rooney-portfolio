@@ -15,8 +15,8 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Portfolio Showcase — Michael Rooney" />
     <meta name="twitter:description" content="Selected work and project showcase by front-end developer Michael Rooney." />
-  
-    <link rel="stylesheet" href="css/styles.css" />    
+
+    <link rel="stylesheet" href="css/styles.css" />
     <link rel="canonical" href="https://michaelrooney.dev/portfolio-showcase.html" />
   </head>
 
@@ -25,9 +25,9 @@
 
     <header>
       <nav class="nav" role="navigation" aria-label="Primary">
-        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <a href="index.html" class="logo" aria-label="Home">MR</a>
         <ul>
-          <li><a href="index.html#work">Work</a></li>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
           <li><a href="index.html#about">About</a></li>
           <li><a href="journal.html">Journal</a></li>
           <li><a href="index.html#contact">Contact</a></li>
@@ -45,47 +45,139 @@
           Work
         </h1>
         <p>
-          A curated selection of design and development work,
-          presented with clarity and intent.
+          A curated collection of front-end applications and components —
+          built for usability, scalability, and real-world use.
         </p>
       </section>
 
       <div class="divider reveal"></div>
 
-      <!-- SHOWCASE GRID -->
+      <!-- PROJECTS -->
       <section aria-labelledby="projects-heading">
         <span class="section-label">Projects</span>
         <h2 id="projects-heading" class="reveal">Work Samples</h2>
 
-        <div class="showcase-grid stagger">
+        <div class="stagger">
 
-          <a href="#" class="showcase-card">
-            <span class="project-meta">Web Application</span>
-            <h3>Work Sample One</h3>
-            <p>
-              Description of the project — problem, solution, and outcome.
-            </p>
-            <span class="showcase-card-link">View Project ↗</span>
-          </a>
+          <article class="project">
+            <span class="project-num">01</span>
+            <div class="project-content">
+              <span class="project-meta">Web Application</span>
+              <h3>Quick Bites Kiosk</h3>
+              <p>
+                A responsive self-service kiosk experience designed
+                for speed, clarity, and usability.
+              </p>
+            </div>
+            <a
+              href="https://michaelrooney99.github.io/quickbites-kiosk/"
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
 
-          <a href="#" class="showcase-card">
-            <span class="project-meta">React / TypeScript</span>
-            <h3>Work Sample Two</h3>
-            <p>
-              Description of the project — problem, solution, and outcome.
-            </p>
-            <span class="showcase-card-link">View Project ↗</span>
-          </a>
+          <article class="project">
+            <span class="project-num">02</span>
+            <div class="project-content">
+              <span class="project-meta">React / TypeScript</span>
+              <h3>Task Management App</h3>
+              <p>
+                A task manager with drag-and-drop workflows,
+                persistent state, and scalable architecture.
+              </p>
+            </div>
+            <a
+              href="https://michaelrooney99.github.io/task-manager/"
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
 
-          <a href="#" class="showcase-card">
-            <span class="project-meta">UI Design</span>
-            <h3>Work Sample Three</h3>
-            <p>
-              Description of the project — problem, solution, and outcome.
-            </p>
-            <span class="showcase-card-link">View Project ↗</span>
-          </a>
+          <article class="project">
+            <span class="project-num">03</span>
+            <div class="project-content">
+              <span class="project-meta">Angular / JavaScript / TypeScript</span>
+              <h3>Angular Components</h3>
+              <p>
+                A collection of reusable Angular components designed for maintainability and scalability.
+                Designed independently by fellow students and myself as part of a front-end development course.
+              </p>
+            </div>
+            <a
+              href="https://michaelrooney99.github.io/angular-components-s26/"
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
 
+          <article class="project">
+            <span class="project-num">04</span>
+            <div class="project-content">
+              <span class="project-meta">React / JavaScript / TypeScript</span>
+              <h3>React Components</h3>
+              <p>
+                A collection of reusable React components designed for maintainability and scalability.
+                Designed independently by fellow students and myself as part of a front-end development course.
+              </p>
+            </div>
+            <a
+              href="https://michaelrooney99.github.io/react-components-s26/"
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
+
+          <article class="project">
+            <span class="project-num">05</span>
+            <div class="project-content">
+              <span class="project-meta">HTML / Bootstrap 5</span>
+              <h3>Willow Gardens — Bootstrap</h3>
+              <p>
+                A multi-page community garden site built with Bootstrap 5. Features
+                a plot application form with validation, resource listings, gardening
+                tips, and accessible navigation across four pages.
+              </p>
+            </div>
+            <a 
+              href="https://michaelrooney99.github.io/WillowGardens/"
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
+
+          <article class="project">
+            <span class="project-num">06</span>
+            <div class="project-content">
+              <span class="project-meta">HTML / Tailwind CSS</span>
+              <h3>Willow Gardens — Tailwind</h3>
+              <p>
+                The same community garden concept rebuilt with Tailwind CSS — 
+                a side-by-side study in utility-first vs. component-based styling 
+                approaches.
+              </p>
+            </div>
+            <a 
+              href="https://michaelrooney99.github.io/WillowGardensTW/"
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+              class="project-link magnetic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >View Project</a>
+          </article>
         </div>
       </section>
 
