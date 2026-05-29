@@ -150,15 +150,20 @@
               <tr><th>Port</th><th>Protocol</th><th>Transport</th></tr>
             </thead>
             <tbody>
+              <tr><td>20/21</td><td>FTP</td><td>TCP</td></tr>
               <tr><td>22</td><td>SSH</td><td>TCP</td></tr>
               <tr><td>25</td><td>SMTP</td><td>TCP</td></tr>
               <tr><td>53</td><td>DNS</td><td>TCP &amp; UDP</td></tr>
               <tr><td>67/68</td><td>DHCP</td><td>UDP</td></tr>
+              <tr><td>69</td><td>TFTP</td><td>UDP</td></tr>
               <tr><td>80</td><td>HTTP</td><td>TCP</td></tr>
               <tr><td>110</td><td>POP3</td><td>TCP</td></tr>
+              <tr><td>123</td><td>NTP</td><td>UDP</td></tr>
               <tr><td>143</td><td>IMAP</td><td>TCP</td></tr>
               <tr><td>161/162</td><td>SNMP</td><td>UDP</td></tr>
+              <tr><td>389</td><td>LDAP</td><td>TCP &amp; UDP</td></tr>
               <tr><td>443</td><td>HTTPS</td><td>TCP</td></tr>
+              <tr><td>514</td><td>syslog</td><td>UDP</td></tr>              
               <tr><td>3389</td><td>RDP</td><td>TCP</td></tr>
             </tbody>
           </table>
@@ -187,6 +192,79 @@
           </p>
 
           <p>
+            Subnetting math requires converting Host bits (<em>h</em>) and Network bits (<em>n</em>) into usable host and subnet configurations.
+          </p>
+
+          <div class="callout">
+            <p><strong>1. Usable Hosts per Subnet:</strong></p>
+            <p><code>H = 2<sup>h</sup> - 2</code></p>
+            <p>Where <em>h</em> is the number of remaining 0s (host bits) in the 32-bit subnet mask.</p>
+          </div>
+
+          <div class="callout">
+            <p><strong>2. Number of Subnets Created:</strong></p>
+            <p><code>S = 2<sup>n</sup></code></p>
+            <p>Where <em>n</em> is the number of borrowed 1s (network bits) from the default classful boundary.</p>
+          </div>
+
+          <h3>Fast-Reference Cheat Table</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>CIDR</th>
+                <th>Subnet Mask</th>
+                <th>Total IPs</th>
+                <th>Usable IPs</th>
+                <th>Notes / Typical Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/24</code></td>
+                <td>255.255.255.0</td>
+                <td>256</td>
+                <td>254</td>
+                <td>Standard SOHO local network segment.</td>
+              </tr>
+              <tr>
+                <td><code>/25</code></td>
+                <td>255.255.255.128</td>
+                <td>128</td>
+                <td>126</td>
+                <td>Split a /24 class directly in half.</td>
+              </tr>
+              <tr>
+                <td><code>/26</code></td>
+                <td>255.255.255.192</td>
+                <td>64</td>
+                <td>62</td>
+                <td>Ideal for mid-sized departmental isolation.</td>
+              </tr>
+              <tr>
+                <td><code>/27</code></td>
+                <td>255.255.255.224</td>
+                <td>32</td>
+                <td>30</td>
+                <td>Great for small remote offices (e.g., 26 hosts).</td>
+              </tr>
+              <tr>
+                <td><code>/28</code></td>
+                <td>255.255.255.240</td>
+                <td>16</td>
+                <td>14</td>
+                <td>Small host environments or device pools.</td>
+              </tr>
+              <tr>
+                <td><code>/30</code></td>
+                <td>255.255.255.252</td>
+                <td>4</td>
+                <td>2</td>
+                <td>Standard point-to-point router WAN links.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
             The private IPv4 ranges — addresses that are not routable on the public
             internet — are defined in RFC 1918:
           </p>
@@ -196,9 +274,9 @@
               <tr><th>Range</th><th>CIDR</th><th>Addresses</th></tr>
             </thead>
             <tbody>
-              <tr><td>10.0.0.0 – 10.255.255.255</td><td>10.0.0.0/8</td><td>~16.7 million</td></tr>
-              <tr><td>172.16.0.0 – 172.31.255.255</td><td>172.16.0.0/12</td><td>~1 million</td></tr>
-              <tr><td>192.168.0.0 – 192.168.255.255</td><td>192.168.0.0/16</td><td>~65,000</td></tr>
+              <tr><td>10.0.0.0 - 10.255.255.255</td><td>10.0.0.0/8</td><td>~16.7 million</td></tr>
+              <tr><td>172.16.0.0 - 172.31.255.255</td><td>172.16.0.0/12</td><td>~1 million</td></tr>
+              <tr><td>192.168.0.0 - 192.168.255.255</td><td>192.168.0.0/16</td><td>~65,000</td></tr>
             </tbody>
           </table>
 
