@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>N10-009 Study Notes: Troubleshooting — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A practical walkthrough of Network+ domain 5 — the troubleshooting methodology, tools, and common failure scenarios — anchored to real homelab debugging sessions."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="N10-009 Study Notes: Troubleshooting — Michael Rooney" />
+    <meta property="og:description" content="A practical walkthrough of Network+ domain 5 — the troubleshooting methodology, tools, and common failure scenarios — anchored to real homelab debugging sessions." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/n10-009-04.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="N10-009 Study Notes: Troubleshooting — Michael Rooney" />
+    <meta name="twitter:description" content="A practical walkthrough of Network+ domain 5 — the troubleshooting methodology, tools, and common failure scenarios — anchored to real homelab debugging sessions." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/n10-009-04.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-28-2026">May 28, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+          <h1>N10-009 Study Notes: Troubleshooting</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Part four of five. Domain 5, Network Troubleshooting, is weighted at 21%
+            of the N10-009 exam — the second heaviest domain, and arguably the most
+            practical. Everything in the previous three entries is context for this one.
+            The troubleshooting domain tests whether you can apply that knowledge to
+            diagnose what's wrong, not just describe what things are.
+          </p>
+
+          <p>
+            This is also the domain that homelabbing prepares you for most directly.
+            You can read about troubleshooting methodology. You can memorize the steps.
+            But nothing reinforces it like having sat in front of a broken configuration
+            at midnight and worked through it systematically until something worked.
+          </p>
+
+          <h2>The Troubleshooting Methodology</h2>
+
+          <p>
+            CompTIA defines a seven-step troubleshooting methodology. The exam tests
+            this explicitly — know the steps, know the order, know why the order matters.
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Step</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Identify the problem</td></tr>
+              <tr><td>2</td><td>Establish a theory of probable cause</td></tr>
+              <tr><td>3</td><td>Test the theory to determine the cause</td></tr>
+              <tr><td>4</td><td>Establish a plan of action and identify potential effects</td></tr>
+              <tr><td>5</td><td>Implement the solution or escalate</td></tr>
+              <tr><td>6</td><td>Verify full system functionality and implement preventive measures</td></tr>
+              <tr><td>7</td><td>Document findings, actions, and outcomes</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            Steps 1 and 2 are where most people lose time. Identifying the problem means
+            gathering information — what changed recently, what's affected, what isn't,
+            what the symptoms are specifically. A theory is not a guess; it's a hypothesis
+            based on the evidence gathered. You test the most probable cause first, and
+            if that theory is wrong, you form a new one rather than randomly trying
+            changes. Step 7 is the one people skip. Writing down what you did and what
+            fixed it is what prevents you from spending two hours solving the same problem
+            six months later.
+          </p>
+
+          <h2>Troubleshooting Tools</h2>
+
+          <p>
+            The exam expects you to know what each tool does and when to reach for it.
+            These are the ones that appear most frequently in questions.
+          </p>
+
+          <p>
+            <strong>ping</strong> sends ICMP Echo Request packets to a target and reports
+            whether they're returned. It confirms Layer 3 reachability. If you can ping
+            the gateway but not an external address, the problem is likely upstream.
+            If you can't ping the gateway, the problem is likely local — routing, the
+            default gateway configuration, or a physical connection issue.
+          </p>
+
+          <p>
+            <strong>traceroute</strong> (or <code>tracert</code> on Windows) maps the
+            path packets take to a destination by sending packets with incrementally
+            increasing TTL values. Each router that decrements the TTL to zero returns
+            an ICMP Time Exceeded message, revealing its IP address and the round-trip
+            time to that hop. A traceroute that stops at a specific hop points you at
+            the device — or the link between devices — where the problem lives.
+          </p>
+
+          <p>
+            <strong>nslookup</strong> and <strong>dig</strong> query DNS. Given a hostname,
+            they return the IP address it resolves to and which DNS server answered.
+            If an IP address works but the hostname doesn't, you have a DNS problem, not
+            a network problem. Knowing the difference saves significant debugging time.
+          </p>
+
+          <p>
+            <strong>netstat</strong> shows active network connections, listening ports,
+            and their states. <code>netstat -an</code> shows all connections numerically.
+            <code>netstat -tulnp</code> on Linux shows which processes are listening
+            on which ports. If a service isn't reachable, confirming whether it's
+            actually listening on the expected port is one of the first things to check.
+          </p>
+
+          <p>
+            <strong>nmap</strong> scans a host or network to discover open ports and
+            running services. A quick <code>nmap -sV &lt;host&gt;</code> tells you what
+            a host is actually exposing to the network versus what you think it should
+            be exposing. Used for both troubleshooting and security auditing.
+          </p>
+
+          <p>
+            <strong>Wireshark</strong> captures and analyzes network traffic at the packet
+            level. When you need to know exactly what is being sent and received —
+            not whether a connection succeeds, but what the actual payload contains,
+            what error the server returns, whether the TLS handshake completes — 
+            Wireshark is the tool. It's powerful and produces a lot of data; learning
+            to filter effectively (by IP, port, protocol, or expression) is most of
+            the skill.
+          </p>
+
+          <p>
+            <strong>iperf</strong> tests network throughput between two endpoints.
+            One device runs as a server (<code>iperf -s</code>), the other as a client
+            (<code>iperf -c &lt;server-ip&gt;</code>). The result tells you the actual
+            achievable bandwidth on a link — useful for confirming whether a slow
+            connection is a network problem or an application problem.
+          </p>
+
+          <h2>Common Failure Scenarios</h2>
+
+          <p>
+            The exam presents troubleshooting scenarios and asks you to identify the
+            most likely cause or the best next step. The common failure patterns are
+            worth knowing as a mental library.
+          </p>
+
+          <p>
+            <strong>IP address conflict:</strong> Two devices assigned the same IP.
+            Symptoms are intermittent connectivity for one or both devices, with
+            unpredictable behavior as ARP cache entries are overwritten. Check with
+            <code>arp -a</code> or the DHCP server's lease table.
+          </p>
+
+          <p>
+            <strong>Incorrect default gateway:</strong> The device can reach other hosts
+            on the same subnet (Layer 2) but can't reach anything outside it. Ping
+            the gateway — if that fails, the gateway configuration on the device is
+            wrong. If the gateway responds but external addresses don't, check the
+            gateway itself.
+          </p>
+
+          <p>
+            <strong>DNS failure:</strong> IP addresses work but hostnames don't.
+            Devices can browse by IP but not by name. nslookup against the configured
+            DNS server confirms whether it's a resolution failure or a network failure.
+          </p>
+
+          <p>
+            <strong>Duplex mismatch:</strong> One end of a connection is set to full
+            duplex, the other to half duplex. The link is up and traffic flows, but
+            performance is degraded and error counters climb. Often caused by one side
+            being set to auto-negotiate and the other hard-coded. Symptoms include
+            late collisions and runts in interface statistics.
+          </p>
+
+          <p>
+            <strong>VLAN misconfiguration:</strong> A device can't reach others it
+            should be able to reach, or can reach devices it shouldn't be able to.
+            Check port VLAN assignments, trunk port configuration, and whether the
+            correct VLAN is tagged or untagged on the relevant ports.
+          </p>
+
+          <p>
+            <strong>Physical layer issues:</strong> A surprising number of mysterious
+            connectivity problems are a bad cable, an unseated connector, or a failed
+            SFP. If software debugging produces no clear cause, verify the physical
+            layer first. Link lights, cable testers, and swap testing are all valid.
+          </p>
+
+          <h2>Layer-by-Layer Approach</h2>
+
+          <p>
+            When a connection isn't working and you don't know why, the OSI model
+            gives you a structured path through the problem. Start at Layer 1 and
+            work up — or start at Layer 7 and work down. Both approaches are valid;
+            choose based on whether you have more information about the physical
+            situation or the application behavior.
+          </p>
+
+          <p>
+            Layer 1: Is the cable connected? Is the link light on? Is the port enabled
+            on the switch? Layer 2: Is the MAC address in the switch's CAM table?
+            Is ARP resolving correctly? Is the VLAN assignment right? Layer 3: Does
+            the device have the correct IP, subnet mask, and default gateway? Can it
+            ping the gateway? Can it ping an external IP? Layer 4: Is the service
+            listening on the expected port? Is a firewall rule blocking the port?
+            Layer 7: Is the application configured correctly? Is the service returning
+            an error?
+          </p>
+
+          <p class="callout">
+            Most connectivity problems are Layer 1, 2, or 3. Most application problems
+            that look like connectivity problems are Layer 7. The layer model tells you
+            where to look first.
+          </p>
+
+          <h2>In the Lab</h2>
+
+          <p>
+            Every significant debugging session in this journal followed the troubleshooting
+            methodology, often without labeling it as such at the time. Writing these
+            notes is partly the exercise of going back and naming the steps.
+          </p>
+
+          <p>
+            The NUT USB debugging session is the clearest example. The problem: the
+            peaNUT LXC was showing UPS data that turned out to be entirely fabricated —
+            dummy device files configured during initial setup, not the real hardware.
+            Step 1: identify the problem (nut_exporter returning 503, leading to
+            discovery of the dummy device config). Step 2: theory — the UPS driver
+            isn't configured against the real hardware. Step 3: test by updating
+            ups.conf to point at the real device. What followed was several hours of
+            discovering that the real fix required not just a config change but a
+            fundamental architectural decision: USB HID devices cannot be claimed from
+            inside an LXC container at the kernel level, regardless of how the passthrough
+            is configured. Each approach — device passthrough, full bus mount, privileged
+            LXC, udev symlinks, unbinding the host driver — was a theory tested and
+            eliminated. The final solution, running NUT directly on the Proxmox host
+            and connecting peaNUT remotely, was step 5. Step 7 is documented in the
+            April 30th journal entry and in the peaNUT service notes.
+          </p>
+
+          <p>
+            The Prometheus bind mount issue followed the same pattern. The problem:
+            Docker creating directories at bind mount paths when the source files don't
+            exist yet, then failing when it tries to mount a directory onto a file path
+            inside the container. The error message — "not a directory" — pointed at the
+            symptom, not the cause. The theory (wrong config file path) was wrong. The
+            actual cause (Docker's behavior with nonexistent bind mount sources) only
+            became clear by reading the container creation logs carefully. Fix: create
+            the config files before deploying the stack. Verify: redeploy, confirm all
+            targets green. Document: added to the Prometheus notes as a known gotcha.
+          </p>
+
+          <p>
+            The Grafana SMTP configuration for alerting required working through the
+            layer-by-layer approach in a different context. The service was running.
+            The configuration looked correct. The test notification was failing. Working
+            through it: the SMTP credentials were right, the server address was right,
+            but Gmail requires an App Password when 2FA is enabled — a standard password
+            is rejected at the application authentication layer, not the network layer.
+            Ping would have told you SMTP was reachable. Only testing the actual
+            authentication step revealed the real cause.
+          </p>
+
+          <p>
+            The SNMP community string mismatch on the Netgear switch is the shortest
+            version of this story. Zabbix was configured to poll the switch. No data
+            was returning. The switch was reachable by IP. Port 161 was open — confirmed
+            with nmap. The agent was running. The community string in Zabbix didn't
+            match the one configured on the switch. Changed the string, data appeared.
+            Five minutes of actual debugging, forty minutes of eliminating other possible
+            causes first.
+          </p>
+
+          <p>
+            That last one is worth sitting with. A tool returning nothing — no error,
+            no data — is one of the harder failure modes to diagnose because it gives
+            you no direction. The methodology matters most in exactly these cases:
+            gather information, form a theory, test it, move to the next theory if
+            it's wrong. Random changes without a theory just add noise and make the
+            state harder to reason about.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="n10-009-03-security-operations.html">← Previous: Security &amp; Operations</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

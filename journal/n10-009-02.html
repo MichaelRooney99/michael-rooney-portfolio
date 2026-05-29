@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>N10-009 Study Notes: Network Implementation — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A practical walkthrough of Network+ domain 2 — Ethernet, switching, VLANs, STP, wireless, and virtualization networking — anchored to a real five-node homelab."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="N10-009 Study Notes: Network Implementation — Michael Rooney" />
+    <meta property="og:description" content="A practical walkthrough of Network+ domain 2 — Ethernet, switching, VLANs, STP, wireless, and virtualization networking — anchored to a real five-node homelab." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/n10-009-02.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="N10-009 Study Notes: Network Implementation — Michael Rooney" />
+    <meta name="twitter:description" content="A practical walkthrough of Network+ domain 2 — Ethernet, switching, VLANs, STP, wireless, and virtualization networking — anchored to a real five-node homelab." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/n10-009-02.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-28-2026">May 28, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+          <h1>N10-009 Study Notes: Network Implementation</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Part two of five. Domain 1 covered the conceptual foundation — addressing,
+            routing, how packets move. Domain 2, Network Implementation, is where that
+            theory meets physical and virtual infrastructure: how networks are actually
+            built, what the gear does, and how the pieces connect. It's weighted at
+            19% of the N10-009 exam.
+          </p>
+
+          <h2>Ethernet and Switching</h2>
+
+          <p>
+            Ethernet is the dominant wired networking standard. At the physical layer
+            it defines how signals travel over copper or fiber. At the data link layer
+            it defines how devices are addressed and how frames are structured. Every
+            device on an Ethernet network has a MAC address — a 48-bit hardware
+            identifier burned into the network interface, written as six pairs of
+            hex digits. MAC addresses are Layer 2; IP addresses are Layer 3. A switch
+            works at Layer 2 and uses MAC addresses to decide where to send frames.
+          </p>
+
+          <p>
+            When a frame arrives on a switch port, the switch reads the source MAC
+            address and records which port it came from in its MAC address table
+            (also called the CAM table). When it sees a frame destined for a MAC
+            address it already knows, it forwards the frame only to that port.
+            When it sees an unknown destination, it floods the frame to all ports
+            except the one it arrived on. This is how a switch reduces unnecessary
+            traffic compared to a hub, which always floods everything to everyone.
+          </p>
+
+          <p>
+            Common Ethernet standards by speed and medium:
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Standard</th><th>Speed</th><th>Medium</th><th>Max Distance</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>100BASE-TX</td><td>100 Mbps</td><td>Cat5 UTP</td><td>100m</td></tr>
+              <tr><td>1000BASE-T</td><td>1 Gbps</td><td>Cat5e/Cat6 UTP</td><td>100m</td></tr>
+              <tr><td>10GBASE-T</td><td>10 Gbps</td><td>Cat6a UTP</td><td>100m</td></tr>
+              <tr><td>1000BASE-SX</td><td>1 Gbps</td><td>Multimode fiber</td><td>550m</td></tr>
+              <tr><td>1000BASE-LX</td><td>1 Gbps</td><td>Single-mode fiber</td><td>5km</td></tr>
+            </tbody>
+          </table>
+
+          <h2>VLANs</h2>
+
+          <p>
+            A VLAN — Virtual Local Area Network — is a logical subdivision of a
+            physical network. VLANs let you isolate groups of devices on the same
+            physical switch as if they were on entirely separate switches. Devices
+            in different VLANs cannot communicate directly — all inter-VLAN traffic
+            must be routed, which means it has to pass through a Layer 3 device
+            (a router or a Layer 3 switch).
+          </p>
+
+          <p>
+            Switch ports operate in one of two modes. An access port belongs to a
+            single VLAN and connects to end devices — a workstation, a server, an
+            access point. The device plugged into an access port doesn't know or
+            care about VLANs; the switch handles the tagging. A trunk port carries
+            traffic for multiple VLANs simultaneously and is used for uplinks between
+            switches, or between a switch and a router. Trunk ports use 802.1Q tagging
+            — a 4-byte tag inserted into the Ethernet frame that identifies which VLAN
+            the frame belongs to.
+          </p>
+
+          <h2>Spanning Tree Protocol</h2>
+
+          <p>
+            Redundant physical connections between switches are desirable for resilience,
+            but they create a problem: broadcast loops. A broadcast frame entering a
+            loop of switches circulates forever, multiplying with each pass and
+            consuming all available bandwidth — a broadcast storm. Spanning Tree
+            Protocol (STP) prevents this by detecting loops and blocking redundant
+            paths, leaving only one active path between any two network segments. If
+            the active path fails, STP recalculates and activates a previously blocked
+            path, restoring connectivity.
+          </p>
+
+          <p>
+            Rapid STP (RSTP, 802.1w) is the modern version — it converges in seconds
+            rather than the 30–50 seconds the original STP required. Most switches
+            run RSTP by default. Know that STP exists, what problem it solves, and
+            what a root bridge is (the switch that STP elects as the reference point
+            for the spanning tree topology).
+          </p>
+
+          <h2>Wireless Networking</h2>
+
+          <p>
+            The 802.11 family of standards defines Wi-Fi. The exam tests which
+            standards use which frequency bands, what speeds they support, and
+            what the trade-offs are.
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Standard</th><th>Frequency</th><th>Max Speed</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>802.11a</td><td>5 GHz</td><td>54 Mbps</td><td>Older, less interference</td></tr>
+              <tr><td>802.11b</td><td>2.4 GHz</td><td>11 Mbps</td><td>Legacy</td></tr>
+              <tr><td>802.11g</td><td>2.4 GHz</td><td>54 Mbps</td><td>Backward compat with b</td></tr>
+              <tr><td>802.11n (Wi-Fi 4)</td><td>2.4 / 5 GHz</td><td>600 Mbps</td><td>MIMO introduced</td></tr>
+              <tr><td>802.11ac (Wi-Fi 5)</td><td>5 GHz</td><td>3.5 Gbps</td><td>MU-MIMO, beamforming</td></tr>
+              <tr><td>802.11ax (Wi-Fi 6)</td><td>2.4 / 5 / 6 GHz</td><td>9.6 Gbps</td><td>OFDMA, high-density</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            The 2.4 GHz band has longer range and better wall penetration but is
+            heavily congested — only three non-overlapping channels (1, 6, 11) and
+            shared with microwaves, Bluetooth, and baby monitors. The 5 GHz band
+            offers more channels, less interference, and higher throughput but shorter
+            range. 802.11ax adds the 6 GHz band specifically to escape congestion.
+          </p>
+
+          <p>
+            Wireless security protocols: WEP is broken and should never be used.
+            WPA was a stopgap. WPA2 (using AES-CCMP) is the minimum acceptable
+            standard. WPA3 is current and adds features like Simultaneous
+            Authentication of Equals (SAE), which resists offline dictionary attacks
+            against the handshake.
+          </p>
+
+          <h2>WAN Technologies</h2>
+
+          <p>
+            WAN technologies connect geographically separated networks. The exam covers
+            several at a conceptual level. DSL (Digital Subscriber Line) runs over
+            existing telephone copper. Cable broadband runs over coaxial. Fiber delivers
+            the highest throughput and lowest latency. Cellular (4G LTE, 5G) provides
+            connectivity where wired access isn't available, at the cost of higher
+            latency and variable throughput. Satellite (including LEO services) covers
+            remote locations but introduces meaningful latency due to orbital distance.
+          </p>
+
+          <p>
+            MPLS (Multiprotocol Label Switching) is worth knowing — it's a WAN
+            technology used by enterprises and service providers that routes traffic
+            using short path labels rather than IP addresses, improving speed and
+            enabling traffic engineering. SD-WAN (Software-Defined WAN) abstracts
+            WAN connectivity into software, allowing organizations to use multiple
+            cheaper internet connections with intelligent traffic routing rather than
+            expensive dedicated MPLS circuits.
+          </p>
+
+          <h2>Cloud and Virtualization Networking</h2>
+
+          <p>
+            Network+ expects familiarity with cloud networking concepts. The three
+            service models: IaaS (Infrastructure as a Service) — you manage VMs and
+            networking. PaaS (Platform as a Service) — you manage applications, the
+            provider manages the platform. SaaS (Software as a Service) — you use
+            the software, the provider manages everything underneath.
+          </p>
+
+          <p>
+            Virtualization networking introduces concepts that map directly to physical
+            networking. A virtual switch (vSwitch) connects VMs inside a hypervisor
+            the same way a physical switch connects devices. A VM can be on a separate
+            virtual network from its host, or bridged directly to the physical network.
+            Network segmentation through virtualization follows the same principles as
+            physical VLAN segmentation — isolation is enforced at the software layer
+            rather than the hardware layer.
+          </p>
+
+          <h2>In the Lab</h2>
+
+          <p>
+            The switching layer here is a Netgear GS308EP — an 8-port managed switch
+            with 802.1Q VLAN support and PoE. It's where VLAN segmentation actually
+            happens in the lab. Port 8 is configured as a trunk port carrying both
+            VLAN 1 (the main <code>10.10.10.0/24</code> LAN) and VLAN 20
+            (<code>10.10.20.0/24</code>, isolated lab and IoT) as tagged traffic to
+            OPNsense's vtnet2 interface. Port 6 is the main LAN uplink. Port 1 is
+            an access port for VLAN 20 — devices plugged in there land on the isolated
+            network without any awareness that VLANs exist.
+          </p>
+
+          <p>
+            Inter-VLAN routing happens in OPNsense. Traffic from a VLAN 20 device
+            heading to a VLAN 1 resource has to pass through the gateway at
+            <code>10.10.10.1</code>, which can apply firewall rules to it in transit.
+            That's the point of segmentation — not just organization, but control over
+            what can reach what. A device on VLAN 20 can't directly communicate with
+            a device on VLAN 1 without OPNsense permitting it. Physical isolation
+            without needing physical separation.
+          </p>
+
+          <p>
+            Proxmox itself is a virtualization platform that implements its own virtual
+            networking. Each node has a Linux bridge — <code>vmbr0</code> — that
+            functions as a virtual switch connecting VMs and LXCs on that node to the
+            physical network interface. LXCs are assigned to that bridge and appear
+            on the <code>10.10.10.0/24</code> network as if they were physical machines.
+            The Prometheus container running inside the Docker LXC on Shasta, the peaNUT
+            LXC on Ankhh, the Ansible LXC also on Shasta — all of them participate in
+            the same Layer 2 domain through that bridge, and are reachable by IP from
+            anywhere else on the subnet.
+          </p>
+
+          <p>
+            The WAN technology in use here is a standard cable broadband connection.
+            OPNsense sits behind the ISP router with no double NAT — the ISP router
+            is in bridge mode, making OPNsense the true network edge. Cloudflare DDNS
+            tracks the public IP and updates DNS records automatically when it changes,
+            which is exactly the problem SD-WAN solves at enterprise scale: making
+            connectivity stable and manageable regardless of what the underlying
+            circuits are doing.
+          </p>
+
+          <p>
+            The STP note is worth making explicit: the lab doesn't have redundant
+            switch paths right now, so STP isn't actively in play. But understanding
+            why it exists — and what happens without it if you add a cable that creates
+            a loop — is the kind of thing that saves you from a broadcast storm
+            during a late-night cable shuffle. The Netgear GS308EP supports loop
+            prevention; it's enabled.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="n10-009-01-networking-concepts.html">← Previous: Networking Concepts</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>N10-009 Study Notes: Networking Concepts — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A practical walkthrough of Network+ domain 1 — the OSI model, IP addressing, subnetting, routing, and DNS — anchored to a real five-node homelab."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="N10-009 Study Notes: Networking Concepts — Michael Rooney" />
+    <meta property="og:description" content="A practical walkthrough of Network+ domain 1 — the OSI model, IP addressing, subnetting, routing, and DNS — anchored to a real five-node homelab." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/n10-009-01.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="N10-009 Study Notes: Networking Concepts — Michael Rooney" />
+    <meta name="twitter:description" content="A practical walkthrough of Network+ domain 1 — the OSI model, IP addressing, subnetting, routing, and DNS — anchored to a real five-node homelab." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/n10-009-01.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-28-2026">May 28, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+          <h1>N10-009 Study Notes: Networking Concepts</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            This is the first in a five-part series of study notes I'm writing while
+            preparing for the CompTIA Network+ exam. The goal is dual-purpose: to
+            cement my own understanding by writing it out, and to give anyone following
+            a similar path — homelabber, career-switcher, or just someone curious about
+            networking — a practical anchor for concepts that can otherwise feel abstract.
+            Each entry covers a domain from the N10-009 exam, followed by a section on
+            how I see that domain reflected in my own lab.
+          </p>
+
+          <p>
+            Domain 1, Networking Concepts, is weighted at 23% of the exam. It's the
+            foundation everything else builds on — the vocabulary, the models, the
+            addressing schemes. You won't build anything correctly if this part is shaky.
+          </p>
+
+          <h2>The OSI Model</h2>
+
+          <p>
+            The OSI model is a seven-layer framework that describes how data moves across
+            a network. It exists to give engineers a shared language for describing where
+            something happens — and therefore where to look when something breaks. The
+            layers, from bottom to top: Physical, Data Link, Network, Transport, Session,
+            Presentation, Application.
+          </p>
+
+          <p>
+            The mnemonic most people learn is "Please Do Not Throw Sausage Pizza Away."
+            What matters for the exam — and for real troubleshooting — is understanding
+            what each layer is responsible for and what kind of device or protocol lives
+            there.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Layer</th>
+                <th>Name</th>
+                <th>Responsibility</th>
+                <th>Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>7</td><td>Application</td><td>User-facing protocols, data formatting</td><td>HTTP, DNS, SMTP, SSH</td></tr>
+              <tr><td>6</td><td>Presentation</td><td>Encryption, encoding, compression</td><td>TLS/SSL, JPEG, ASCII</td></tr>
+              <tr><td>5</td><td>Session</td><td>Establishes and manages sessions</td><td>NetBIOS, RPC, PPTP</td></tr>
+              <tr><td>4</td><td>Transport</td><td>End-to-end delivery, reliability</td><td>TCP, UDP</td></tr>
+              <tr><td>3</td><td>Network</td><td>Logical addressing, routing</td><td>IP, ICMP, routers</td></tr>
+              <tr><td>2</td><td>Data Link</td><td>MAC addressing, framing, switching</td><td>Ethernet, ARP, switches</td></tr>
+              <tr><td>1</td><td>Physical</td><td>Raw bit transmission</td><td>Cables, NICs, hubs</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            The TCP/IP model condenses this into four layers — Network Access, Internet,
+            Transport, and Application — and is what actually underpins modern networking.
+            The OSI model is the exam framework; TCP/IP is what your packets are actually
+            using. Know both, understand why they differ.
+          </p>
+
+          <h2>TCP vs. UDP</h2>
+
+          <p>
+            At Layer 4, everything is either TCP or UDP. TCP is connection-oriented —
+            it establishes a session with a three-way handshake (SYN, SYN-ACK, ACK),
+            guarantees delivery, and retransmits dropped packets. UDP is connectionless —
+            it fires packets without a handshake and doesn't check whether they arrived.
+          </p>
+
+          <p>
+            Neither is better. They're appropriate for different things. TCP is right for
+            anything where accuracy matters more than speed: web traffic, file transfers,
+            SSH sessions. UDP is right for anything where speed matters more than
+            perfection: video streaming, DNS queries, VoIP, game traffic. A dropped
+            DNS query just means you ask again. A dropped video frame is just a blip.
+            A dropped piece of a file download corrupts the file.
+          </p>
+
+          <h2>Ports and Protocols</h2>
+
+          <p>
+            Ports are how a single IP address hosts multiple services simultaneously.
+            When a packet arrives at an IP address, the port number tells the OS which
+            application should receive it. Port numbers run from 0 to 65535. Well-known
+            ports are 0–1023 and require elevated privileges to bind. Registered ports
+            are 1024–49151. Ephemeral ports (49152–65535) are assigned temporarily
+            to client connections.
+          </p>
+
+          <p>
+            The exam expects you to know the common ones cold. The ones that come up most:
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Port</th><th>Protocol</th><th>Transport</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>22</td><td>SSH</td><td>TCP</td></tr>
+              <tr><td>25</td><td>SMTP</td><td>TCP</td></tr>
+              <tr><td>53</td><td>DNS</td><td>TCP &amp; UDP</td></tr>
+              <tr><td>67/68</td><td>DHCP</td><td>UDP</td></tr>
+              <tr><td>80</td><td>HTTP</td><td>TCP</td></tr>
+              <tr><td>110</td><td>POP3</td><td>TCP</td></tr>
+              <tr><td>143</td><td>IMAP</td><td>TCP</td></tr>
+              <tr><td>161/162</td><td>SNMP</td><td>UDP</td></tr>
+              <tr><td>443</td><td>HTTPS</td><td>TCP</td></tr>
+              <tr><td>3389</td><td>RDP</td><td>TCP</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            Anki is the right tool for this list. Flashcard one direction (port → protocol)
+            and the other (protocol → port). The exam will test both.
+          </p>
+
+          <h2>IPv4 Addressing and Subnetting</h2>
+
+          <p>
+            Every device on an IP network has a 32-bit address written in dotted-decimal
+            notation — four octets separated by periods, each ranging from 0 to 255.
+            The address has two parts: the network portion, which identifies the subnet,
+            and the host portion, which identifies the specific device. A subnet mask
+            tells you where that boundary falls.
+          </p>
+
+          <p>
+            CIDR notation (/24, /25, /16, etc.) is just a shorthand for the subnet mask
+            — the number after the slash is how many bits are set to 1 in the mask.
+            A /24 mask is 255.255.255.0: 24 bits for the network, 8 bits for hosts,
+            giving you 256 addresses (254 usable — the network address and broadcast
+            address are reserved).
+          </p>
+
+          <p>
+            The private IPv4 ranges — addresses that are not routable on the public
+            internet — are defined in RFC 1918:
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Range</th><th>CIDR</th><th>Addresses</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>10.0.0.0 – 10.255.255.255</td><td>10.0.0.0/8</td><td>~16.7 million</td></tr>
+              <tr><td>172.16.0.0 – 172.31.255.255</td><td>172.16.0.0/12</td><td>~1 million</td></tr>
+              <tr><td>192.168.0.0 – 192.168.255.255</td><td>192.168.0.0/16</td><td>~65,000</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            Subnetting — the practice of dividing a network into smaller segments —
+            is the skill the exam tests most directly under time pressure. Given a
+            network address and a subnet mask, you need to calculate the network address,
+            broadcast address, usable host range, and number of hosts quickly. This
+            is not something you reason through on exam day. It's something you drill
+            until it's mechanical.
+          </p>
+
+          <h2>NAT and Why Private Addresses Work</h2>
+
+          <p>
+            Private addresses can't be routed on the internet — nothing outside your
+            network knows how to reach <code>10.10.10.55</code>. Network Address
+            Translation is what bridges the gap. Your router maintains a translation
+            table and rewrites the source address on outbound packets to its own public
+            IP, then rewrites the destination address on inbound reply packets back to
+            the original private address. From the internet's perspective, all traffic
+            originates from one IP. From your network's perspective, every device has
+            its own address.
+          </p>
+
+          <h2>DNS and DHCP</h2>
+
+          <p>
+            DNS translates human-readable names into IP addresses. When you type
+            <code>grafana.michaelrooney.dev</code>, your OS queries a DNS resolver,
+            which returns the IP address the name maps to. DNS uses port 53, travels
+            over UDP for standard queries (fast, low overhead), and falls back to TCP
+            for responses too large to fit in a single UDP packet or for zone transfers
+            between DNS servers.
+          </p>
+
+          <p>
+            Key DNS record types: A records map a hostname to an IPv4 address. AAAA
+            records map to IPv6. CNAME records are aliases — one name pointing to
+            another. MX records specify mail servers for a domain. TXT records carry
+            arbitrary text, commonly used for domain verification and email
+            authentication (SPF, DKIM).
+          </p>
+
+          <p>
+            DHCP handles IP address assignment automatically. A client broadcasts a
+            DHCPDISCOVER on the network, a DHCP server responds with a DHCPOFFER
+            containing an IP lease, the client accepts with a DHCPREQUEST, and the
+            server confirms with a DHCPACK. The DORA sequence — Discover, Offer,
+            Request, Acknowledge — is worth knowing by name.
+          </p>
+
+          <h2>IPv6</h2>
+
+          <p>
+            IPv4's 32-bit address space gives roughly 4.3 billion addresses — exhausted
+            in practice. IPv6 uses 128-bit addresses written in eight groups of four
+            hexadecimal digits separated by colons, giving an effectively unlimited
+            address space. The exam tests IPv6 address types (unicast, multicast,
+            anycast), the loopback address (<code>::1</code>), and link-local addresses
+            (<code>fe80::/10</code>). NAT is generally unnecessary in IPv6 — every
+            device can have a globally routable address.
+          </p>
+
+          <h2>Routing Concepts</h2>
+
+          <p>
+            Routing is the process of moving packets between networks. A router examines
+            the destination IP address in each packet and consults its routing table to
+            determine the next hop — the next device to forward the packet toward its
+            destination. Routing tables are built through static configuration (an
+            administrator manually defines routes) or dynamic routing protocols that
+            let routers share topology information automatically.
+          </p>
+
+          <p>
+            The exam covers several routing protocols at a conceptual level. RIP
+            (Routing Information Protocol) is a distance-vector protocol — routers
+            share their full routing table with neighbors and use hop count as the
+            metric, limited to 15 hops. OSPF (Open Shortest Path First) is a
+            link-state protocol — routers share information about their direct
+            connections and each router independently calculates the shortest path
+            through the network. BGP (Border Gateway Protocol) is what the internet
+            runs on — a path-vector protocol designed for routing between autonomous
+            systems at massive scale.
+          </p>
+
+          <p class="callout">
+            For Network+, you don't need to configure these protocols — you need to
+            know what they are, how they differ, and which scenario each is appropriate
+            for. CCNA is where the configuration depth comes in.
+          </p>
+
+          <h2>In the Lab</h2>
+
+          <p>
+            Domain 1 is the most directly visible in the lab's addressing scheme.
+            The entire homelab runs on <code>10.10.10.0/24</code> — a /24 subnet,
+            255.255.255.0 mask, 254 usable host addresses. Every node, every LXC,
+            every service gets a static assignment from that range. The IP allocation
+            table in my infrastructure notes is essentially a hand-managed DHCP
+            reservation list — which is exactly what DHCP automates.
+          </p>
+
+          <p>
+            There's a second subnet for isolated lab and IoT traffic: VLAN 20 at
+            <code>10.10.20.0/24</code>. Two separate /24 networks on the same physical
+            infrastructure. The OSI model makes this legible — the physical layer is
+            shared hardware, the data link layer is where VLANs are enforced on the
+            managed switch, and the network layer is where OPNsense does inter-VLAN
+            routing between the two subnets. Layer separation isn't academic; it's
+            literally how the segmentation works.
+          </p>
+
+          <p>
+            DNS is handled by Unbound running inside OPNsense. Every proxied service
+            — <code>grafana.michaelrooney.dev</code>, <code>home.michaelrooney.dev</code>,
+            <code>vault.michaelrooney.dev</code>, a dozen others — has an A record that
+            points to NginX Proxy Manager, which then routes by hostname to the
+            appropriate internal IP. Understanding what a DNS query actually does,
+            step by step, makes the whole proxy setup obvious rather than magical.
+          </p>
+
+          <p>
+            NAT is why any of this reaches the internet. The ISP provides one public
+            IP. OPNsense translates between that and the <code>10.10.10.0/24</code>
+            private range. Every outbound connection from any node in the lab appears
+            to the internet as coming from that single public address. Cloudflare DDNS
+            keeps the public IP mapping current so external access still works when
+            the ISP changes it.
+          </p>
+
+          <p>
+            Routing is OPNsense's primary job. Every packet leaving a node hits the
+            gateway at <code>10.10.10.1</code>, which consults its routing table and
+            forwards accordingly — out to the internet, across to VLAN 20, or to
+            another host on the same subnet. When the OPNsense VM went down during a
+            firewall rule misconfiguration, nothing in the lab could route anywhere.
+            That's a live demonstration of what a router actually does: without it,
+            hosts on the same switch can still reach each other at Layer 2, but
+            anything requiring Layer 3 routing stops completely.
+          </p>
+
+          <p>
+            Tailscale adds another layer on top of all of this — a mesh VPN overlay
+            that builds encrypted tunnels between devices regardless of their physical
+            network location. It operates at Layer 3, assigning each device an address
+            in the <code>100.64.0.0/10</code> range and routing traffic between them
+            through those tunnels. The out-of-band access entry in my infrastructure
+            notes — Tailscale at <code>100.64.0.78</code> as the recovery path when
+            OPNsense is unreachable — is exactly the kind of network resilience thinking
+            that troubleshooting questions on the exam are built around.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-23-2026.html">← Previous: 05-23-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

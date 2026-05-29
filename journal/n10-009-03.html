@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>N10-009 Study Notes: Security &amp; Operations — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A practical walkthrough of Network+ domains 3 and 4 — firewalls, VPNs, AAA, SNMP, monitoring, and high availability — anchored to a real homelab."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="N10-009 Study Notes: Security &amp; Operations — Michael Rooney" />
+    <meta property="og:description" content="A practical walkthrough of Network+ domains 3 and 4 — firewalls, VPNs, AAA, SNMP, monitoring, and high availability — anchored to a real homelab." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/n10-009-03.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="N10-009 Study Notes: Security &amp; Operations — Michael Rooney" />
+    <meta name="twitter:description" content="A practical walkthrough of Network+ domains 3 and 4 — firewalls, VPNs, AAA, SNMP, monitoring, and high availability — anchored to a real homelab." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/n10-009-03.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-28-2026">May 28, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+          <h1>N10-009 Study Notes: Security &amp; Operations</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Part three of five. This entry covers two domains together — Network Security
+            (20%) and Network Operations (17%) — because in practice they're deeply
+            intertwined. You can't operate a network safely without understanding the
+            security model, and you can't secure a network you don't understand
+            operationally. Together they account for 37% of the exam, making this
+            the heaviest single session in the study plan.
+          </p>
+
+          <h2>Firewalls</h2>
+
+          <p>
+            A firewall controls traffic between network zones based on defined rules.
+            Rules are evaluated in order and typically follow a default-deny posture —
+            anything not explicitly permitted is dropped. Understanding how rule order
+            works matters: a permissive rule early in the chain can override a
+            restrictive rule later, and vice versa.
+          </p>
+
+          <p>
+            Firewall types by capability. A packet filter operates at Layer 3 and 4 —
+            it inspects source IP, destination IP, port, and protocol. It's fast but
+            stateless: it evaluates each packet in isolation with no awareness of
+            whether it belongs to an established session. A stateful firewall tracks
+            active connections in a state table. It knows that an inbound packet is
+            a reply to an outbound connection initiated from inside the network, and
+            can permit it without a separate explicit inbound rule. Most modern
+            firewalls are stateful. A next-generation firewall (NGFW) adds Layer 7
+            inspection — application awareness, user identity, intrusion prevention,
+            and deep packet inspection — going well beyond port and protocol.
+          </p>
+
+          <p>
+            IDS versus IPS: an Intrusion Detection System monitors traffic and generates
+            alerts when it identifies suspicious patterns. It's passive — it sees traffic
+            but doesn't block it. An Intrusion Prevention System sits inline in the
+            traffic path and can actively block traffic that matches threat signatures.
+            Both compare traffic against known attack signatures and behavioral baselines.
+          </p>
+
+          <h2>VPNs and Tunneling</h2>
+
+          <p>
+            A VPN creates an encrypted tunnel between two endpoints, allowing traffic
+            to traverse an untrusted network (like the internet) securely. The
+            traffic inside the tunnel is encrypted, so anyone observing the underlying
+            connection sees only the encrypted wrapper, not the actual payload.
+          </p>
+
+          <p>
+            Site-to-site VPNs connect two networks — two offices, or an office and
+            a cloud environment — through a persistent encrypted tunnel. Remote access
+            VPNs connect individual devices to a network. The device gets an IP
+            address on the remote network and routes designated traffic through the
+            tunnel as if it were physically present there.
+          </p>
+
+          <p>
+            Common VPN protocols: IPsec operates at Layer 3 and can run in transport
+            mode (encrypts the payload, leaves the original IP header) or tunnel mode
+            (encrypts the entire original packet and wraps it in a new IP header).
+            SSL/TLS VPNs operate at Layer 7 and are accessible through a web browser
+            or a lightweight client. OpenVPN is an open-source implementation using
+            TLS. WireGuard is a modern, lightweight protocol known for simplicity
+            and high performance.
+          </p>
+
+          <h2>AAA — Authentication, Authorization, and Accounting</h2>
+
+          <p>
+            AAA is a framework for controlling access to network resources. Authentication
+            verifies identity — who are you? Authorization determines what that identity
+            is permitted to do — what can you access? Accounting records what was done
+            and when — what did you actually do?
+          </p>
+
+          <p>
+            RADIUS (Remote Authentication Dial-In User Service) is the most common AAA
+            protocol for network access control. It runs over UDP and handles
+            authentication and authorization centrally — a wireless controller or VPN
+            gateway forwards credentials to a RADIUS server, which validates them against
+            a user directory and returns an accept or reject. TACACS+ (Terminal Access
+            Controller Access-Control System Plus) is a Cisco-centric alternative that
+            separates authentication, authorization, and accounting into distinct
+            functions and uses TCP for reliable delivery.
+          </p>
+
+          <p>
+            Multi-factor authentication (MFA) combines two or more factors: something you
+            know (password), something you have (hardware token, authenticator app),
+            something you are (biometric). Network+ expects you to know the categories
+            and why layering them raises the bar for an attacker.
+          </p>
+
+          <h2>Network Hardening</h2>
+
+          <p>
+            Hardening is the practice of reducing attack surface — disabling services
+            and accounts that aren't needed, enforcing minimum necessary permissions,
+            keeping software patched, and applying defense in depth so that no single
+            failure compromises the whole system.
+          </p>
+
+          <p>
+            Specific practices the exam covers: changing default credentials on every
+            device (routers, switches, APs all ship with known defaults that are
+            trivially exploited). Disabling unused switch ports. Implementing port
+            security — limiting the number of MAC addresses a switch port will accept,
+            or binding a port to a specific MAC address. Using 802.1X for network
+            access control so that only authenticated devices can access the network.
+            Segmenting sensitive systems onto separate VLANs with restricted access.
+            Keeping firmware and OS patches current.
+          </p>
+
+          <h2>SNMP and Monitoring</h2>
+
+          <p>
+            SNMP (Simple Network Management Protocol) is the standard protocol for
+            monitoring and managing network devices. It runs over UDP port 161 (polling)
+            and 162 (traps). An SNMP manager queries devices — routers, switches, servers
+            — for data. The devices run SNMP agents that respond to queries. MIBs
+            (Management Information Bases) are the structured databases that define
+            what data a device exposes via SNMP and how it's organized.
+          </p>
+
+          <p>
+            SNMP versions matter for the exam. SNMPv1 and v2c use community strings
+            for authentication — essentially a shared password transmitted in plaintext.
+            SNMPv3 adds real authentication (MD5 or SHA) and encryption (DES or AES),
+            making it the only version appropriate for production environments where
+            security matters.
+          </p>
+
+          <p>
+            Syslog collects log messages from network devices and sends them to a
+            centralized server. Log messages have severity levels defined by RFC 5424:
+            Emergency, Alert, Critical, Error, Warning, Notice, Informational, Debug
+            (0–7). Knowing the severity scale and what each level represents is
+            tested directly.
+          </p>
+
+          <p>
+            NetFlow and sFlow are traffic flow analysis protocols. Where SNMP tells you
+            a port is saturated, NetFlow tells you which conversations are responsible —
+            source, destination, port, protocol, byte count. Used for bandwidth analysis,
+            capacity planning, and detecting anomalous traffic patterns.
+          </p>
+
+          <h2>High Availability and Redundancy</h2>
+
+          <p>
+            High availability is about designing systems so that a single component
+            failure doesn't take down the service. Key concepts:
+          </p>
+
+          <p>
+            FHRP — First Hop Redundancy Protocol — ensures that if a default gateway
+            fails, traffic automatically reroutes through a backup. HSRP (Hot Standby
+            Router Protocol) is Cisco's proprietary implementation. VRRP (Virtual Router
+            Redundancy Protocol) is the open standard. Both work by presenting a virtual
+            IP address shared between two routers — one active, one standby. If the
+            active router goes down, the standby takes over the virtual IP with no
+            change required on client devices.
+          </p>
+
+          <p>
+            NIC teaming (link aggregation, 802.3ad/LACP) bonds multiple physical
+            network interfaces into a single logical interface. This provides both
+            redundancy — if one NIC fails, the others continue — and increased throughput.
+          </p>
+
+          <p>
+            Power redundancy at the network level means UPS (Uninterruptible Power Supply)
+            for critical devices and, in larger environments, dual power supplies in
+            servers and switches. The goal is ensuring that a power event doesn't
+            immediately terminate network connectivity.
+          </p>
+
+          <p class="callout">
+            High availability is a design philosophy, not a product. Every redundancy
+            decision involves a trade-off between cost, complexity, and the cost of
+            the downtime you're trying to prevent.
+          </p>
+
+          <h2>Documentation</h2>
+
+          <p>
+            Network+ expects you to understand what good documentation looks like and
+            why it matters. Network diagrams — both physical (where equipment physically
+            lives and how it's cabled) and logical (how traffic flows, what IP ranges
+            exist, where services sit) — are the maps that make everything else manageable.
+            IP address management (IPAM) tracks address allocations. Change management
+            processes ensure changes are reviewed and reversible before they're applied.
+            An accurate baseline — documentation of what normal looks like — is what
+            makes abnormal detectable.
+          </p>
+
+          <h2>In the Lab</h2>
+
+          <p>
+            OPNsense is the firewall. It's stateful, rule-based, and sits at the network
+            edge handling all traffic between the lab and the internet, and between VLANs
+            internally. Rules are evaluated top-down with an implicit default deny at the
+            bottom. The incident where a firewall rule cleanup broke the web UI — and
+            required restoring from backup — is a direct demonstration of what an
+            overly aggressive rule set does to management access. The lesson: always
+            have an out-of-band recovery path before touching firewall rules. Tailscale
+            at <code>100.64.0.78</code> is that path.
+          </p>
+
+          <p>
+            VPN is Tailscale, which uses WireGuard under the hood. It forms a mesh
+            overlay between devices regardless of their physical location — the desktop,
+            the phone, and all five lab nodes participate in the same virtual network
+            even when some of them are remote. The Tailscale LXC on Ankhh advertises
+            the <code>10.10.10.0/24</code> subnet as an exit node route, making every
+            internal service reachable from outside the network through the encrypted
+            tunnel. This is a direct implementation of the remote access VPN concept —
+            the device on the road gets routed to the home network through WireGuard
+            tunnels without any change to the internal network configuration.
+          </p>
+
+          <p>
+            SNMP is live and in production. The Netgear GS308EP runs SNMPv2c — a community
+            string, UDP, no encryption. Zabbix polls it on port 161 for port state,
+            traffic counters, and PoE status. The community string mismatch that broke
+            polling initially was exactly the kind of misconfiguration that SNMPv3's
+            authentication would have made more obvious — with v2c, a wrong community
+            string just returns nothing, with no indication of whether the agent is
+            unreachable or simply rejecting the query. In a production environment,
+            SNMPv3 with AES encryption would be the correct choice.
+          </p>
+
+          <p>
+            The monitoring stack covers every major operations concept from this domain.
+            Prometheus collects time-series metrics from all five nodes via node_exporter
+            and the Proxmox API — CPU, memory, disk, network throughput, UPS battery
+            state, load percentage, runtime remaining. Grafana visualizes it with custom
+            dashboards and an alerting ruleset. Zabbix provides infrastructure state
+            monitoring — availability checks, threshold-based alerts, the SNMP polling
+            layer. The two tools are complementary: Prometheus answers "what does this
+            metric's history look like?" and Zabbix answers "is this thing up right now?"
+          </p>
+
+          <p>
+            The Grafana alert rules map directly to operations concepts. The Node Offline
+            rule — <code>up{job="node_exporter"} == 0</code> — is a threshold-based
+            availability alert. The UPS on Battery rule — <code>nut_ups_status == 2</code>
+            — is an event-triggered alert. The Shutdown Warning rule, firing when battery
+            runtime drops below 300 seconds, is a predictive threshold. The 2-minute
+            pending period before an alert fires is what prevents alert fatigue from
+            transient blips — a deliberate operational decision, not a default.
+          </p>
+
+          <p>
+            High availability at the power layer is the CyberPower SX950U. All five
+            nodes are on UPS power. NUT runs on Ankhh and broadcasts a graceful
+            shutdown signal to all four slave nodes when battery hits 20% or five minutes
+            of runtime remain. Each slave's upsmon receives the signal and initiates
+            an orderly shutdown. Proxmox Backup Server running nightly on dedicated
+            bare metal is the data redundancy layer. The three independent access paths
+            to Vaultwarden — direct LAN IP, NPM proxy, and Tailscale — are a practical
+            implementation of the same principle: no single failure should take down
+            access to credentials needed for recovery.
+          </p>
+
+          <p>
+            Documentation here is the infrastructure notes, the per-service wiki pages,
+            and this journal. The network diagram that exists is in Homelable — an
+            interactive topology map running on Murloc at
+            <code>map.michaelrooney.dev</code>. That's the logical diagram. The physical
+            diagram is considerably simpler: one switch, five machines, a UPS. Both
+            matter, for different reasons.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="n10-009-02-implementation.html">← Previous: Network Implementation</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

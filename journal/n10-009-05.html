@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>N10-009 Study Notes: Review &amp; What's Next — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A full review of the N10-009 exam domains, what to focus on in the final week, and what the path to CCNA looks like from here."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="N10-009 Study Notes: Review &amp; What's Next — Michael Rooney" />
+    <meta property="og:description" content="A full review of the N10-009 exam domains, what to focus on in the final week, and what the path to CCNA looks like from here." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/n10-009-05.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="N10-009 Study Notes: Review &amp; What's Next — Michael Rooney" />
+    <meta name="twitter:description" content="A full review of the N10-009 exam domains, what to focus on in the final week, and what the path to CCNA looks like from here." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/n10-009-05.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-28-2026">May 28, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+          <h1>N10-009 Study Notes: Review &amp; What's Next</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Part five of five. Four entries of concept, implementation, security,
+            operations, and troubleshooting. This one is the consolidation pass —
+            where everything gets compressed back down to what matters most for
+            the final stretch before the exam, and where the path forward starts
+            to take shape.
+          </p>
+
+          <p>
+            If you've been following this series as a study companion, this is the
+            entry to read twice. First time through to identify your gaps. Second
+            time to confirm you've closed them.
+          </p>
+
+          <h2>Domain Weights — Where the Exam Lives</h2>
+
+          <p>
+            The N10-009 exam is 90 questions, 90 minutes, passing score 720 out of 900.
+            The domain weights aren't just organizational — they tell you where to
+            concentrate your final week.
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Domain</th><th>Weight</th><th>Entry</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1.0 Networking Concepts</td><td>23%</td><td>Part 1</td></tr>
+              <tr><td>2.0 Network Implementation</td><td>19%</td><td>Part 2</td></tr>
+              <tr><td>3.0 Network Operations</td><td>17%</td><td>Part 3</td></tr>
+              <tr><td>4.0 Network Security</td><td>20%</td><td>Part 3</td></tr>
+              <tr><td>5.0 Network Troubleshooting</td><td>21%</td><td>Part 4</td></tr>
+            </tbody>
+          </table>
+
+          <p>
+            Domains 4 and 5 together are 41% of the exam. Domain 1 is another 23%.
+            Those three areas alone account for nearly two-thirds of the total score.
+            That's where to spend the last week.
+          </p>
+
+          <h2>High-Priority Recall — Domain 1</h2>
+
+          <p>
+            The OSI model layers in order, and what lives at each one. The difference
+            between TCP and UDP and which protocols use which. Port numbers — the full
+            common list, in both directions (port to protocol, protocol to port).
+            Private IPv4 ranges by heart. Subnet math: given a /24, /25, /26, /27,
+            know the number of hosts, the network address format, and the broadcast
+            address immediately. IPv6 address types and the loopback. DNS record types.
+            The DORA sequence for DHCP. What NAT does and why private addresses need it.
+          </p>
+
+          <p>
+            The subnetting piece is the one that requires drilling, not just reading.
+            Use ExamCompass or a subnetting worksheet and do it until it's automatic.
+            On exam day, time pressure and question framing will try to slow you down.
+            Mechanical comfort with the math removes that variable.
+          </p>
+
+          <h2>High-Priority Recall — Domain 2</h2>
+
+          <p>
+            How a switch builds its MAC address table and makes forwarding decisions.
+            What a hub does differently and why it's inferior. VLAN concepts: access
+            ports versus trunk ports, 802.1Q tagging, inter-VLAN routing requiring
+            a Layer 3 device. What STP does and what problem it solves — broadcast
+            storms, root bridge election, blocked ports. The 802.11 wireless standards:
+            which bands each uses, approximate maximum throughputs, and the key
+            distinguishing features. WPA2 versus WPA3 and why WEP is off the table.
+            What IaaS, PaaS, and SaaS each describe.
+          </p>
+
+          <h2>High-Priority Recall — Domains 3 and 4</h2>
+
+          <p>
+            Stateless versus stateful versus NGFW — what each inspects and what it can't.
+            IDS versus IPS — the key distinction is passive detection versus active
+            prevention. VPN tunnel types and the protocols behind them. The AAA framework
+            — what each letter means and which protocol implements it (RADIUS, TACACS+).
+            SNMP versions and the critical difference between v2c and v3. Syslog severity
+            levels, 0–7, in order. What a FHRP does and how HSRP and VRRP differ.
+            Documentation types: physical diagrams, logical diagrams, IPAM. What change
+            management is for and why a rollback plan matters.
+          </p>
+
+          <h2>High-Priority Recall — Domain 5</h2>
+
+          <p>
+            The seven-step troubleshooting methodology, in order, without looking it up.
+            What each command-line tool does: ping, traceroute, nslookup, dig, netstat,
+            nmap, iperf, Wireshark. The layer-by-layer diagnostic approach and which
+            layer each tool addresses. Common failure patterns: IP conflict, wrong default
+            gateway, DNS failure, duplex mismatch, VLAN misconfiguration, physical
+            layer issues. The habit of forming a theory before making a change —
+            and documenting what you did after.
+          </p>
+
+          <h2>Final Week Strategy</h2>
+
+          <p>
+            Practice exams are the primary tool at this point, not new content. Each
+            practice exam does two things: it surfaces knowledge gaps, and it builds
+            the endurance to sustain focus for 90 minutes under time pressure. Professor
+            Messer's practice exams are the closest to the actual exam style. Jason
+            Dion's are higher volume and useful for drilling specific domains.
+          </p>
+
+          <p>
+            After each practice exam, review every wrong answer — not just the correct
+            answer, but why the other choices were wrong. The exam uses distractor
+            answers that are plausible enough to catch you if your understanding is
+            shallow. Understanding why the wrong answers are wrong builds the same
+            mental model that produces the right answer on questions you haven't seen.
+          </p>
+
+          <p>
+            The night before: nothing new. Review the port list and the OSI layers.
+            Sleep. The exam is 90 minutes — it's not a marathon of endurance, it's
+            a sprint of recall. Rest matters more than a last-minute cram at that point.
+          </p>
+
+          <p class="callout">
+            The goal isn't to feel ready. The goal is to pass. Those aren't the same
+            thing. Feeling ready is a subjective state that's never quite satisfied.
+            Passing is a number: 720 out of 900. Practice exam scores tell you whether
+            you're there, not your confidence level.
+          </p>
+
+          <h2>What the Homelab Built — Honest Accounting</h2>
+
+          <p>
+            Before moving to what comes next, it's worth being direct about what
+            the homelab actually prepared versus what the studying filled in.
+          </p>
+
+          <p>
+            The lab built genuine intuition for: subnetting and IP address management
+            (having managed a static allocation table across 20+ addresses for months).
+            DNS and how resolution flows (having watched nslookup and dig behavior across
+            a multi-service environment). VPN overlay networking (Tailscale's behavior
+            under various routing conditions, including failure modes). Monitoring
+            architecture — what metrics to collect, what thresholds to set, the
+            difference between availability and performance data. Troubleshooting
+            methodology — not by name, but by practice across a dozen debugging sessions
+            that each required forming a theory, testing it, and moving on when it
+            was wrong. Power and redundancy at a systems level.
+          </p>
+
+          <p>
+            The studying filled in: precise terminology the exam expects. Protocol
+            specifics at a level the lab doesn't require — OSPF versus RIP versus BGP
+            conceptually, SNMPv3 authentication modes, TACACS+ versus RADIUS at the
+            architectural level. Wireless standards, which the lab has but doesn't
+            require engineering-level understanding of. The formal troubleshooting
+            methodology as a named, ordered process. Port numbers across the full list,
+            not just the ones that came up in practice.
+          </p>
+
+          <p>
+            The combination is what makes both worth doing. The intuition makes the
+            terminology land somewhere real. The terminology gives the intuition
+            precision. Neither one alone is the full picture.
+          </p>
+
+          <h2>What's Next — CCNA</h2>
+
+          <p>
+            Network+ is a proof of foundation. CCNA — Cisco Certified Network Associate
+            — is where the depth begins. The exam (200-301) covers everything Network+
+            does and goes substantially further: OSPF configuration, STP behavior
+            and tuning, ACL syntax, switch security features, HSRP and FHRP in practice,
+            wireless LAN controller configuration, SD-WAN, network automation with
+            Python and REST APIs. The goal is to have it done by end of summer.
+          </p>
+
+          <p>
+            That's an ambitious timeline for a meaningfully harder exam. The plan is
+            to treat it the same way: structured domain-by-domain study, practice
+            questions throughout rather than at the end, and the lab as the place
+            where abstract configurations become concrete. CCNA will require hands-on
+            CLI practice — Cisco's Packet Tracer provides a free simulation environment,
+            and Cisco DevNet has lab exercises. The lab topology here maps reasonably
+            well to CCNA scenarios: a multi-node environment with a managed switch,
+            VLAN segmentation, and a firewall at the edge provides most of the physical
+            structure.
+          </p>
+
+          <p>
+            JNCIA-Junos (Juniper's entry-level cert) is also on the roadmap. Given
+            that the network engineering team the April conversation pointed toward is
+            moving away from Cisco infrastructure toward Juniper and HP, JNCIA may be
+            more immediately relevant than CCNA for that specific opportunity. Both
+            are on the list. The order will depend on how the summer goes.
+          </p>
+
+          <h2>A Note for Anyone Following Along</h2>
+
+          <p>
+            If you started this series because you're also working toward Network+,
+            a few honest notes from the other side of the studying.
+          </p>
+
+          <p>
+            Build something first if you can. Not because it makes the exam easier —
+            the exam will still ask about things you've never personally configured.
+            But because having a mental image of a real network, even a small one,
+            makes abstract concepts land differently. When I read about VLAN trunking,
+            I see port 8 on the Netgear switch carrying tagged traffic to OPNsense.
+            That picture makes the concept stick in a way that a diagram in a textbook
+            doesn't.
+          </p>
+
+          <p>
+            Do the practice exams earlier than you think you need to. Most people treat
+            practice exams as a final check. They're more useful as a diagnostic tool
+            throughout — each one tells you where to spend the next study session.
+            Doing your first practice exam in the final week means you don't have time
+            to act on what it tells you.
+          </p>
+
+          <p>
+            Write things down. Notes, a blog, a journal, a doc no one ever reads.
+            The act of writing a concept out forces you to find the edges of your
+            understanding. Wherever you stall or hedge or reach for a vague phrase —
+            that's the gap. This series exists partly because writing it revealed
+            several of those gaps before the exam did.
+          </p>
+
+          <p>
+            The certification isn't the destination. It's a credential that opens a
+            specific door. What you actually know matters more and longer than what
+            the cert says. Study for understanding. The passing score will follow.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="n10-009-04-troubleshooting.html">← Previous: Troubleshooting</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

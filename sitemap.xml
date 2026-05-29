@@ -112,5 +112,29 @@
     <loc>https://michaelrooney.dev/journal/05-16-2026.html</loc>
     <priority>0.6</priority>
   </url>
-  
+  <url>
+    <loc>https://michaelrooney.dev/journal/05-23-2026.html</loc>
+    <priority>0.6</priority> 
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/n10-009-01.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/n10-009-02.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/n10-009-03.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/n10-009-04.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/n10-009-05.html</loc>
+    <priority>0.6</priority>
+  </url>
+
 </urlset>

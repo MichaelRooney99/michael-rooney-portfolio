@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Going Dark for a Bit — Michael Rooney</title>
+    <meta
+      name="description"
+      content="The Network+ voucher is purchased. The exam is soon. Here's where the homelab stands, what I'm studying, and why CCNA is next."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Going Dark for a Bit — Michael Rooney" />
+    <meta property="og:description" content="The Network+ voucher is purchased. The exam is soon. Here's where the homelab stands, what I'm studying, and why CCNA is next." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/05-23-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Going Dark for a Bit — Michael Rooney" />
+    <meta name="twitter:description" content="The Network+ voucher is purchased. The exam is soon. Here's where the homelab stands, what I'm studying, and why CCNA is next." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/05-23-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../index.html#work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="05-28-2026">May 28, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-certs">Certs</span>
+          </div>
+          <h1>Going Dark for a Bit</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The voucher is purchased. The exam is coming up soon. If you've been following
+            along here and things suddenly go quiet — no new homelab builds, no Ansible
+            writeups, no infrastructure rabbit holes — this is why. For the next stretch,
+            the lab takes a back seat. Network+ is the focus.
+          </p>
+
+          <p>
+            I wanted to write this down before going heads-down, partly for accountability
+            and partly because I think the study process is worth documenting the same way
+            everything else here gets documented. If you're working toward Network+ yourself,
+            or just curious what the preparation looks like from someone who came in
+            through the homelab side of things, follow along.
+          </p>
+
+          <h2>Where the lab stands</h2>
+
+          <p>
+            The timing feels right to pause on new builds. The lab is in a stable,
+            well-monitored state — probably the best shape it's been in. Before going dark,
+            here's a snapshot of what's running.
+          </p>
+
+          <p>
+            Five Proxmox nodes across a <code>10.10.10.0/24</code> subnet, managed behind
+            an OPNsense gateway with Unbound DNS and a Cloudflare wildcard cert covering
+            every internal service. Node 0 handles network services. Ankhh is the primary
+            workload node and UPS master — the CyberPower SX950U connects directly to the
+            host via USB, running NUT in netserver mode with four slave nodes monitoring
+            it over the network. Shasta hosts the Docker stack and the Ansible control
+            node. Murloc runs productivity services. PBS handles nightly backups on
+            a dedicated bare metal box with 30-day retention.
+          </p>
+
+          <p>
+            The observability layer is fully built out. Prometheus scrapes all five nodes
+            via node_exporter, pulls Proxmox cluster metrics through pve_exporter, and
+            collects UPS data via nut_exporter — all feeding into Grafana dashboards and
+            a live alerting ruleset for node availability, UPS battery state, and
+            shutdown thresholds. Zabbix runs alongside it on Shasta for infrastructure
+            state monitoring and SNMP polling of the Netgear GS308EP switch. The two
+            tools cover different things and don't overlap in a way that causes noise.
+          </p>
+
+          <p>
+            Ansible is a permanent part of the infrastructure now — a dedicated LXC on
+            Shasta with six active playbooks enforcing consistent state across all five
+            nodes. Audit, baseline packages, node_exporter version pinning, NUT master
+            and slave configs, rolling updates. Configuration drift is what Ansible
+            exists to prevent and it's doing its job. Vaultwarden handles credentials
+            with three independent access paths so it survives any combination of NPM
+            or OPNsense going down. And there's now an interactive topology map of the
+            whole thing running on Murloc — which, if I'm being honest, was a completely
+            optional project that I built mostly because I wanted to see it all laid out.
+          </p>
+
+          <p class="callout">
+            The lab didn't slow down because it's finished. It slowed down because
+            there's something more important to do right now.
+          </p>
+
+          <h2>Why Network+ right now</h2>
+
+          <p>
+            Back in April, I had a Zoom call with a network engineering manager at my
+            employer — the one I'd been building toward for months. He was direct about
+            the certification path: Network+ as a foundation, then CCNA, with JNCIA-Junos
+            worth a serious look given the team's infrastructure direction. That
+            conversation moved Network+ from "something I'll get to" to the specific,
+            scheduled thing I'm doing right now. The voucher being purchased is the
+            concrete form of that.
+          </p>
+
+          <p>
+            The honest picture is that the lab has already taught me a significant
+            chunk of what Network+ tests. Routing across a five-node subnet. Configuring
+            Tailscale as a mesh VPN overlay. Troubleshooting why a NUT slave couldn't
+            reach the master on port 3493. Understanding the difference between
+            Zabbix's availability monitoring and Prometheus's time-series metrics —
+            and when each one is the right tool. Debugging why SNMP polling on the
+            switch wasn't returning data and tracing it back to a community string
+            mismatch. All of it is applied networking. The cert formalizes what the
+            lab has been teaching in practice.
+          </p>
+
+          <p class="callout">
+            Building something and being asked to explain it from first principles
+            are different skills. The exam tests the second one.
+          </p>
+
+          <h2>The study plan</h2>
+
+          <p>
+            The N10-009 exam covers five domains: Networking Concepts (23%), Network
+            Implementation (19%), Network Operations (17%), Network Security (20%),
+            and Network Troubleshooting (21%). Security and Troubleshooting together
+            account for nearly half the exam, which shapes where the time goes.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Phase</th>
+                <th>Focus</th>
+                <th>Topics</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Week 1</td>
+                <td>Networking Concepts</td>
+                <td>OSI model, TCP/IP stack, ports &amp; protocols, IPv4/IPv6 addressing, subnetting, CIDR, NAT, DNS, DHCP, routing fundamentals</td>
+              </tr>
+              <tr>
+                <td>Week 2</td>
+                <td>Implementation &amp; Infrastructure</td>
+                <td>Ethernet, switching, VLANs, STP, wireless standards (802.11), WAN technologies, cloud concepts, virtualization networking</td>
+              </tr>
+              <tr>
+                <td>Week 3</td>
+                <td>Security &amp; Operations</td>
+                <td>Firewalls, IDS/IPS, VPNs, AAA, network hardening, monitoring &amp; logging, SNMP, NetFlow, documentation, high availability</td>
+              </tr>
+              <tr>
+                <td>Week 4</td>
+                <td>Troubleshooting &amp; Review</td>
+                <td>Troubleshooting methodology, tools (ping, traceroute, nslookup, netstat, Wireshark), practice exams, full domain review, weak-spot targeting</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
+            The daily rhythm: new material in the morning — video content or reading,
+            one objective at a time. Active recall in the afternoon — flash cards,
+            practice questions on that day's topics, no passive re-reading. Evenings
+            are for connecting concepts back to something real in the lab. That last
+            part matters. If I can trace a concept to a configuration I've actually
+            touched, it sticks in a way that abstract definitions don't.
+          </p>
+
+          <h2>Where the homelab connects</h2>
+
+          <p>
+            More than I expected, honestly. A few specific mappings worth naming:
+          </p>
+
+          <p>
+            The entire lab runs on a single <code>10.10.10.0/24</code> subnet with a
+            separate isolated VLAN 20 at <code>10.10.20.0/24</code> for lab and IoT
+            devices, trunked through the managed switch to OPNsense. That's subnetting,
+            CIDR notation, VLAN segmentation, and inter-VLAN routing — all on the exam,
+            all already in production. The Netgear GS308EP runs SNMP v2c, which Zabbix
+            polls for port state and traffic counters. SNMP is a named exam objective.
+            I've already debugged a live community string mismatch on it.
+          </p>
+
+          <p>
+            Tailscale is a mesh VPN overlay — exit nodes, subnet routing, the distinction
+            between direct connections and relay paths. VPN tunneling is testable material
+            and I've already broken it once in a way that taught me exactly how the
+            routing works. NginX Proxy Manager sitting in front of every internal service
+            is a practical exercise in reverse proxying, SSL termination, and
+            understanding what a DNS name actually resolves to at the network layer.
+          </p>
+
+          <p>
+            And the Zabbix and Prometheus deployments between them cover nearly every
+            monitoring and logging concept the exam names: SNMP polling, threshold-based
+            alerting, time-series data collection, log aggregation, the difference between
+            availability checks and performance metrics. I built both of those stacks
+            from scratch and debugged both of them when they didn't work. That's the
+            troubleshooting methodology the exam describes — I just didn't have the
+            vocabulary for it at the time.
+          </p>
+
+          <p class="callout">
+            The lab didn't give me the vocabulary the exam expects.
+            The studying does that. But the lab gave me the intuition that makes
+            the vocabulary land somewhere real rather than somewhere abstract.
+          </p>
+
+          <h2>Resources</h2>
+
+          <p>
+            Keeping the resource stack deliberately small. More materials isn't better
+            preparation — it's just more context switching.
+          </p>
+
+          <p>
+            Professor Messer's Network+ N10-009 course is the primary source. It's free,
+            maps directly to the exam objectives, and is what most of the community
+            points to as the baseline. The paid practice exams are part of the plan.
+            Jason Dion's Udemy question bank for volume. ExamCompass for subnetting
+            drills specifically — subnetting is the one area where raw repetition under
+            time pressure matters more than conceptual understanding. Anki for spaced
+            repetition on ports, protocols, and acronyms. The list is long and the
+            forgetting curve is real.
+          </p>
+
+          <h2>What comes after</h2>
+
+          <p>
+            CCNA is next, and the goal is to have it done by end of summer. That's not
+            a casual ambition — CCNA is a meaningfully harder exam than Network+, with
+            deeper coverage of routing protocols, switching concepts, and Cisco-specific
+            implementation. But the conversation in April made the timeline clear. The
+            team is moving in a direction where that depth matters, and waiting until
+            fall doesn't serve anyone.
+          </p>
+
+          <p>
+            After Network+ closes, the Ansible work picks back up — the Glances
+            standardization playbook is still on the roadmap, and the roles refactor
+            has been waiting. JNCIA-Junos gets a serious research pass once CCNA
+            is in motion. And the lab will have new things to document. It always does.
+          </p>
+
+          <p>
+            But that's all for later. For now — heads down, exam close, journal quiet.
+            See you on the other side.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="05-07-2026.html">← Previous: 05-07-2026 Entry</a>          
+          <a href="n10-009-01.html">Next: Networking Concepts →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
