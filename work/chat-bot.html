@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network+ AI Study Coach</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #0e0d0b;
+      --bg-raised: #151410;
+      --text: #f0ede8;
+      --muted: #7a7670;
+      --subtle: #2a2925;
+      --accent: #c8622a;
+      --accent-dim: #7a3c1a;
+      --border: #232220;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg);
+      color: var(--text);
+      /* Portfolio custom SVG noise overlay */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    .serif {
+      font-family: var(--serif);
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-6 selection:bg-orange-800 selection:text-orange-100">
+
+  <!-- Clean non-blocking custom Error Toast -->
+  <div id="error-toast" class="hidden fixed bottom-6 right-6 z-50 max-w-md bg-[#1c0f0f] border border-red-900/40 p-4 rounded-lg shadow-xl flex gap-3 items-start transition-all duration-300">
+    <div class="text-red-500 mt-0.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <div class="flex-1">
+      <h4 class="font-bold text-red-200 text-sm">Connection Interrupted</h4>
+      <p id="error-message" class="text-xs text-red-400 mt-0.5"></p>
+    </div>
+    <button onclick="hideErrorToast()" class="text-red-400 hover:text-red-200">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="border-b border-[#232220] bg-[#0e0d0b]/90 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="text-[#c8622a] font-serif italic text-2xl">
+          mr
+        </div>
+        <div class="border-l border-[#232220] pl-3">
+          <h1 class="text-lg font-normal tracking-tight text-[#f0ede8] serif">Network+ AI Study Coach</h1>
+          <p class="text-[10px] tracking-widest uppercase text-[#7a7670]">Homelab-Linked Intelligence Module</p>
+        </div>
+      </div>
+      <div>
+        <a href="../journal.html" class="text-xs tracking-wider uppercase text-[#7a7670] hover:text-[#f0ede8] transition">
+          ← Back to Portfolio Journal
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <main class="max-w-6xl w-full mx-auto px-6 mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 items-stretch">
+    
+    <!-- Left Column: Pre-prompts & Context Control -->
+    <div class="md:col-span-1 flex flex-col justify-between gap-6">
+      
+      <!-- Prompts Selector Card -->
+      <div class="bg-[#151410] border border-[#232220] rounded-lg p-6 flex flex-col gap-4">
+        <div>
+          <span class="text-[10px] text-[#c8622a] tracking-widest uppercase font-bold block mb-1">Pre-Prompt Targets</span>
+          <h2 class="text-xl text-[#f0ede8] font-normal serif leading-snug">Quick-Fire Study Vectors</h2>
+          <p class="text-xs text-[#7a7670] mt-1">Inject these pre-prompts to quickly test your knowledge on complex exam domains.</p>
+        </div>
+
+        <!-- Pre-Prompt Clickable List -->
+        <div class="flex flex-col gap-2 mt-2">
+          <button onclick="firePrePrompt('vlsm')" class="w-full bg-[#0e0d0b] hover:bg-[#191714] border border-[#232220] hover:border-[#c8622a]/40 text-left p-3.5 rounded-lg text-xs transition flex items-center justify-between group">
+            <span class="text-[#f0ede8] group-hover:text-[#c8622a] transition duration-200">✨ Custom VLSM Challenge</span>
+            <span class="text-[#7a7670] group-hover:translate-x-1 transition duration-200">→</span>
+          </button>
+          
+          <button onclick="firePrePrompt('routing')" class="w-full bg-[#0e0d0b] hover:bg-[#191714] border border-[#232220] hover:border-[#c8622a]/40 text-left p-3.5 rounded-lg text-xs transition flex items-center justify-between group">
+            <span class="text-[#f0ede8] group-hover:text-[#c8622a] transition duration-200">Explain Routing Protocols</span>
+            <span class="text-[#7a7670] group-hover:translate-x-1 transition duration-200">→</span>
+          </button>
+          
+          <button onclick="firePrePrompt('udp')" class="w-full bg-[#0e0d0b] hover:bg-[#191714] border border-[#232220] hover:border-[#c8622a]/40 text-left p-3.5 rounded-lg text-xs transition flex items-center justify-between group">
+            <span class="text-[#f0ede8] group-hover:text-[#c8622a] transition duration-200">UDP Sockets & Demuxing</span>
+            <span class="text-[#7a7670] group-hover:translate-x-1 transition duration-200">→</span>
+          </button>
+          
+          <button onclick="firePrePrompt('cidr')" class="w-full bg-[#0e0d0b] hover:bg-[#191714] border border-[#232220] hover:border-[#c8622a]/40 text-left p-3.5 rounded-lg text-xs transition flex items-center justify-between group">
+            <span class="text-[#f0ede8] group-hover:text-[#c8622a] transition duration-200">CIDR Sizing Analogies</span>
+            <span class="text-[#7a7670] group-hover:translate-x-1 transition duration-200">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- System Status Tracker -->
+      <div class="bg-[#151410]/60 border border-[#232220] rounded-lg p-5 flex flex-col items-center justify-center text-center gap-2">
+        <div class="text-[9px] tracking-widest uppercase text-[#7a7670] font-bold">Model Environment</div>
+        <div class="flex items-center gap-2 text-xs font-medium text-[#c8622a]">
+          <span class="h-2 w-2 rounded-full bg-emerald-600 animate-ping"></span>
+          gemini-3-flash-preview
+        </div>
+        <div class="text-[10px] text-[#7a7670] mt-1 max-w-[28ch]">
+          Fully sandboxed dynamic pipeline ready for recall queries.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Interactive Chat Interface -->
+    <div class="md:col-span-2 flex flex-col bg-[#151410] border border-[#232220] rounded-lg overflow-hidden h-[560px] md:h-auto min-h-[500px]">
+      
+      <!-- Chat Head/Status -->
+      <div class="bg-[#0e0d0b] px-6 py-4 border-b border-[#232220] flex justify-between items-center">
+        <div class="flex items-center gap-2.5">
+          <div class="bg-[#c8622a]/10 text-[#c8622a] px-2 py-1 rounded text-xs font-mono">L7</div>
+          <div>
+            <h3 class="text-sm font-semibold text-[#f0ede8] serif">Interactive Session</h3>
+            <p class="text-[9px] text-emerald-500 uppercase tracking-widest font-mono">Virtual Pipeline Est.</p>
+          </div>
+        </div>
+        <button onclick="clearChatLog()" class="text-[10px] tracking-wider uppercase text-[#7a7670] hover:text-[#f0ede8] px-2.5 py-1.5 rounded border border-[#232220] hover:border-[#7a7670]/40 transition bg-[#151410]">
+          Reset Dialog
+        </button>
+      </div>
+
+      <!-- Message Log Viewport -->
+      <div id="chat-viewport" class="flex-1 overflow-y-auto p-6 space-y-4">
+        
+        <!-- Welcome Message -->
+        <div class="flex gap-4 items-start max-w-[90%]">
+          <div class="bg-[#c8622a] text-[#0e0d0b] font-bold text-xs h-7 w-7 rounded flex items-center justify-center flex-shrink-0 serif">
+            AI
+          </div>
+          <div class="bg-[#0e0d0b] border border-[#232220] p-4 rounded-r-lg rounded-bl-lg text-sm text-[#f0ede8]/90 leading-relaxed">
+            Welcome, Michael. I am your Network+ study assistant. I specialize in breaking down subnet masking math, encapsulation hierarchies, and local routing behaviors.
+            <br><br>
+            Feel free to query me directly, or leverage the <strong class="text-[#c8622a]">Quick-Fire Study Vectors</strong> on the left to inject dynamic recall triggers!
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Loading Status Bar -->
+      <div id="loading-bar" class="hidden px-6 py-2.5 bg-[#0e0d0b]/40 border-t border-[#232220]/60 flex gap-2.5 items-center text-xs text-[#7a7670]">
+        <div class="flex gap-1">
+          <span class="w-1.5 h-1.5 bg-[#c8622a] rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+          <span class="w-1.5 h-1.5 bg-[#c8622a] rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+          <span class="w-1.5 h-1.5 bg-[#c8622a] rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+        </div>
+        <span class="italic font-mono">Formulating technical response...</span>
+      </div>
+
+      <!-- Chat Form Input -->
+      <div class="p-4 bg-[#0e0d0b] border-t border-[#232220]">
+        <form onsubmit="handleQuerySubmit(event)" class="flex gap-2">
+          <input type="text" id="query-input" placeholder="Type a concept query (e.g., 'What is standard MTU size?')..." class="flex-1 bg-[#151410] border border-[#232220] rounded px-4 py-3 text-sm text-[#f0ede8] focus:outline-none focus:border-[#c8622a] placeholder-[#7a7670]/60 transition">
+          <button type="submit" class="bg-[#c8622a] hover:bg-[#b0521e] text-[#0e0d0b] font-bold px-6 py-3 rounded text-sm transition tracking-wider uppercase font-mono">
+            Send
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Logic & API Controls -->
+  <script>
+    // System Configurations
+    const apiKey = ""; // Implicitly injected at runtime by the environment
+
+    // Pre-prompt vectors map
+    const prePrompts = {
+      vlsm: {
+        system: "You are a professional network deployment architect. You create challenging and precise Variable Length Subnet Masking (VLSM) challenges.",
+        user: "Generate a realistic VLSM subnet assignment challenge for a small company needing 4 subnets: Engineering (120 hosts), Sales (55 hosts), Marketing (28 hosts), and Link (2 hosts). Use starting block 192.168.10.0/24. Provide the organization sequence, calculations, and a clean Markdown table showing the results."
+      },
+      routing: {
+        system: "You are an expert systems trainer who specializes in routing metrics and vector convergence.",
+        user: "Explain the absolute, core difference in mechanics between Distance-Vector and Link-State routing protocols. Highlight RIP vs OSPF, convergence behaviors, and typical real-world deployment cases."
+      },
+      udp: {
+        system: "You are an expert protocols software engineer who explains packet demultiplexing simply.",
+        user: "Why does UDP not use sequence numbers, and how does the receiving operating system identify which local socket or application receives UDP datagrams? Please keep your response concise but detailed."
+      },
+      cidr: {
+        system: "You are an expert educator who creates clever physical analogies for dry logical IP routing concepts.",
+        user: "Provide a creative, easy-to-remember analogy or system for a student to memorize the difference in subnet size when dealing with CIDR blocks /25, /26, /27, and /28."
+      }
+    };
+
+    // Gemini API caller with Exponential Backoff
+    async function executeModelCall(userQuery, systemPrompt) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+      };
+
+      let delay = 1000;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`API returned HTTP ${response.status}`);
+          }
+
+          const result = await response.json();
+          const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+          throw new Error("Empty candidate payload received.");
+        } catch (error) {
+          if (attempt === 4) throw error;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2; // Double delay: 1s, 2s, 4s, 8s
+        }
+      }
+      throw new Error("API connections failed after exhaustive retries.");
+    }
+
+    // Query Submit Handler
+    async function handleQuerySubmit(event) {
+      if (event) event.preventDefault();
+      
+      const inputEl = document.getElementById('query-input');
+      const question = inputEl.value.trim();
+      if (!question) return;
+
+      appendMessage(question, 'user');
+      inputEl.value = '';
+
+      const loader = document.getElementById('loading-bar');
+      loader.classList.remove('hidden');
+
+      const systemPrompt = "You are an expert CompTIA Network+ Virtual Coach. Answer queries with technical accuracy, clarity, and structural formatting (like lists or tables where helpful) for a professional candidate. Keep explanations highly concise and conceptual.";
+
+      try {
+        const response = await executeModelCall(question, systemPrompt);
+        appendMessage(response, 'ai');
+      } catch (err) {
+        showErrorToast("Unable to reach the Coach module. Check your connection.");
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+
+    // Pre-Prompt Injector
+    async function firePrePrompt(type) {
+      const selected = prePrompts[type];
+      if (!selected) return;
+
+      // Append user indicator to dialog
+      appendMessage(`✨ Trigger Study Vector: [${type.toUpperCase()}]`, 'user');
+
+      const loader = document.getElementById('loading-bar');
+      loader.classList.remove('hidden');
+
+      try {
+        const response = await executeModelCall(selected.user, selected.system);
+        appendMessage(response, 'ai');
+      } catch (err) {
+        showErrorToast("Could not retrieve vector challenge. Check network status.");
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+
+    // Chat Message Appender
+    function appendMessage(text, sender) {
+      const viewport = document.getElementById('chat-viewport');
+      const wrapper = document.createElement('div');
+
+      if (sender === 'user') {
+        wrapper.className = "flex gap-4 justify-end items-start max-w-[90%] ml-auto";
+        wrapper.innerHTML = `
+          <div class="bg-[#2a2925] border border-[#232220] p-4 rounded-l-lg rounded-tr-lg text-sm text-[#f0ede8] leading-relaxed whitespace-pre-line">
+            ${text}
+          </div>
+          <div class="bg-[#2a2925] text-[#7a7670] font-bold text-[10px] h-7 w-7 rounded flex items-center justify-center flex-shrink-0 font-mono">
+            ME
+          </div>
+        `;
+      } else {
+        wrapper.className = "flex gap-4 items-start max-w-[90%]";
+        wrapper.innerHTML = `
+          <div class="bg-[#c8622a] text-[#0e0d0b] font-bold text-xs h-7 w-7 rounded flex items-center justify-center flex-shrink-0 serif">
+            AI
+          </div>
+          <div class="bg-[#0e0d0b] border border-[#232220] p-4 rounded-r-lg rounded-bl-lg text-sm text-[#f0ede8]/95 leading-relaxed prose-chat select-text">
+            ${formatMarkdown(text)}
+          </div>
+        `;
+      }
+
+      viewport.appendChild(wrapper);
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+
+    // Clear Chat Log
+    function clearChatLog() {
+      const viewport = document.getElementById('chat-viewport');
+      viewport.innerHTML = `
+        <div class="flex gap-4 items-start max-w-[90%]">
+          <div class="bg-[#c8622a] text-[#0e0d0b] font-bold text-xs h-7 w-7 rounded flex items-center justify-center flex-shrink-0 serif">
+            AI
+          </div>
+          <div class="bg-[#0e0d0b] border border-[#232220] p-4 rounded-r-lg rounded-bl-lg text-sm text-[#f0ede8]/90 leading-relaxed">
+            Welcome, Michael. I am your Network+ study assistant. I specialize in breaking down subnet masking math, encapsulation hierarchies, and local routing behaviors.
+            <br><br>
+            Feel free to query me directly, or leverage the <strong class="text-[#c8622a]">Quick-Fire Study Vectors</strong> on the left to inject dynamic recall triggers!
+          </div>
+        </div>
+      `;
+    }
+
+    // Helper: Basic Markdown Parser for code, tables and formatting
+    function formatMarkdown(src) {
+      return src
+        // Tables parse
+        .replace(/\|(.+?)\|/g, (match) => {
+          const cells = match.split('|').map(c => c.trim()).filter(Boolean);
+          if (cells.some(c => c.includes('---'))) return ''; // Skip markdown divider lines
+          return `<div class="grid grid-cols-${cells.length} gap-2 p-1.5 border-b border-[#232220]/60 font-mono text-xs">${cells.map(c => `<div>${c}</div>`).join('')}</div>`;
+        })
+        // Backticks code block
+        .replace(/```([\s\S]+?)```/g, '<pre class="bg-[#151410] border border-[#232220] p-3 rounded font-mono text-xs text-orange-400 overflow-x-auto my-2">$1</pre>')
+        // Single backticks inline code
+        .replace(/`([^`\n]+?)`/g, '<code class="bg-[#2a2925] px-1 py-0.5 rounded font-mono text-xs text-orange-400">$1</code>')
+        // Bold tags
+        .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    // Toast Controllers
+    function showErrorToast(msg) {
+      const toast = document.getElementById('error-toast');
+      const text = document.getElementById('error-message');
+      text.innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 7000);
+    }
+
+    function hideErrorToast() {
+      document.getElementById('error-toast').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
