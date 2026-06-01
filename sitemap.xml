@@ -136,5 +136,8 @@
     <loc>https://michaelrooney.dev/journal/n10-009-05.html</loc>
     <priority>0.6</priority>
   </url>
-
-</urlset>
+  <url>
+    <loc>https://michaelrooney.dev/work/mrdev-bot.html</loc>
+    <priority>0.5</priority>
+  </url>
+  </urlset>
