@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Capstone — Homelab Status Page — Michael Rooney</title>
+    <meta name="description" content="Build journal for a public-facing homelab infrastructure status page — Madison College internship capstone project." />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Capstone — Homelab Status Page — Michael Rooney" />
+    <meta property="og:description" content="Build journal for a public-facing homelab infrastructure status page — Madison College internship capstone project." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Capstone — Homelab Status Page — Michael Rooney" />
+    <meta name="twitter:description" content="Build journal for a public-facing homelab infrastructure status page — Madison College internship capstone project." />
+
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+
+      <section class="hero journal-hero hero-load" aria-labelledby="capstone-heading">
+        <span class="hero-eyebrow">Madison College — Internship Capstone</span>
+        <h1 id="capstone-heading">Homelab Status Page</h1>
+        <p>
+          A session-by-session build journal for a public-facing infrastructure 
+          status page — built with Vite, React, TypeScript, and TanStack Query, 
+          deployed at status.michaelrooney.dev via Cloudflare Zero Trust tunnel.
+        </p>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section class="capstone-meta reveal" aria-label="Project details">
+        <div class="capstone-meta-grid">
+
+          <div class="capstone-meta-block">
+            <span class="section-label">Stack</span>
+            <ul class="capstone-stack-list">
+              <li>Vite + React + TypeScript</li>
+              <li>TanStack Query</li>
+              <li>Tailwind CSS v4</li>
+              <li>Recharts</li>
+              <li>Cloudflare Zero Trust</li>
+            </ul>
+          </div>
+
+          <div class="capstone-meta-block">
+            <span class="section-label">Data Sources</span>
+            <ul class="capstone-stack-list">
+              <li>Prometheus + node_exporter</li>
+              <li>NUT via nut_exporter</li>
+              <li>Proxmox API (planned)</li>
+              <li>Zabbix JSON-RPC (planned)</li>
+            </ul>
+          </div>
+
+          <div class="capstone-meta-block">
+            <span class="section-label">Deliverables</span>
+            <ul class="capstone-stack-list">
+              <li>Live site at status.michaelrooney.dev</li>
+              <li>GitHub repo shared with instructor</li>
+              <li>This build journal</li>
+              <li>216+ logged hours</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="hours-heading">
+        <span class="section-label">Progress</span>
+        <h2 id="hours-heading" class="reveal">Hours Log</h2>
+
+        <div class="table-responsive reveal">
+          <table class="skills-table capstone-hours-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Session</th>
+                <th>Hours</th>
+                <th>Running Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Jun 8, 2026</td>
+                <td><a href="06-08-2026.html">Scaffold, dependencies, and data layer</a></td>
+                <td>4.5</td>
+                <td>4.5</td>
+              </tr>
+
+            </tbody>
+            <tfoot>
+              <tr class="capstone-hours-total">
+                <td colspan="2">Total</td>
+                <td>4.5</td>
+                <td>4.5 / 216</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <!-- SESSION JOURNAL -->
+      <section aria-labelledby="sessions-heading">
+        <span class="section-label">Build Journal</span>
+        <h2 id="sessions-heading" class="reveal">Sessions</h2>
+
+        <ol class="entry-list" reversed>
+
+          <li>
+            <a href="06-08-2026.html" class="entry" aria-label="Read: Scaffold, dependencies, and data layer — June 8 2026">
+              <time class="entry-date" datetime="06-08-2026">Jun 8, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 1 — Scaffold, Dependencies, and Data Layer</h2>
+                <p class="entry-excerpt">
+                  Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4 config, 
+                  TanStack Query provider, and all three services files — types, 
+                  Prometheus adapter, and the index facade. Data layer complete, 
+                  nothing in the browser yet.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+        </ol>
+      </section>
+
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
