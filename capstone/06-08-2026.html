@@ -63,32 +63,6 @@
             in the browser worth looking at yet.
           </p>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Detail</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Date</td>
-                <td>June 8, 2026</td>
-              </tr>
-              <tr>
-                <td>Hours</td>
-                <td>4.5</td>
-              </tr>
-              <tr>
-                <td>Files created</td>
-                <td>types.ts, prometheus.ts, index.ts, main.tsx (modified), App.tsx (modified)</td>
-              </tr>
-              <tr>
-                <td>Commits</td>
-                <td>4</td>
-              </tr>
-            </tbody>
-          </table>
 
           <h2>Starting from scratch</h2>
 
@@ -98,16 +72,11 @@
             rather than pick up from existing files. The reasoning was 
             straightforward — hand-keying the code produces a better journal, 
             a more accurate hour log, and a project I can speak to completely 
-            in a conversation with Perry or anyone else who asks about it.
+            in a conversation with my instructor or anyone else who asks about it.
           </p>
 
           <p>
-            The scaffold is Vite with React and TypeScript. Vite replaced 
-            Create React App as the standard way to scaffold React projects — 
-            it starts faster, builds faster, and doesn't carry CRA's legacy 
-            weight. TypeScript over plain JavaScript because the data layer 
-            in this project is complex enough that catching type errors at 
-            compile time is worth the overhead.
+            The scaffold is Vite with React and TypeScript. 
           </p>
 
           <h2>The dependency choices</h2>
@@ -134,7 +103,7 @@
             is not part of the official React documentation — it lives at 
             tanstack.com/query as a third-party library.
           </p>
-
+          
           <p>
             Tailwind v4 uses a Vite plugin instead of a config file. The 
             entire CSS setup is one import line in <code>index.css</code>. 

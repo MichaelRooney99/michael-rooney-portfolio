@@ -137,10 +137,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://michaelrooney.dev/work/mrdev-bot.html</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://michaelrooney.dev/capstone/index.html</loc>
     <priority>0.7</priority>
   </url>
