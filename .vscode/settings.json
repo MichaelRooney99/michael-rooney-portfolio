@@ -1,0 +1,7 @@
+{
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 80,
+    "chat.editor.wordWrap": "on",
+    "editor.rulers": [120],
+    "dart.lineLength": 120
+}
