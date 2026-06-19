@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 5 — Zabbix, Debugging, and a Deliberate Deferral — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Wiring up the Zabbix proxy route, debugging a wrong IP, fixing TypeScript strict mode errors, and making a deliberate decision to defer Zabbix configuration in favor of deployment momentum."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 5 — Zabbix, Debugging, and a Deliberate Deferral — Michael Rooney" />
+    <meta property="og:description" content="Wiring up the Zabbix proxy route, debugging a wrong IP, fixing TypeScript strict mode errors, and making a deliberate decision to defer Zabbix configuration in favor of deployment momentum." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/06-17-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Session 5 — Zabbix, Debugging, and a Deliberate Deferral — Michael Rooney" />
+    <meta name="twitter:description" content="Wiring up the Zabbix proxy route, debugging a wrong IP, fixing TypeScript strict mode errors, and making a deliberate decision to defer Zabbix configuration in favor of deployment momentum." />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/06-17-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-17-2026">June 17, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 5 — Zabbix, Debugging, and a Deliberate Deferral</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The goal for this session was the Zabbix adapter — a fourth 
+            data source using JSON-RPC over HTTP, a different protocol 
+            from everything else in the project. The proxy route got 
+            built, TypeScript errors got fixed, the right IP got found, 
+            and the API started responding. Then it became clear that 
+            Zabbix itself hadn't been configured with any hosts beyond 
+            the Zabbix server. The adapter works. The data isn't there 
+            yet. This session ended with a deliberate decision rather 
+            than a failure.
+          </p>
+
+          <h2>What Zabbix JSON-RPC looks like</h2>
+
+          <p>
+            Prometheus and Proxmox both use REST — different URLs for 
+            different resources. Zabbix uses JSON-RPC — every request 
+            goes to the same endpoint (<code>/api_jsonrpc.php</code>), 
+            and the body of the request describes what you want. A 
+            typical call looks like this:
+          </p>
+
+          <pre><code>{
+  "jsonrpc": "2.0",
+  "method": "host.get",
+  "params": { "output": ["hostid", "name", "status"] },
+  "id": 1
+}</code></pre>
+
+          <p>
+            The <code>method</code> field tells Zabbix what operation 
+            to perform. <code>params</code> is the arguments. 
+            <code>id</code> is a request identifier you choose — 
+            useful for matching responses when batching multiple calls, 
+            which we don't need here.
+          </p>
+
+          <p>
+            Zabbix also requires authentication before any data call. 
+            You call <code>user.login</code> first, get a token back, 
+            and include that token in every subsequent request. The 
+            proxy handles this automatically — login on first call, 
+            cache the token, refresh before it expires. Zabbix sessions 
+            expire after 15 minutes of inactivity by default, so the 
+            proxy refreshes 1 minute early to give headroom.
+          </p>
+
+          <h2>The proxy route</h2>
+
+          <p>
+            The Zabbix route in the proxy is a thin pass-through — it 
+            takes whatever <code>method</code> and <code>params</code> 
+            the client sends, gets or reuses the cached auth token, 
+            attaches it, forwards the request to Zabbix, and returns 
+            the raw response. The client decides what Zabbix data it 
+            wants. The proxy's only job is handling credentials.
+          </p>
+
+          <p>
+            One addition the Proxmox route didn't need: 
+            <code>express.json()</code> middleware on the route. The 
+            Zabbix route accepts a POST body from the client specifying 
+            the method and params. Without <code>express.json()</code> 
+            the body parser doesn't run and <code>req.body</code> is 
+            undefined. The Proxmox route uses 
+            <code>http-proxy-middleware</code> which handles body 
+            parsing internally — the Zabbix route is a manual handler 
+            so it needs explicit middleware.
+          </p>
+
+          <p>
+            The CORS middleware also needed updating — it originally 
+            only allowed GET requests. The Zabbix route requires POST, 
+            so <code>Access-Control-Allow-Methods</code> was updated 
+            to include POST. Without this the browser's preflight 
+            OPTIONS check would reject the request before it left 
+            the browser.
+          </p>
+
+          <h2>TypeScript strict mode errors</h2>
+
+          <p>
+            The proxy's TypeScript config has strict mode enabled. 
+            <code>response.json()</code> returns <code>unknown</code> 
+            in strict mode — not <code>any</code> — which means you 
+            can't access properties on it without narrowing the type 
+            first. Three errors surfaced:
+          </p>
+
+          <ul>
+            <li>
+              <code>json.error</code> — can't access property on 
+              <code>unknown</code>
+            </li>
+            <li>
+              <code>json.result</code> — same issue
+            </li>
+            <li>
+              Return type mismatch — <code>zabbixToken</code> typed 
+              as <code>string | null</code> but function return type 
+              is <code>string</code>
+            </li>
+          </ul>
+
+          <p>
+            The fix was a <code>ZabbixLoginResponse</code> interface 
+            and a cast on the parsed JSON. Adding a 
+            <code>if (!json.result)</code> guard after the error check 
+            narrows the type so TypeScript knows <code>json.result</code> 
+            is a <code>string</code> at the assignment point. The 
+            return type mismatch resolves automatically once that 
+            narrowing is in place.
+          </p>
+
+          <h2>Wrong IP — the expected mistake</h2>
+
+          <p>
+            The initial <code>proxy/.env</code> had 
+            <code>ZABBIX_HOST=http://10.10.10.56:8090</code> — Murloc's 
+            host IP. Zabbix runs inside an LXC on Murloc at its own 
+            IP: <code>10.10.10.108</code>. The proxy was trying to 
+            reach the Zabbix LXC at the wrong address entirely. Updating 
+            the env variable and restarting the proxy fixed it 
+            immediately.
+          </p>
+
+          <p>
+            This is the same class of mistake as the NUT LXC situation — 
+            confusing the Proxmox host IP with the LXC IP. In a 
+            multi-LXC environment these are always different. The host 
+            is the hypervisor. The LXC has its own IP on the same subnet. 
+            Worth having a reference of LXC IPs somewhere accessible.
+          </p>
+
+          <h2>The API works — the data isn't there</h2>
+
+          <p>
+            Once the correct IP was in place the sanity check returned:
+          </p>
+
+          <pre><code>{"jsonrpc":"2.0","result":[{"hostid":"10084","name":"Zabbix server","status":"0"}],"id":1}</code></pre>
+
+          <p>
+            Login successful, token cached, request proxied correctly, 
+            response returned. One host visible: the Zabbix server itself. 
+            The Proxmox nodes and the GS308EP switch were never added to 
+            Zabbix after initial setup. The monitoring configuration — 
+            adding hosts, assigning templates, configuring SNMP for the 
+            switch — was always a "figure it out later" item that never 
+            got done.
+          </p>
+
+          <h2>The decision</h2>
+
+          <p>
+            Two options were on the table. Set up Zabbix monitoring 
+            properly now — adding all hosts, SNMP config for the switch, 
+            user group permissions — then build the adapter against real 
+            data. Or defer Zabbix configuration to a dedicated session, 
+            build a placeholder adapter that connects and returns whatever 
+            is visible, and move on to deployment.
+          </p>
+
+          <p>
+            The second option is the right call for where the project 
+            is. The status page has three working data sources, nine 
+            services rendering live data, and a public URL waiting to 
+            be wired up. Zabbix configuration is its own project — 
+            doing it properly deserves its own session and its own 
+            journal entry. Trying to do it inline here would slow 
+            deployment down for work that doesn't block anything else.
+          </p>
+
+          <p class="callout">
+            Knowing when to defer something is as important as knowing 
+            how to build it. The Zabbix adapter infrastructure is in 
+            place — proxy route, auth token caching, correct IP. When 
+            the monitoring config gets done, wiring it into the status 
+            page is a short session.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            Deployment. The next session covers Docker Compose — bundling 
+            the React client build and the Express proxy into a single 
+            deployable unit — and the Cloudflare Zero Trust tunnel that 
+            makes the status page publicly accessible at 
+            status.michaelrooney.dev without opening any inbound ports.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-11-2026.html">← Session 4</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
