@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connection Reset by Peer — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Deploying Zabbix Agent 2 across all five Proxmox nodes via Ansible — a version mismatch with the server, a 404 from a repo path that changed between Zabbix versions, and a missing log directory that crash-looped the service after the upgrade."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Connection Reset by Peer — Michael Rooney" />
+    <meta property="og:description" content="Deploying Zabbix Agent 2 across all five Proxmox nodes via Ansible — a version mismatch with the server, a 404 from a repo path that changed between Zabbix versions, and a missing log directory that crash-looped the service after the upgrade." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/06-20-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Connection Reset by Peer — Michael Rooney" />
+    <meta name="twitter:description" content="Deploying Zabbix Agent 2 across all five Proxmox nodes via Ansible — a version mismatch with the server, a 404 from a repo path that changed between Zabbix versions, and a missing log directory that crash-looped the service after the upgrade." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/06-20-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-20-2026">June 20, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Connection Reset by Peer</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The managed switch doesn't arrive until Wednesday, so today's
+            Zabbix work was scoped deliberately narrow: get Zabbix Agent 2
+            installed and talking to the server on all five Proxmox nodes,
+            and leave the SNMP/switch side for Thursday once the hardware
+            is actually in hand. That part of the plan held. What didn't
+            go as quickly as expected was getting from "agent installed"
+            to "agent actually responding" — three separate problems
+            stacked on top of each other, each one only visible once the
+            previous one was cleared.
+          </p>
+
+          <h2>Starting from zero</h2>
+
+          <p>
+            First step was confirming there was actually nothing to build
+            on. The Zabbix runbook notes said Agent 2 was part of initial
+            setup, but a quick check across all five nodes —
+            <code>ansible all -m shell -a "systemctl status zabbix-agent2"</code>
+            — came back with <code>Unit zabbix-agent2.service could not be
+            found</code> on every single one. Good to know before assuming
+            otherwise. Clean slate, fresh install, and a clear case for
+            doing it through Ansible rather than by hand five times.
+          </p>
+
+          <p>
+            The playbook itself came together quickly, following the same
+            shape as the existing <code>node_exporter.yml</code> and
+            <code>nut_master.yml</code> — add the repo, install the
+            package, deploy a config, confirm the port is listening. Passive
+            checks only, since everything's on one flat subnet with no
+            firewall between the nodes and the Zabbix LXC — no reason to
+            add the complexity of active checks pushing through NAT or
+            firewalls that don't exist here.
+          </p>
+
+          <h2>A variable that wasn't where I thought</h2>
+
+          <p>
+            First real snag had nothing to do with Zabbix. The playbook
+            referenced a new <code>zabbix_host</code> variable that needed
+            to live in <code>group_vars/all/common.yml</code> alongside
+            the existing NUT and node_exporter variables. Added it, ran
+            the playbook, got <code>'zabbix_host' is undefined</code> —
+            even though the variable was sitting right there in the file.
+          </p>
+
+          <p>
+            The diagnostic path here is worth writing down because it's
+            reusable: <code>ansible -m debug -a "var=zabbix_host" -e
+            @group_vars/all/common.yml</code> resolved the variable just
+            fine, which made the problem look like it was somewhere in
+            the playbook itself. But that command force-loads the file
+            directly via <code>-e</code> — it doesn't test whether normal
+            auto-discovery would find it. <code>ansible-inventory --list
+            -y</code> is the more honest test, because it resolves
+            variables exactly the way <code>ansible-playbook</code> would,
+            with no shortcuts.
+          </p>
+
+          <p class="callout">
+            A variable resolving under <code>-e @file</code> proves the
+            file is valid YAML. It proves nothing about whether
+            auto-discovery would have found it on its own.
+          </p>
+
+          <p>
+            The actual cause: <code>group_vars/</code> has to live
+            adjacent to wherever <code>ansible.cfg</code> points the
+            <code>inventory</code> setting — in this case,
+            <code>inventory/hosts.yml</code> — not at the repo root. A
+            top-level <code>group_vars/</code> next to <code>playbooks/</code>
+            looks like the right place by every convention I'd seen, but
+            Ansible doesn't auto-discover it there. Moving it to
+            <code>inventory/group_vars/all/</code> fixed it. Documented in
+            the Ansible runbook now so this doesn't cost twenty minutes
+            again on the next variable I add.
+          </p>
+
+          <h2>Connection reset by peer</h2>
+
+          <p>
+            With the variable problem solved, the playbook ran clean
+            across all five nodes — repo added, package installed, config
+            deployed, service started, port 10050 confirmed listening.
+            Felt done. Then I checked the Zabbix frontend after adding the
+            five host entries, and every single one showed:
+          </p>
+
+          <pre><code>Not available
+Get value from agent failed: cannot read response: cannot read from
+socket: [104] Connection reset by peer.</code></pre>
+
+          <p>
+            A reset is a more specific signal than it might look like at
+            first. It's not a timeout — the connection isn't going
+            nowhere. It's not a refused connection — nothing's actively
+            blocking the port. The TCP handshake completes, the agent
+            accepts the connection, and then something in the protocol
+            exchange itself causes the agent to actively tear it down.
+            That pattern points at a server-and-agent-don't-speak-the-same-
+            protocol-version problem, not a network problem — which
+            matters, because it meant the firewall and connectivity
+            checks I'd already run were a dead end, not a place to keep
+            digging.
+          </p>
+
+          <p>
+            <code>zabbix_server -V</code> on the Zabbix LXC: 7.4.10.
+            <code>dpkg -l | grep zabbix-agent2</code> on Ankhh: 7.0.27.
+            There it was. I'd pinned the agent install to the 7.0 repo
+            without ever checking what the server itself was actually
+            running — the Zabbix.md runbook just said "7.x," and I filled
+            in the rest with an assumption instead of a command.
+          </p>
+
+          <h2>A repo path that moved</h2>
+
+          <p>
+            Fixing the version should have been a one-line change — swap
+            <code>7.0</code> for <code>7.4</code> in the repo URL. It
+            wasn't, because Zabbix restructured the repo layout somewhere
+            between those two versions. The 7.0 URL pattern is
+            <code>repo.zabbix.com/zabbix/7.0/debian/pool/...</code> — no
+            extra path segment. Swapping in 7.4 and keeping that same
+            shape returns a clean 404. The actual 7.4 path adds a
+            <code>/release/</code> segment:
+            <code>repo.zabbix.com/zabbix/7.4/release/debian/pool/...</code>.
+          </p>
+
+          <p>
+            Worth saying plainly: that's not a guessable typo-fix. It's a
+            real structural change in how Zabbix organizes their repo
+            between major versions, and the only way to know it changed
+            is to actually check rather than pattern-match from the last
+            version that worked. A quick search against Zabbix's own repo
+            directory listing confirmed the correct path before touching
+            the playbook again — better to verify once than fail across
+            five nodes a second time on a guess.
+          </p>
+
+          <p>
+            One more wrinkle on the version swap: the playbook's
+            repo-already-configured check only tested whether
+            <code>/etc/apt/sources.list.d/zabbix.list</code> existed, not
+            what version it pointed at. Since the 7.0 repo file was
+            already sitting there from the first run, that check silently
+            skipped re-adding the repo entirely — the 7.4 URL never even
+            got attempted until I added a step to forcibly remove the old
+            repo file first. Fixed for today, flagged as a known
+            idempotency gap for later — every future run of this playbook
+            now re-downloads and reinstalls the repo package even when
+            nothing's changed, which is wasteful but not wrong. A problem
+            for a day when I actually run this playbook routinely instead
+            of just today.
+          </p>
+
+          <h2>The upgrade that broke the thing it fixed</h2>
+
+          <p>
+            With the correct repo and <code>state: latest</code> forcing
+            an actual upgrade rather than a no-op, the playbook reported
+            everything <code>changed</code> as expected. Then the port
+            10050 check timed out on all five nodes — a regression from
+            the run that had worked cleanly before the version fix.
+          </p>
+
+          <p>
+            <code>systemctl status</code> on Ankhh showed the service
+            crash-looping — <code>activating (auto-restart)</code>,
+            restart counter climbing, exit code 1 on every attempt. The
+            journal had the real story:
+          </p>
+
+          <pre><code>Validating configuration file "/etc/zabbix/zabbix_agent2.conf"
+Validation successful
+Cannot open log file /var/log/zabbix-agent2/zabbix_agent2.log</code></pre>
+
+          <p>
+            Config was fine. Binary was fine. It just couldn't open its
+            own log file — because the directory didn't exist.
+            <code>ls -la /var/log/zabbix-agent2/</code> confirmed it
+            outright: no such file or directory. The <code>zabbix</code>
+            system user and group were present and normal, so this wasn't
+            a permissions problem on something that existed. The 7.0
+            package must have created that directory at initial install,
+            and the 7.4 upgrade path simply never recreated it.
+          </p>
+
+          <p class="callout">
+            A task reporting <code>ok</code> on "enable and start the
+            service" only confirms systemd accepted the request — not
+            that the process stayed running. Check the journal, not just
+            the task result, when something feels too clean.
+          </p>
+
+          <p>
+            The fix is one task: create the directory with the right
+            ownership before the config gets deployed, every run, every
+            time. Small addition, but it makes the playbook resilient to
+            this specific packaging gap on any future reinstall — not
+            just a patch for today.
+          </p>
+
+          <h2>What actually got verified, and what didn't</h2>
+
+          <p>
+            Once the directory existed, the service started clean and
+            port 10050 came back green across all five nodes on the next
+            run. I'd also added a step to the playbook that automatically
+            ran <code>zabbix_get</code> against each node, delegated to
+            the Zabbix LXC, so the whole chain — agent install through
+            confirmed working response — could verify itself without
+            manual steps. That step failed too, but for a boring reason:
+            the Zabbix LXC isn't in Ansible's inventory and has no SSH
+            access for the <code>ansible</code> user, so
+            <code>delegate_to</code> couldn't reach it at all.
+          </p>
+
+          <p>
+            Rather than provision SSH access to a host that has no other
+            reason to need it, I pulled the step out entirely. Manual
+            verification — running <code>zabbix_get</code> directly on the
+            Zabbix LXC — is the reliable path here, and it's what actually
+            confirmed the fix. Not every check needs to be automated
+            inside the playbook just because it can be. The port-listening
+            check inside Ansible is good enough as an automated signal;
+            the protocol-level confirmation can stay manual.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            All five Proxmox nodes are running Zabbix Agent 2 7.4.x,
+            version-matched to the server, passive-check-only, listening
+            and confirmed responding. The Ansible playbook handles the
+            whole install end to end and is resilient now to both
+            problems hit today — the version pin and the missing log
+            directory — for any future rebuild. What's left is entirely
+            manual and entirely in the Zabbix frontend: creating the five
+            host objects with the right hostnames, host group, and the
+            standard Linux template, then watching the availability column
+            actually turn green.
+          </p>
+
+          <p>
+            The switch lands Wednesday. SNMP configuration and the
+            corresponding Zabbix template work for it is Thursday's
+            problem, on purpose — today's scope was the part that didn't
+            need to wait on hardware, and it's done.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="n10-009-05.html">← Previous: N10-009 Review &amp; What's Next</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

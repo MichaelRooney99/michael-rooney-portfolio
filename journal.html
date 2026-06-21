@@ -54,8 +54,6 @@
         <button class="filter-btn" data-filter="projects">Projects</button>
         <button class="filter-btn" data-filter="certs">Certs</button>
       </div>
-      
-          
       <section aria-label="Journal entries">
         <a href="capstone/index.html" class="capstone-banner reveal" aria-label="View the capstone project journal">
             <div class="journal-banner-text">
@@ -69,7 +67,24 @@
             </div>
             <span class="journal-banner-cta">Follow the Build ↗</span>
           </a>
+
         <ol class="entry-list" reversed>
+
+          <li data-tags="homelab learning">
+            <a href="journal/06-20-2026.html" class="entry" aria-label="Read: Connection Reset by Peer — June 20 2026">
+              <time class="entry-date" datetime="06-20-2026">June 20, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Connection Reset by Peer</h2>
+                <p class="entry-excerpt">
+                  Deploying Zabbix Agent 2 across all five Proxmox nodes via Ansible — a version mismatch with the server, a 404 from a repo path that changed between Zabbix versions, and a missing log directory that crash-looped the service after the upgrade.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-homelab">Homelab</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
 
           <li data-tags="certs learning">
             <a href="journal/n10-009-05.html" class="entry" aria-label="Read: N10-009 Study Notes: Review and What's Next — May 28 2026">
