@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zabbix Online, Switch Offline — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Completing Zabbix monitoring for all five Proxmox nodes — 606 items collecting — and discovering the Netgear GS308Ev4 doesn't support SNMP."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Zabbix Online, Switch Offline — Michael Rooney" />
+    <meta property="og:description" content="Completing Zabbix monitoring for all five Proxmox nodes — 606 items collecting — and discovering the Netgear GS308Ev4 doesn't support SNMP." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/06-27-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Zabbix Online, Switch Offline — Michael Rooney" />
+    <meta name="twitter:description" content="Completing Zabbix monitoring for all five Proxmox nodes — 606 items collecting — and discovering the Netgear GS308Ev4 doesn't support SNMP." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/06-27-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-27-2026">June 27, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Zabbix Online, Switch Offline</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Last session ended with Zabbix Agent 2 installed and confirmed
+            listening on all five Proxmox nodes, but with the Zabbix frontend
+            work still outstanding — no host objects, no templates, no actual
+            data collecting. Today finished that half of the job. It also
+            surfaced a hardware limitation I hadn't anticipated: the switch
+            that arrived this week doesn't support SNMP at all.
+          </p>
+
+          <h2>Finishing what the playbook can't</h2>
+
+          <p>
+            The Ansible playbook handles everything up to the agent being
+            installed and listening. What it can't do — at least not without
+            pulling in the Zabbix API, which is more scope than this warranted
+            — is create the host objects in the Zabbix frontend, assign them
+            to a host group, and link the monitoring template. That's a manual
+            step, done once per host, and it's what actually connects "agent
+            is listening" to "data is collecting."
+          </p>
+
+          <p>
+            The process is the same for each node: Data collection → Hosts →
+            Create host. Set the hostname to match the inventory name exactly
+            — <code>network</code>, <code>ankhh</code>, <code>shasta</code>,
+            <code>murloc</code>, <code>pbs</code> — because the agent's
+            <code>Hostname=</code> value in the config has to match the
+            frontend host name for Zabbix to correlate them correctly. Add an
+            agent interface pointing at the node's IP on port 10050. Link the
+            "Linux by Zabbix agent" template. Save.
+          </p>
+
+          <p>
+            Within a minute of creating each entry, the Availability column
+            flipped green. All five nodes Available, 606 items collecting
+            across the cluster — CPU breakdown, memory, disk and filesystem
+            usage, network interface traffic, context switches, uptime, load
+            averages. One item reported "Not supported," which at this scale
+            is noise rather than a problem.
+          </p>
+
+          <p class="callout">
+            The difference between "agent is listening" and "monitoring is
+            working" is the template. A host with no template linked is
+            Available but collecting nothing useful — it's the template that
+            defines what items get polled, on what schedule, with what
+            thresholds. Available status alone doesn't tell you much.
+          </p>
+
+          <h2>The switch arrived — but not the feature</h2>
+
+          <p>
+            The Netgear GS308E arrived as expected. It went into the rack,
+            got its management IP set to <code>10.10.10.3</code>, and VLAN
+            configuration went in cleanly — 802.1Q, port 2 as the trunk to
+            OPNsense carrying both VLAN 1 and VLAN 20, ports 5–8 as VLAN 20
+            access ports for isolated lab and IoT devices. OPNsense firewall
+            rules updated to enforce the segmentation. That part worked
+            exactly as expected.
+          </p>
+
+          <p>
+            The SNMP configuration was next on the list. The problem is that
+            there is no SNMP configuration. The GS308E's web UI — firmware
+            V1.0.1.3 on the v4 hardware revision — has no SNMP menu anywhere.
+            Not hidden under an advanced section. Not behind a setting that
+            needed to be enabled first. Just absent.
+          </p>
+
+          <p>
+            A quick check against Netgear's documentation confirmed it: the
+            GS308Ev4 dropped SNMP support entirely compared to earlier
+            revisions of the same model. The v1 through v3 hardware did
+            support SNMP v2c. The v4 simplified the feature set and removed
+            it. This isn't a firmware issue that a future update might fix —
+            it's a hardware revision difference.
+          </p>
+
+          <p class="callout">
+            The model number being the same across revisions is a known
+            frustration with consumer networking gear. GS308E v3 and GS308E
+            v4 are meaningfully different products with different feature
+            sets, but they share a model number and look identical on the
+            shelf. The revision number is what matters, and it's not always
+            prominently displayed.
+          </p>
+
+          <p>
+            The practical impact is limited. The switch does everything the
+            lab needs it to do — VLAN segmentation, managed port configuration,
+            loop prevention. What it can't do is expose itself to Zabbix for
+            per-port traffic visibility. That's a nice-to-have rather than
+            a requirement, and it's addressable later with a switch that
+            actually supports SNMP if port-level observability becomes
+            important enough to justify it.
+          </p>
+
+          <h2>Documentation corrections</h2>
+
+          <p>
+            Several places in the infrastructure notes had referenced the
+            switch as having SNMP v2c support — that was based on the feature
+            set of the pre-v4 hardware and carried forward without being
+            verified against what actually arrived. Those references are
+            corrected: <code>infrastructure.md</code> now accurately describes
+            the GS308Ev4's feature set, and the Zabbix monitored assets table
+            no longer lists the switch as a pending SNMP target.
+          </p>
+
+          <h2>Where Zabbix stands</h2>
+
+          <p>
+            All five Proxmox nodes are fully monitored — agent installed via
+            Ansible, host objects configured in the frontend, Linux template
+            linked, 606 items collecting. That's the core of what Zabbix was
+            deployed to do: infrastructure state monitoring on the cluster
+            nodes. The switch monitoring gap is noted and honest. OPNsense
+            monitoring via SNMP or its API is still on the list, and there's
+            a clear path to it — OPNsense does expose SNMP — but it wasn't
+            in scope for today.
+          </p>
+
+          <p>
+            The observability stack is in the best shape it's been. Prometheus
+            covers time-series metrics. Grafana turns those into dashboards
+            and alerting. Zabbix handles infrastructure state and availability
+            across the cluster. The gap between where they overlap and where
+            they don't is intentional rather than accidental.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-20-2026.html">← Previous: Connection Reset by Peer</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
