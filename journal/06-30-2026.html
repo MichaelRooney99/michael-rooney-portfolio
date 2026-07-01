@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Two Hours to Spare — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A wildcard cert renewal that failed silently until the real Certbot log revealed the actual cause — a Proxmox-level DNS misconfiguration pointing an LXC at Tailscale's resolver instead of the LAN, unrelated to the Cloudflare token I spent an hour chasing first."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Two Hours to Spare — Michael Rooney" />
+    <meta property="og:description" content="A wildcard cert renewal that failed silently until the real Certbot log revealed the actual cause — a Proxmox-level DNS misconfiguration pointing an LXC at Tailscale's resolver instead of the LAN, unrelated to the Cloudflare token I spent an hour chasing first." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/06-30-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Two Hours to Spare — Michael Rooney" />
+    <meta name="twitter:description" content="A wildcard cert renewal that failed silently until the real Certbot log revealed the actual cause — a Proxmox-level DNS misconfiguration pointing an LXC at Tailscale's resolver instead of the LAN." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/06-30-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-30-2026">June 30, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Two Hours to Spare</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The wildcard cert for *.michaelrooney.dev was set to expire
+            at 2:17 AM. I noticed with about a day of runway left, tried
+            to renew it through NPM the normal way, and got nothing but
+            a generic "Internal Error." No detail, no hint. What followed
+            was an hour of reasonably chasing the wrong thing before the
+            actual log told me what was really going on — and it had
+            nothing to do with certificates at all.
+          </p>
+
+          <h2>The obvious suspect</h2>
+
+          <p>
+            This cert renews via a DNS-01 challenge through Cloudflare,
+            which means the first thing worth checking is always the API
+            token — permissions, scope, whether it's stale. That's exactly
+            where I started. Checked the token's permission type, confirmed
+            it was <code>Zone.DNS:Edit</code> and not the easy-to-mistake
+            <code>Zone.Zone:Edit</code>, confirmed it was scoped to the
+            right zone, regenerated it as a precaution, dropped the new one
+            into NPM. Still failed. Same generic error.
+          </p>
+
+          <p>
+            At that point the reasonable move was to stop guessing and go
+            read the actual log instead of continuing to reason about
+            NPM's UI from the outside.
+          </p>
+
+          <h2>What the log actually said</h2>
+
+          <p>
+            NPM runs Certbot inside its own LXC, and the real output lives
+            at <code>/data/logs/letsencrypt.log</code> on that container —
+            not anywhere NPM's UI surfaces directly. The traceback wasn't
+            subtle once I was looking at it:
+          </p>
+
+          <pre><code>socket.gaierror: [Errno -3] Temporary failure in name resolution
+Failed to resolve 'acme-v02.api.letsencrypt.org'</code></pre>
+
+          <p>
+            Certbot never got far enough to even attempt the Cloudflare
+            challenge. It couldn't resolve Let's Encrypt's own API
+            endpoint. Every minute I'd spent on the token was chasing a
+            step the process never reached.
+          </p>
+
+          <p class="callout">
+            A generic "Internal Error" from a wrapper UI tells you almost
+            nothing about where in the process something actually broke.
+            The instinct to reason from the most likely cause — the
+            Cloudflare token, in this case — isn't wrong, but it's still
+            a theory. The log is the test. I should have pulled it first
+            and saved the hour.
+          </p>
+
+          <h2>Chasing DNS resolution to its actual source</h2>
+
+          <p>
+            <code>cat /etc/resolv.conf</code> on the NPM LXC explained
+            everything:
+          </p>
+
+          <pre><code># --- BEGIN PVE ---
+search taild13874.ts.net
+nameserver 100.100.100.100
+nameserver fd7a:115c:a1e0::53
+# --- END PVE ---</code></pre>
+
+          <p>
+            The LXC's DNS was pointed entirely at Tailscale's MagicDNS
+            resolver — <code>100.100.100.100</code> — instead of OPNsense
+            and Unbound at <code>10.10.10.1</code>. Nothing about
+            certificates, tokens, or Cloudflare was ever the problem. The
+            container simply couldn't resolve any external hostname,
+            Let's Encrypt included.
+          </p>
+
+          <p>
+            The <code># --- BEGIN PVE ---</code> marker is the tell —
+            that block is injected automatically by Proxmox based on the
+            LXC's DNS Domain setting in the Datacenter UI, not something
+            that lives durably inside the container itself. Editing
+            <code>resolv.conf</code> by hand fixes the symptom for exactly
+            as long as the container stays up. The actual setting lives
+            one layer up, at the Proxmox host level.
+          </p>
+
+          <h2>Fix now, fix for real</h2>
+
+          <p>
+            With expiry a couple hours out, the immediate move was the
+            manual one — overwrite <code>resolv.conf</code> with
+            <code>nameserver 10.10.10.1</code> and retry the cert
+            immediately. It worked cleanly: DNS resolved, the Cloudflare
+            DNS-01 challenge completed, a new wildcard cert issued with
+            time to spare.
+          </p>
+
+          <p>
+            That alone wasn't enough to actually close this out, though.
+            A manual edit to a file that Proxmox regenerates on every
+            container start is a fix with an expiration date of its own —
+            next reboot, same failure, probably discovered at a worse time
+            than this one. The real fix was in Proxmox: Datacenter → the
+            NPM LXC → DNS Domain, nameserver corrected to
+            <code>10.10.10.1</code> at the source Proxmox actually reads
+            from.
+          </p>
+
+          <p class="callout">
+            The manual fix and the real fix aren't the same thing, and
+            it's worth being honest with yourself about which one you've
+            actually done. Editing a generated file buys time. Fixing the
+            thing that generates it is what makes the problem stay fixed.
+          </p>
+
+          <h2>Rebuilding rather than renewing</h2>
+
+          <p>
+            Rather than keep fighting the existing cert's renewal state
+            once DNS was working again, I issued a fresh certificate
+            outright — same domains, ECDSA P-256, clean DNS-01 validation
+            against the newly-scoped Cloudflare token. Kept the old cert
+            alive and in place while migrating every proxy host over to
+            the new one individually — Grafana, Vaultwarden, Zabbix,
+            Homepage, Portainer, Prometheus, and the rest — confirming
+            each one loaded correctly before moving to the next. Only
+            deleted the old cert once nothing referenced it anymore.
+          </p>
+
+          <p>
+            That order matters more than it sounds like it should. If the
+            new cert had turned out to have its own problem, the old one
+            — expiring but still valid in the moment — would have kept
+            everything online while I sorted it out. Migrating everything
+            at once and deleting the old cert immediately would have
+            traded a slow, controlled process for an all-or-nothing bet.
+          </p>
+
+          <h2>What actually happened here</h2>
+
+          <p>
+            No part of this was a certificate problem. It was a DNS
+            problem wearing a certificate problem's clothes, and the
+            token investigation — reasonable as a first theory — turned
+            out to be a detour because I hadn't looked at the actual
+            evidence yet. Somewhere along the way this LXC's Proxmox-level
+            DNS setting got pointed at Tailscale's resolver instead of the
+            LAN, probably during the Tailscale install itself, and it sat
+            unnoticed because nothing failed until the one moment a
+            fully-qualified external hostname actually needed resolving.
+          </p>
+
+          <p>
+            That's a familiar shape from the Network+ troubleshooting
+            material — form a theory, test it, and when it's wrong, go
+            get better evidence instead of forming a second theory from
+            the same vantage point. The log was sitting right there the
+            entire time. It just took a wrong turn through Cloudflare's
+            dashboard to remember to go read it.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-27-2026.html">← Previous: 06-27-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
