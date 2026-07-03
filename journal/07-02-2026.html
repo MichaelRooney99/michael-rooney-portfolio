@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teaching the Lab to Talk Trash — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A pure-fun side project — a small Flask relay that adds snark to Grafana alerts and Proxmox/PBS notifications before forwarding them to Discord, plus an SSH lockout on a freshly provisioned LXC and a first look at Proxmox's Handlebars webhook templating."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Teaching the Lab to Talk Trash — Michael Rooney" />
+    <meta property="og:description" content="A pure-fun side project — a small Flask relay that adds snark to Grafana alerts and Proxmox/PBS notifications before forwarding them to Discord, plus an SSH lockout on a freshly provisioned LXC and a first look at Proxmox's Handlebars webhook templating." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-02-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Teaching the Lab to Talk Trash — Michael Rooney" />
+    <meta name="twitter:description" content="A pure-fun side project — a small Flask relay that adds snark to Grafana alerts and Proxmox/PBS notifications before forwarding them to Discord, plus an SSH lockout on a freshly provisioned LXC and a first look at Proxmox's Handlebars webhook templating." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-02-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-02-2026">July 2, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Teaching the Lab to Talk Trash</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Not every session needs to move the capstone forward or check a box
+            on a cert roadmap. This one was purely for the fun of it — the kind
+            of homelab tinkering that exists because it's funny, not because
+            anything needed it. It started with a real question — do I have the
+            hardware to run a local AI agent — and ended somewhere completely
+            different.
+          </p>
+
+          <h2>The local AI detour</h2>
+
+          <p>
+            The honest answer on local AI turned out to be: not comfortably,
+            not yet. Nothing in the current five-node fleet has a discrete
+            GPU, and CPU-only inference on even a well-specced node lands
+            somewhere around 5-15 tokens per second for a small quantized
+            model — usable for poking at, not something you'd want to actually
+            use. The real unlock is a Lenovo Tiny with a GPU riser — the
+            P3 or P360 Tiny specifically, since those are the only Tiny
+            models with a PCIe slot for a low-profile card — paired with
+            something like an RTX A1000. That's a real project, but it's a
+            hardware purchase, not a today project. Filed away for later.
+          </p>
+
+          <h2>What I actually built instead</h2>
+
+          <p>
+            Proxmox already emails me when backups finish. Informative,
+            technically. Also completely lifeless — a green checkmark and a
+            timestamp, the same as every other backup email anyone has ever
+            gotten. The idea that stuck: what if the lab just roasted me
+            instead of quietly informing me. Grafana already fires alerts
+            when a node goes down or the UPS switches to battery. Proxmox
+            and PBS already fire notifications on backup and maintenance
+            jobs. All of that could route through one small relay that adds
+            a line of personality before forwarding the real details to
+            Discord.
+          </p>
+
+          <p>
+            Roastbot is a small Flask app — two routes, a dictionary of
+            snarky lines keyed by event type, and a POST to a Discord
+            webhook. Nothing clever about the code. The interesting part
+            was everything around it.
+          </p>
+
+          <h2>Where it lives</h2>
+
+          <p>
+            Its own small unprivileged LXC on Shasta — 1 core, 512MB RAM,
+            8GB disk, the same footprint as most of the other single-purpose
+            LXCs in the fleet. Node 0 was never a real option here; the
+            NIC passthrough architecture there means inter-LXC traffic
+            hairpins through OPNsense, which is exactly the wrong property
+            for something that needs to reliably receive webhooks. Shasta
+            already hosts the Grafana/Prometheus stack, so co-locating
+            keeps the alert source and the relay on the same failure
+            domain rather than creating a situation where a Shasta outage
+            takes down Grafana but leaves the relay orphaned, or vice versa.
+          </p>
+
+          <h2>The SSH lockout</h2>
+
+          <p>
+            First real snag, and a small one: couldn't SSH into the fresh
+            LXC at all. <code>grep PermitRootLogin /etc/ssh/sshd_config</code>
+            showed a commented-out line —
+            <code>#PermitRootLogin prohibit-password</code>. Worth writing
+            down because it's a subtle trap: a commented line isn't a
+            no-op, it's just the file's default stub. OpenSSH's actual
+            compiled-in default is also <code>prohibit-password</code>,
+            so the setting was in effect either way. Root login was never
+            blocked — it just required a key, and this LXC didn't have one
+            deployed yet since it was hand-provisioned outside the normal
+            Ansible flow that distributes the fleet's ed25519 key
+            everywhere else.
+          </p>
+
+          <p class="callout">
+            The fix was console access — <code>pct enter</code> from the
+            Shasta host — and manually dropping a public key into
+            <code>/root/.ssh/authorized_keys</code>. No config file
+            changes needed. The lockout wasn't a misconfiguration, it was
+            a missing key on a host that skipped the usual provisioning
+            path. Worth deciding later whether to bring this LXC into the
+            Ansible inventory properly so it stops being the one snowflake
+            host in the fleet.
+          </p>
+
+          <h2>Proxmox's webhook templating</h2>
+
+          <p>
+            Wiring Grafana up was the easy half — its default webhook
+            payload already matches what a receiver would expect: a
+            top-level <code>alerts</code> array with status, labels, and
+            annotations per alert. No templating needed, just point it at
+            the relay and go.
+          </p>
+
+          <p>
+            Proxmox VE and PBS were a different story, in a way I hadn't
+            touched before. Both use Handlebars templating for webhook
+            targets — the URL, headers, and body can all reference
+            <code>{{ title }}</code>, <code>{{ message }}</code>,
+            <code>{{ severity }}</code>, and a <code>{{ fields.&lt;name&gt; }}</code>
+            namespace for event-specific metadata. The body template ended
+            up being:
+          </p>
+
+          <pre><code>{
+  "hostname": "{{#if fields.hostname}}{{ fields.hostname }}{{else}}{{ escape title }}{{/if}}",
+  "message": "{{ escape message }}",
+  "severity": "{{ severity }}"
+}</code></pre>
+
+          <p>
+            The <code>escape</code> helper matters more than it looks —
+            backup messages can contain newlines, and a raw newline inside
+            a JSON string quietly breaks the payload. The
+            <code>{{#if}}</code> fallback covers notification types where
+            <code>fields.hostname</code> isn't populated, falling back to
+            the title instead so nothing arrives blank.
+          </p>
+
+          <p>
+            One thing that only became obvious after both PVE and PBS were
+            wired up: they're not reporting the same events. The familiar
+            "backup done" email comes from PVE's <code>vzdump</code> job
+            notifications. PBS runs its own separate set — garbage
+            collection, prune, verify, sync — so the PBS side of Roastbot
+            ended up roasting a completely different flavor of maintenance
+            noise than expected, not duplicate backup-completion messages.
+            Not a problem, just not what I assumed going in.
+          </p>
+
+          <h2>What it looks like now</h2>
+
+          <p>
+            Three sources — Grafana, PVE, PBS — all routing into one
+            Discord channel through a single small relay. Backup emails
+            are still informative. They're also now occasionally rude
+            about it. Grafana's three existing alert rules (Node Offline,
+            UPS on Battery, Shutdown Warning) route directly to the
+            <code>roastbot</code> contact point. Both Proxmox notification
+            targets sit alongside the existing email target in each
+            system's default matcher, so nothing that used to work stopped
+            working — Roastbot just showed up as a second, funnier
+            delivery path.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            The honest todo: bring this LXC into the Ansible inventory so
+            it's not the one hand-provisioned host in an otherwise fully
+            managed fleet. Beyond that, nothing — this one was never meant
+            to be a real project. Local AI is still the actual next
+            hardware purchase whenever that budget lines up. This was just
+            the fun in between.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-30-2026.html">← Previous: 06-30-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
