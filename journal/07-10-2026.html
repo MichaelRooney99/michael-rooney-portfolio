@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Giving the Capstone a Real Home — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Standing up Dega as an isolated VLAN 20 node built specifically to host the capstone status page — retargeted Ansible playbooks, scoped firewall pinholes for the proxy's outbound calls, and the VM-vs-LXC decision that came from taking the isolation seriously."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Giving the Capstone a Real Home — Michael Rooney" />
+    <meta property="og:description" content="Standing up Dega as an isolated VLAN 20 node built specifically to host the capstone status page — retargeted Ansible playbooks, scoped firewall pinholes for the proxy's outbound calls, and the VM-vs-LXC decision that came from taking the isolation seriously." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-10-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Giving the Capstone a Real Home — Michael Rooney" />
+    <meta name="twitter:description" content="Standing up Dega as an isolated VLAN 20 node built specifically to host the capstone status page — retargeted Ansible playbooks, scoped firewall pinholes for the proxy's outbound calls, and the VM-vs-LXC decision that came from taking the isolation seriously." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-10-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-10-2026">July 10, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Giving the Capstone a Real Home</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The capstone deployment plan on paper — a Docker LXC on Shasta 
+            at <code>10.10.10.110</code> — was never wrong, exactly. It was 
+            just the default placement, not a deliberate one. Today that 
+            plan got replaced with something more intentional: a sixth 
+            M920Q, reviving the Dega name, built from the start as an 
+            isolated home for the status page rather than one more service 
+            folded into the existing Docker host.
+          </p>
+
+          <h2>Not a general-purpose node</h2>
+
+          <p>
+            The distinction that shaped everything else today: Dega isn't 
+            <em>a</em> place the capstone could run. It's the place built 
+            specifically because the capstone needed one. Once framed that 
+            way, putting it on VLAN 20 stopped being an interesting 
+            architectural experiment and became the obvious answer — a 
+            public-facing status page reachable from the internet via a 
+            Cloudflare tunnel has no business sharing a subnet with 
+            Vaultwarden or the NUT server. The isolation isn't a feature 
+            bolted on afterward. It's the reason the node exists on its 
+            own subnet at all.
+          </p>
+
+          <h2>Firewall rules — scoped to what the proxy actually needs</h2>
+
+          <p>
+            The tricky part of isolating a node that's supposed to host 
+            something is remembering that isolation cuts both directions. 
+            VLAN 20's existing rule blocks that subnet from reaching 
+            <code>10.10.10.0/24</code> outright — which would silently 
+            break the capstone's entire reason for existing, since the 
+            Express proxy makes outbound calls to three internal services 
+            on every poll cycle:
+          </p>
+
+          <ul>
+            <li><code>10.10.10.55:8006</code> — Proxmox API (Ankhh)</li>
+            <li><code>10.10.10.105:9090</code> — Prometheus</li>
+            <li><code>10.10.10.108:8090</code> — Zabbix JSON-RPC</li>
+          </ul>
+
+          <p>
+            Rather than opening VLAN 20 back up broadly, each of those got 
+            its own narrow allow rule, scoped to the capstone VM's specific 
+            IP rather than the whole subnet, sitting above the existing 
+            block rule so OPNsense evaluates them first. Ansible gets the 
+            same treatment — one rule, port 22 only, control node to Dega. 
+            Kuma still doesn't get a pinhole; Prometheus and Zabbix already 
+            cover availability monitoring for this node the same way they 
+            do for the rest of the fleet, so a third path through the 
+            firewall would only be adding an opening, not adding coverage.
+          </p>
+
+          <p class="callout">
+            The failure mode I was specifically trying to avoid here: 
+            <code>Promise.allSettled</code> in the capstone's services 
+            facade swallows failed adapters silently by design — partial 
+            visibility over a blank page. That's the right behavior for 
+            the app, but it means a firewall misconfiguration and a real 
+            bug look identical from the UI. If the Proxmox category just 
+            vanished after deployment, I wanted the playbook to have 
+            already ruled the network layer out before I went looking 
+            anywhere else.
+          </p>
+
+          <p>
+            To make that concrete, the provisioning playbook ends with 
+            three <code>wait_for</code> checks — Dega reaching Ankhh, 
+            Prometheus, and Zabbix on their respective ports — before 
+            considering the node ready. If those pass, any future 
+            "category disappeared" debugging starts from the assumption 
+            that it's a code or permissions issue, the same pattern from 
+            the Session 4 capstone debugging, not a network one.
+          </p>
+
+          <h2>Ansible — retargeting, not rebuilding</h2>
+
+          <p>
+            The playbooks from the original Shasta-hosted plan didn't need 
+            new logic, just a new destination. The inventory group renamed 
+            from a placeholder to <code>capstone_host</code>, pointed at 
+            Dega's VM IP instead of a Shasta LXC. 
+            <code>capstone_provision.yml</code> — Docker and cloudflared 
+            install — needed the three verify tasks added but nothing else 
+            changed. <code>capstone_deploy.yml</code> needed literally 
+            nothing; it clones the repo, writes the proxy's <code>.env</code> 
+            from Vault, and brings up the Compose stack regardless of which 
+            node <code>capstone_host</code> resolves to. That's the value of 
+            having built these as inventory-driven playbooks from the start 
+            rather than hardcoding a target — the actual placement decision 
+            turned out to be swappable without touching deployment logic 
+            at all.
+          </p>
+
+          <h2>VM over LXC, and why that decision held</h2>
+
+          <p>
+            The Docker workload itself isn't running yet, but the VM-vs-LXC 
+            question got settled before any of the above. Every existing 
+            Docker host in the lab uses a privileged LXC, which works fine 
+            when the host isn't exposed externally — but a privileged LXC 
+            shares the host kernel with Proxmox, and Dega's entire purpose 
+            is reducing blast radius for something that's reachable from 
+            the internet. Matching the existing pattern here would have 
+            undercut the reason the node exists in the first place. Going 
+            with a VM instead was the one place today where consistency 
+            with the rest of the fleet was the wrong instinct.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            Dega is live on VLAN 20 at <code>10.10.20.54</code>, in 
+            Ansible inventory as a normal <code>proxmox_nodes</code> 
+            member, reporting into Prometheus and Zabbix like the rest 
+            of the cluster. The three outbound firewall pinholes for the 
+            capstone's data sources are in place and will get verified 
+            automatically the moment the provisioning playbook runs 
+            against the VM. The provisioning and deploy playbooks are 
+            retargeted and waiting.
+          </p>
+
+          <h2>What's next</h2>
+
+          <ul>
+            <li>Create the Docker VM on Dega</li>
+            <li>Run <code>capstone_provision.yml</code> against it — Docker, cloudflared, and the three connectivity checks</li>
+            <li>Run <code>capstone_deploy.yml</code> — clone, write the proxy env from Vault, bring up the Compose stack</li>
+            <li>Configure the public hostname route in the Cloudflare Zero Trust dashboard, pointing at the proxy port</li>
+            <li>Confirm <code>status.michaelrooney.dev</code> resolves and all four data sources render through the new firewall rules</li>
+          </ul>
+
+          <p>
+            Most of today was rework rather than new ground — same 
+            playbooks, retargeted; same firewall rule pattern, applied 
+            with narrower scope. But getting the placement decision right 
+            before the app is actually running there is worth more than 
+            getting it running quickly somewhere that turns out to be 
+            wrong.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-09-2026.html">← Previous: 07-09-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
