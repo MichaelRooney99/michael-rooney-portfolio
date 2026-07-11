@@ -56,7 +56,7 @@
           </p>
           
           <p>
-            The isolation was the entire point of this deployment. Over the past month, I have been building out my capstone project—a public-facing infrastructure status page using React, Vite, and TanStack Query. Because the frontend needs to fetch data from the Proxmox API, I had to build a Node/Express proxy backend to securely hold the API token without exposing it to the browser. Since this status page will be exposed to the public internet via a Cloudflare Zero Trust tunnel, I needed a secure, quarantined environment to host the Docker containers. If the public-facing proxy is ever compromised, the attacker is trapped on VLAN 20, walled off from the main management network.
+            The isolation is deliberate — this node exists to host the capstone status page once it's public via a Cloudflare tunnel, and a public-facing box has no business sitting on the same subnet as Vaultwarden or the NUT server. That reasoning gets its own writeup tomorrow. Today was just getting the node itself into a healthy, fleet-managed state before anything gets deployed on it.
           </p>
 
           <p>

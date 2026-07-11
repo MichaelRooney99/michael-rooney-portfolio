@@ -54,40 +54,19 @@
         <div class="prose">
 
           <p>
-            The capstone deployment plan on paper — a Docker LXC on Shasta 
-            at <code>10.10.10.110</code> — was never wrong, exactly. It was 
-            just the default placement, not a deliberate one. Today that 
-            plan got replaced with something more intentional: a sixth 
-            M920Q, reviving the Dega name, built from the start as an 
-            isolated home for the status page rather than one more service 
-            folded into the existing Docker host.
+            Yesterday's session got Dega itself into shape — online, in Ansible inventory, NUT config sorted out after the <code>MINSUPPLIES</code> bug. What it didn't have yet was any of the actual capstone-specific wiring: firewall rules for the proxy's outbound calls, a retargeted deployment path, or a real answer to how the Docker workload should be isolated. That's today's session.
           </p>
 
-          <h2>Not a general-purpose node</h2>
+          <h2>Isolation cuts both directions</h2>
 
           <p>
-            The distinction that shaped everything else today: Dega isn't 
-            <em>a</em> place the capstone could run. It's the place built 
-            specifically because the capstone needed one. Once framed that 
-            way, putting it on VLAN 20 stopped being an interesting 
-            architectural experiment and became the obvious answer — a 
-            public-facing status page reachable from the internet via a 
-            Cloudflare tunnel has no business sharing a subnet with 
-            Vaultwarden or the NUT server. The isolation isn't a feature 
-            bolted on afterward. It's the reason the node exists on its 
-            own subnet at all.
-          </p>
-
-          <h2>Firewall rules — scoped to what the proxy actually needs</h2>
-
-          <p>
-            The tricky part of isolating a node that's supposed to host 
-            something is remembering that isolation cuts both directions. 
-            VLAN 20's existing rule blocks that subnet from reaching 
-            <code>10.10.10.0/24</code> outright — which would silently 
-            break the capstone's entire reason for existing, since the 
-            Express proxy makes outbound calls to three internal services 
-            on every poll cycle:
+            The tricky part of a node that's isolated by design and also 
+            needs to host something is remembering that the isolation 
+            works both ways. VLAN 20's existing rule blocks that subnet 
+            from reaching <code>10.10.10.0/24</code> outright — which 
+            would silently break the capstone's entire reason for 
+            existing, since the Express proxy makes outbound calls to 
+            three internal services on every poll cycle:
           </p>
 
           <ul>
