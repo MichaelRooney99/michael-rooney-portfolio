@@ -179,11 +179,11 @@
           </p>
 
           <p>
-            Rotating the credential and adding <code>no_log: true</code> to
-            the task are both still open as of writing this — flagged
-            explicitly rather than assumed done, since assuming a fix
-            happened because it was discussed is exactly the kind of gap
-            that turns into a real incident later.
+            Rotated the credential and added <code>no_log: true</code> to
+            the task before moving on — flagged explicitly as open until
+            both were actually confirmed done, rather than assumed fixed
+            just because they'd been discussed. That distinction matters:
+            a conversation about a fix isn't the fix.
           </p>
 
           <h2>Live, but quietly incomplete</h2>
@@ -249,6 +249,13 @@
             throughout: the browser only ever talks to nginx, which is the
             only thing the tunnel exposes and the only thing that needs to
             be trusted from outside.
+          </p>
+
+          <p>
+            Both loose ends from the credential leak are closed now too —
+            the Zabbix password rotated, <code>no_log: true</code> confirmed
+            in the playbook. Deployment day is actually done, not just
+            looking done.
           </p>
 
         </div>
