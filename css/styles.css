@@ -961,6 +961,19 @@ button:focus-visible {
   color: var(--text);
   background: rgba(255, 255, 255, 0.01);
 }
+
+.capstone-hours-table td a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.capstone-hours-table td a:hover,
+.capstone-hours-table td a:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 /* ─────────────────────────────────────────
    6. Capstone project
 ───────────────────────────────────────── */
