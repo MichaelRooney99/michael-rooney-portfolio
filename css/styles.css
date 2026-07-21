@@ -158,6 +158,44 @@ a.logo {
 }
 
 /* ─────────────────────────────────────────
+   NAV: MOBILE TOGGLE
+───────────────────────────────────────── */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 110;
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ─────────────────────────────────────────
    LAYOUT
 ───────────────────────────────────────── */
 section {
@@ -256,8 +294,14 @@ p {
   padding: 3rem 0;
   border-top: 1px solid var(--border);
   position: relative;
-  cursor: default;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   transition: background 0.3s;
+}
+
+.project:hover {
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .project:last-child {
@@ -312,7 +356,9 @@ p {
   align-self: center;
 }
 
-.project-link:hover {
+.project-link:hover,
+.project:hover .project-link,
+.project:focus-visible .project-link {
   color: var(--text);
   border-color: var(--accent);
   background: rgba(200, 98, 42, 0.07);
@@ -876,8 +922,33 @@ button:focus-visible {
     padding: 1.2rem 1.5rem;
   }
 
+  .nav-toggle {
+    display: flex;
+  }
+
   .nav ul {
-    gap: 1.5rem;
+    position: fixed;
+    inset: 0 0 0 auto;
+    height: 100vh;
+    width: min(75vw, 300px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2.25rem;
+    padding: 2rem 2.5rem;
+    margin: 0;
+    background: var(--bg-raised);
+    border-left: 1px solid var(--border);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .nav ul.open {
+    transform: translateX(0);
+  }
+
+  .nav a {
+    font-size: 0.95rem;
   }
 
   section {
@@ -899,7 +970,9 @@ button:focus-visible {
   }
 
   .project-link {
-    display: none;
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 0.5rem;
   }
 
   .filter-bar,
@@ -974,6 +1047,7 @@ button:focus-visible {
   color: var(--accent);
   border-color: var(--accent);
 }
+
 /* ─────────────────────────────────────────
    6. Capstone project
 ───────────────────────────────────────── */
