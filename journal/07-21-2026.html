@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chasing a Blue Line That Wasn't There — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A pass through the site's mobile experience — full-card project links that surfaced a real hidden-link bug, a nav hamburger rolled out across all 33 pages, a missing data-label attribute, and a debugging detour into a blue underline that turned out to be a stale phone cache."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Chasing a Blue Line That Wasn't There — Michael Rooney" />
+    <meta property="og:description" content="A pass through the site's mobile experience — full-card project links that surfaced a real hidden-link bug, a nav hamburger rolled out across all 33 pages, a missing data-label attribute, and a debugging detour into a blue underline that turned out to be a stale phone cache." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-21-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Chasing a Blue Line That Wasn't There — Michael Rooney" />
+    <meta name="twitter:description" content="A pass through the site's mobile experience — full-card project links, a nav hamburger across all 33 pages, a missing data-label attribute, and a debugging detour into a blue underline that turned out to be a stale phone cache." />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-21-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-21-2026">July 21, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Chasing a Blue Line That Wasn't There</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Today's session started small — a contrast fix on the capstone
+            hours-log links — and kept surfacing one more real problem each
+            time I went looking for the next one. By the end it touched
+            nearly every page on the site, and the last hour was spent
+            debugging something that turned out not to be a bug at all.
+          </p>
+
+          <h2>Small fix first</h2>
+
+          <p>
+            The capstone hours-log table's session links were unstyled
+            <code>&lt;a&gt;</code> tags, falling back to browser-default
+            blue on a dark background. Gave them <code>var(--text)</code>
+            by default with a <code>border-bottom</code>, shifting to
+            <code>var(--accent)</code> on hover — matching the treatment
+            <code>.back-link</code> and <code>.contact-links a</code>
+            already use elsewhere on the site.
+          </p>
+
+          <p>
+            While there, added a banner below the capstone hero linking out
+            to <code>status.michaelrooney.dev</code> now that it's actually
+            live. First pass was a full <code>.journal-banner</code> block;
+            second pass folded it into the hero itself as a
+            <code>.project-link</code> pill next to the existing copy,
+            since a whole separate bordered section was pushing everything
+            below the fold for no real gain over one inline button.
+          </p>
+
+          <h2>Cards that only looked clickable</h2>
+
+          <p>
+            The actual work started with a simple ask: make each project
+            cell the click target instead of a separate "View Project"
+            link. Converting <code>&lt;article class="project"&gt;</code>
+            plus a sibling <code>&lt;a class="project-link"&gt;</code> into
+            a single wrapping <code>&lt;a class="project"&gt;</code> — same
+            pattern <code>.entry-list a.entry</code> already uses — turned
+            up something worse than a styling gap.
+          </p>
+
+          <p class="callout">
+            <code>.project-link { display: none; }</code> at the 768px
+            breakpoint had been hiding the <em>only</em> link on the whole
+            card on mobile. Project cards weren't just under-styled on
+            phones — they were completely untappable, silently, with
+            nothing in the layout suggesting anything was missing.
+          </p>
+
+          <p>
+            Making the whole card the link fixed that as a side effect.
+            Rewrote the mobile rule to keep the pill visible and stack it
+            full-width below the content instead of hiding it, added
+            <code>aria-label</code>s per card since the visible text is
+            now split across a title, meta line, and pill rather than one
+            link's contents, and deliberately left the
+            <code>.magnetic</code> hover effect off the new card-sized
+            links — it's tuned for small buttons, and stretching it over
+            a whole card would read as jittery rather than subtle.
+          </p>
+
+          <h2>A second bug, found by accident</h2>
+
+          <p>
+            Scanning for other mobile gaps while in the CSS turned up
+            <code>.skills-table</code>'s mobile view — headers hide below
+            768px and category labels are meant to render via
+            <code>content: attr(data-label)</code> next to each value.
+            Not one <code>&lt;td&gt;</code> anywhere in the About section,
+            or the capstone hours table sharing the same class, actually
+            had a <code>data-label</code> attribute set. On mobile both
+            tables were rendering as unlabeled rows with dead space where
+            the category name should be.
+          </p>
+
+          <p>
+            Added the labels to the About section table directly; flagged
+            the same fix for the capstone hours table since that file
+            lives outside this project's local copy.
+          </p>
+
+          <h2>One collapse, thirty-three files</h2>
+
+          <p>
+            Nav mobile collapse was next — a hamburger toggle with three
+            bars that morph into an ✕, a slide-in panel from the right
+            using the existing <code>--bg-raised</code> and
+            <code>--border</code> tokens, closes on link click or
+            <kbd>Escape</kbd>. Built and verified on
+            <code>index.html</code> and
+            <code>portfolio-showcase.html</code> first, then the actual
+            ask arrived: do the whole site.
+          </p>
+
+          <p>
+            Thirty-one more pages share the same nav markup — the logo
+            link, then straight into <code>&lt;ul&gt;</code>. A short
+            Python script matched that pattern and inserted the toggle
+            button plus an <code>id="primary-nav"</code> on the list
+            across every file in one pass. Thirty of thirty-one matched
+            cleanly. The one holdout, <code>07-09-2026.html</code>, used
+            single-quoted HTML attributes instead of double —
+            <code>class='nav'</code> instead of
+            <code>class="nav"</code> — so the regex silently skipped it
+            rather than failing loudly. Caught it by diffing the file
+            count against the toggle count instead of assuming the batch
+            run was complete, and patched it by hand.
+          </p>
+
+          <p>
+            Diffed a sample of the batch output against the originals
+            afterward to confirm the change set was exactly what it
+            should be — the <code>&lt;nav&gt;</code> block, nothing
+            else, no incidental reformatting bleeding into entry prose
+            or metadata.
+          </p>
+
+          <h2>The blue line that wasn't</h2>
+
+          <p>
+            The last stretch of the session was a debugging story rather
+            than a build. A screenshot showed random phrases — the tail
+            end of a paragraph, a project number, a card title — underlined
+            in blue with no shared element or class between them. Every
+            theory that would explain a real CSS bug (a missing
+            <code>text-decoration: none</code>, a malformed nested
+            <code>&lt;a&gt;</code>) predicts the <em>entire</em> linked
+            region rendering the same way, not scattered fragments. That
+            pointed at something injecting styling outside the page's own
+            CSS — a browser extension doing grammar or style checking.
+          </p>
+
+          <p>
+            A follow-up screenshot from a private browsing window ruled
+            that out — the underlines were still there, extensions
+            disabled. Real bug, confirmed. Except the generated markup for
+            the affected card, checked directly, was structurally
+            identical to the card rendering cleanly right next to it.
+            Nothing in the code explained the difference.
+          </p>
+
+          <p class="callout">
+            Turned out to be neither theory: the phone was still serving a
+            cached copy of the site from before the deploy finished
+            propagating. Confirmed once the cache cleared and the page
+            reloaded clean. A frustrating one to chase, but a useful
+            reminder that "confirmed in a private window" rules out
+            extensions specifically — it doesn't rule out caching, which
+            behaves the same way whether or not the tab has your saved
+            logins in it.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            Every project card on the site is now a full click target with
+            the mobile tap-target bug fixed as a byproduct, the About
+            section's skills table has correct mobile labels, and all 33
+            pages share one working hamburger nav. The capstone hours
+            table still needs the same <code>data-label</code> treatment
+            applied by hand, since it isn't part of this project's local
+            files.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-19-2026.html">← Previous: 07-19-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
