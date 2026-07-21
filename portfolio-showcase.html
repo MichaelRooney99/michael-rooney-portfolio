@@ -26,7 +26,12 @@
     <header>
       <nav class="nav" role="navigation" aria-label="Primary">
         <a href="index.html" class="logo" aria-label="Home">MR</a>
-        <ul>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
           <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
           <li><a href="index.html#about">About</a></li>
           <li><a href="journal.html">Journal</a></li>
@@ -59,7 +64,13 @@
 
         <div class="stagger">
 
-          <article class="project">
+          <a
+              href="https://michaelrooney99.github.io/quickbites-kiosk/"
+              class="project"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Quick Bites Kiosk project"
+            >
             <span class="project-num">01</span>
             <div class="project-content">
               <span class="project-meta">Web Application</span>
@@ -69,15 +80,16 @@
                 for speed, clarity, and usability.
               </p>
             </div>
-            <a
-              href="https://michaelrooney99.github.io/quickbites-kiosk/"
-              class="project-link magnetic"
+            <span class="project-link">View Project</span>
+          </a>
+
+          <a
+              href="https://michaelrooney99.github.io/task-manager/"
+              class="project"
               target="_blank"
               rel="noopener noreferrer"
-            >View Project</a>
-          </article>
-
-          <article class="project">
+              aria-label="View Task Management App project"
+            >
             <span class="project-num">02</span>
             <div class="project-content">
               <span class="project-meta">React / TypeScript</span>
@@ -87,15 +99,16 @@
                 persistent state, and scalable architecture.
               </p>
             </div>
-            <a
-              href="https://michaelrooney99.github.io/task-manager/"
-              class="project-link magnetic"
+            <span class="project-link">View Project</span>
+          </a>
+
+          <a
+              href="https://michaelrooney99.github.io/angular-components-s26/"
+              class="project"
               target="_blank"
               rel="noopener noreferrer"
-            >View Project</a>
-          </article>
-
-          <article class="project">
+              aria-label="View Angular Components project"
+            >
             <span class="project-num">03</span>
             <div class="project-content">
               <span class="project-meta">Angular / JavaScript / TypeScript</span>
@@ -105,15 +118,16 @@
                 Designed independently by fellow students and myself as part of a front-end development course.
               </p>
             </div>
-            <a
-              href="https://michaelrooney99.github.io/angular-components-s26/"
-              class="project-link magnetic"
+            <span class="project-link">View Project</span>
+          </a>
+
+          <a
+              href="https://michaelrooney99.github.io/react-components-s26/"
+              class="project"
               target="_blank"
               rel="noopener noreferrer"
-            >View Project</a>
-          </article>
-
-          <article class="project">
+              aria-label="View React Components project"
+            >
             <span class="project-num">04</span>
             <div class="project-content">
               <span class="project-meta">React / JavaScript / TypeScript</span>
@@ -123,15 +137,16 @@
                 Designed independently by fellow students and myself as part of a front-end development course.
               </p>
             </div>
-            <a
-              href="https://michaelrooney99.github.io/react-components-s26/"
-              class="project-link magnetic"
+            <span class="project-link">View Project</span>
+          </a>
+
+          <a
+              href="https://michaelrooney99.github.io/WillowGardens/"
+              class="project"
               target="_blank"
               rel="noopener noreferrer"
-            >View Project</a>
-          </article>
-
-          <article class="project">
+              aria-label="View Willow Gardens — Bootstrap project"
+            >
             <span class="project-num">05</span>
             <div class="project-content">
               <span class="project-meta">HTML / Bootstrap 5</span>
@@ -142,15 +157,16 @@
                 tips, and accessible navigation across four pages.
               </p>
             </div>
-            <a 
-              href="https://michaelrooney99.github.io/WillowGardens/"
-              class="project-link magnetic"
+            <span class="project-link">View Project</span>
+          </a>
+
+          <a
+              href="https://michaelrooney99.github.io/WillowGardensTW/"
+              class="project"
               target="_blank"
               rel="noopener noreferrer"
-            >View Project</a>
-          </article>
-
-          <article class="project">
+              aria-label="View Willow Gardens — Tailwind project"
+            >
             <span class="project-num">06</span>
             <div class="project-content">
               <span class="project-meta">HTML / Tailwind CSS</span>
@@ -161,14 +177,14 @@
                 approaches.
               </p>
             </div>
-            <a 
-              href="https://michaelrooney99.github.io/WillowGardensTW/"
-              class="project-link magnetic"
-              target="_blank"
+            <span class="project-link">View Project</span>
+          </a>
+          <a
+              href="/capstone/index.html"
+              class="project"
               rel="noopener noreferrer"
-            >View Project</a>
-          </article>
-          <article class="project">
+              aria-label="View Homelab Status Page project"
+            >
             <span class="project-num">07</span>
             <div class="project-content">
               <span class="hero-eyebrow">Madison College — Internship Capstone</span>
@@ -180,12 +196,8 @@
           deployed at status.michaelrooney.dev via Cloudflare Zero Trust tunnel.
               </p>
             </div>
-            <a
-              href="/capstone/index.html"
-              class="project-link magnetic"
-              rel="noopener noreferrer"
-            >View Project</a>
-          </article>
+            <span class="project-link">View Project</span>
+          </a>
 
 
         </div>
