@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scope Isn't Overhead — It's the Actual Work — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What 'scope' actually means, why it matters more than the build itself, and a repeatable process for scoping a project or feature yourself — drawn from real decisions made (and skipped) across the capstone project."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Scope Isn't Overhead — It's the Actual Work — Michael Rooney" />
+    <meta property="og:description" content="What 'scope' actually means, why it matters more than the build itself, and a repeatable process for scoping a project or feature yourself." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-24-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Scope Isn't Overhead — It's the Actual Work — Michael Rooney" />
+    <meta name="twitter:description" content="What 'scope' actually means, why it matters more than the build itself, and a repeatable process for scoping a project or feature yourself." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-24-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-24-2026">July 24, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Scope Isn't Overhead — It's the Actual Work</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            I use the word "scope" constantly in my own project notes —
+            it shows up in nearly every planning doc for the capstone, and
+            it showed up again in the last journal entry before this one.
+            Someone reading along asked, reasonably, what I actually mean
+            by it. Worth a real answer, since I don't think I've ever
+            written one down, and I'd bet it's a question a lot of people
+            nod past instead of actually asking.
+          </p>
+
+          <h2>What scope actually means</h2>
+
+          <p>
+            Scope answers one question: <em>what, specifically, are we
+            building — and just as importantly, what are we explicitly
+            not building right now?</em>
+          </p>
+
+          <p>
+            That's not the same thing as a to-do list. A to-do list is
+            steps. Scope is the boundary around the whole effort — the
+            line that separates "this is part of the current work" from
+            "this is a good idea for later, but not now." Every planning
+            document I write for a real feature has two kinds of entries,
+            on purpose: things being built, and things deliberately
+            <em>not</em> being built yet, each with a stated reason why.
+            That second category does just as much work as the first —
+            it's what keeps a small task small.
+          </p>
+
+          <h2>Why it matters</h2>
+
+          <p>
+            Three failure modes it prevents, all of which have actually
+            happened to me, not hypotheticals:
+          </p>
+
+          <p>
+            <strong>Scope creep mid-build.</strong> You sit down to fix
+            one small thing — a function accidentally redefining itself
+            on every render, ten minutes of work — and by the time you
+            look up you've redesigned a whole subsystem because you
+            noticed something else while you were in there. Deciding up
+            front that a task is a ten-minute fix, not a feature, is what
+            actually keeps it a ten-minute fix.
+          </p>
+
+          <p>
+            <strong>Building the wrong thing well.</strong> I recently
+            added an incident-history feature to a status page I run —
+            timestamped updates, status badges, the works. Buried in the
+            planning for it was one explicit, unresolved question: should
+            a logged incident retroactively change how the historical
+            uptime charts render for that day? I wrote down two real
+            options and picked neither yet — recommended building the
+            incident log as its own thing first, and revisiting the merge
+            question once there was actual incident data to reason about
+            instead of a hypothetical. Skipping that scoping step
+            wouldn't have looked like a mistake in the moment. It would
+            have looked like extra effort, spent designing logic against
+            data that didn't exist yet.
+          </p>
+
+          <p class="callout">
+            That's the part that's easy to miss: a decision you can't
+            explain isn't really a decision — it's a guess that happened
+            to work out, or didn't. Scoping forces you to write the
+            reasoning down before you're emotionally invested in having
+            already built the thing.
+          </p>
+
+          <p>
+            <strong>Not knowing when you're done.</strong> Without a
+            stated scope, "finished" has no definition. I once rewrote a
+            fairly large reference document from scratch — the kind of
+            task that can expand forever, because there's always one more
+            thing worth documenting. What actually bounded it was a
+            specific, itemized list of exactly what needed to go in,
+            pulled from real work that had already happened. Once those
+            items were in, it was done. Not "done for now" — done.
+            Without that boundary, documentation in particular is a task
+            with no natural end.
+          </p>
+
+          <h2>How to scope something yourself</h2>
+
+          <p>
+            A repeatable process, close to what actually happens every
+            time I sit down to plan real work before touching any code:
+          </p>
+
+          <p>
+            <strong>1. State the problem, not the solution.</strong>
+            "The historical charts are placeholder-only data" is a
+            problem statement. "Build a chart component that queries a
+            metrics backend" is already a solution — and skipping the
+            problem statement means you can't tell later whether you
+            actually solved the right problem, only whether you built
+            the thing you decided to build.
+          </p>
+
+          <p>
+            <strong>2. List what's already decided, and don't re-decide
+            it.</strong> If earlier work already settled something,
+            say so explicitly and move on. Re-litigating a settled
+            decision is one of the most common, and most invisible, ways
+            scope quietly expands — it doesn't feel like scope creep in
+            the moment, it feels like being thorough.
+          </p>
+
+          <p>
+            <strong>3. Write down every real option, even the ones you
+            reject.</strong> Not just the one you're picking. When I was
+            deciding how a status update should get created and stored, I
+            wrote out three real options in a table — including a "full
+            database with an admin UI" option that I explicitly ruled
+            out as overkill. Writing down the rejected options is what
+            makes the chosen one defensible later, instead of arbitrary.
+          </p>
+
+          <p>
+            <strong>4. Name what's explicitly out of scope, not just
+            what's in.</strong> "Not fixing the timezone edge case in
+            this session" is exactly as useful a sentence to write down
+            as "fixing the missing config file is." Both prevent drift —
+            just in opposite directions.
+          </p>
+
+          <p>
+            <strong>5. Define done before you start, not after.</strong>
+            If you can't write the "confirmed working" checklist before
+            you begin, you don't have scope yet. You have an intention.
+          </p>
+
+          <h2>The part that surprised me</h2>
+
+          <p>
+            Scoping isn't a formality you rush through so you can get to
+            the real work. The scoping <em>is</em> the real work. Once a
+            feature is genuinely well-scoped, building it tends to be the
+            easy, almost mechanical part — write the adapter, wire the
+            component, done. The features and fixes in this project that
+            generated the most follow-up debugging weren't the technically
+            hardest ones. They were the ones I scoped poorly, or skipped
+            scoping entirely because the fix looked small enough not to
+            need it.
+          </p>
+
+          <p>
+            If there's one habit worth stealing from this, it's writing
+            the "what I'm explicitly not doing, and why" list before the
+            "what I'm doing" list. The first one is what keeps the second
+            one honest.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-21-2026.html">← Previous: 07-21-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
