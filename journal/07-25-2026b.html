@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Three Small Lies a Working Ansible Collection Told Me — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Scripting Zabbix host registration with the community.zabbix collection — a changed authentication model, a global become setting that doesn't make sense over an API connection, and a template permission scope that isn't the same as the host permission scope, all found the hard way against a real Zabbix server."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Three Small Lies a Working Ansible Collection Told Me — Michael Rooney" />
+    <meta property="og:description" content="Scripting Zabbix host registration with community.zabbix — a changed auth model, a become setting that breaks over an API connection, and a template permission scope that isn't the host permission scope." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-25-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Three Small Lies a Working Ansible Collection Told Me — Michael Rooney" />
+    <meta name="twitter:description" content="Scripting Zabbix host registration with community.zabbix — three real gotchas found against a live server, none of them obvious from the docs alone." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-25-2026b.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-25-2026">July 25, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Three Small Lies a Working Ansible Collection Told Me</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Second entry today — the scraper writeup this morning was
+            curiosity for its own sake; this one's the actual roadmap
+            item it turned out to sit next to. Every Proxmox node has
+            needed one manual step since Zabbix Agent 2 first went out:
+            opening the frontend and registering the host by hand. Today
+            that step got automated, and it took three real, specific
+            bugs to get there — none of them the kind you'd guess from
+            reading the collection's own documentation.
+          </p>
+
+          <h2>The plan that was already wrong</h2>
+
+          <p>
+            Scoped a few sessions back: use the <code>community.zabbix</code>
+            collection instead of hand-rolling API calls, since it
+            handles idempotency correctly rather than me reimplementing
+            it badly. The plan called for passing <code>server_url</code>,
+            <code>login_user</code>, and <code>login_password</code>
+            straight to the module. First real run:
+          </p>
+
+          <p class="callout">
+            <code>Unsupported parameters for (community.zabbix.zabbix_host)
+            module: login_password, login_user, server_url</code>
+          </p>
+
+          <p>
+            The collection had moved on. Current versions authenticate
+            through a dedicated <code>httpapi</code> connection plugin —
+            the play has to "connect" to the Zabbix server the same way
+            a network-device play connects to a switch, not pass
+            credentials as task arguments. That's a structural change,
+            not a syntax fix: the play's actual target became a new
+            <code>zabbix_server</code> inventory entry, deliberately kept
+            out of every other group so no SSH-based playbook ever picks
+            it up by accident, with the real node names looped over
+            inside the play instead of driving which hosts it targets.
+          </p>
+
+          <h2>A global default that assumes a shell that isn't there</h2>
+
+          <p>
+            Second run, past the auth fix:
+          </p>
+
+          <p class="callout">
+            <code>/bin/sh: 1: sudo: not found</code>
+          </p>
+
+          <p>
+            <code>ansible.cfg</code> sets <code>become: true</code>
+            globally, for every play, by default — correct for every
+            SSH-based playbook in this fleet, and something I've never
+            had to think about before because every previous playbook
+            actually had a shell to escalate privilege in. An
+            <code>httpapi</code> connection doesn't. There's no remote
+            terminal underneath it for <code>sudo</code> to run inside —
+            it's an HTTP call, not a login session. Explicit
+            <code>become: false</code> on this one play fixed it, and a
+            Zabbix API call was never going to need root regardless.
+          </p>
+
+          <h2>Two permission systems that look like one</h2>
+
+          <p>
+            Third run:
+          </p>
+
+          <p class="callout">
+            <code>Template not found: Linux by Zabbix agent</code>
+          </p>
+
+          <p>
+            The automation user had Read-Write on the <code>Proxmox
+            Nodes</code> host group — visibly correct in the frontend,
+            confirmed twice. What I hadn't touched was <em>template</em>
+            group permissions, a separate scope from host group
+            permissions in Zabbix's own permission model. The user
+            couldn't see the template at all through the API, despite
+            it being completely visible and linked correctly when I
+            checked as myself. Granted Read on the template's actual
+            group and the error vanished.
+          </p>
+
+          <h2>Confirmed the way everything gets confirmed here</h2>
+
+          <p>
+            Ran it dry against Ankhh first — already registered by hand
+            months ago — specifically to prove the module would
+            recognize existing state instead of trying to recreate it.
+            <code>ok</code>, not <code>changed</code>. Then the same dry
+            run against the full fleet: all six nodes, <code>ok</code>
+            across the board, <code>changed=0</code> in the recap. Only
+            then the real run, same result. Wired into
+            <code>new_node_setup.yml</code> via <code>import_playbook</code>
+            right after the agent install, and the manual frontend step
+            is genuinely retired now — any new node gets registered
+            automatically the moment it joins the fleet.
+          </p>
+
+          <h2>Where this leaves me</h2>
+
+          <p>
+            None of the three errors were things I could have predicted
+            from reading the module's parameter list ahead of time —
+            each one only showed up by actually running it against a
+            real server and reading what came back. Good reminder that
+            "the collection handles this correctly" and "I know exactly
+            how the collection handles this" are different claims, and
+            only one of them needs to be true before you start.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-25-2026.html">← Previous: 07-25-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
