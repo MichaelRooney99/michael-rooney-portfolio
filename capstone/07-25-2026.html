@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 11 — Giving Every Category Real History — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Scoping and building full-category uptime history for Proxmox API and Zabbix — a proxy-side snapshot poller backed by node:sqlite, a dead-code bug found and fixed along the way, and a checklist from last session's mistake applied before deploying instead of after."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 11 — Giving Every Category Real History — Michael Rooney" />
+    <meta property="og:description" content="Scoping and building full-category uptime history for Proxmox API and Zabbix — a proxy-side snapshot poller, a dead-code bug found along the way, and a checklist applied before deploying instead of after." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/07-25-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Session 11 — Giving Every Category Real History — Michael Rooney" />
+    <meta name="twitter:description" content="Scoping and building full-category uptime history for Proxmox API and Zabbix — a proxy-side snapshot poller, a dead-code bug found along the way, and a checklist applied before deploying instead of after." />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/07-25-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-25-2026">July 25, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 11 — Giving Every Category Real History</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Two roadmap items had been sitting scoped-but-not-built for a
+            while: real uptime history for the two categories that never
+            got it, and scripting the manual Zabbix host-registration
+            step. Small wins first — a collapsible incident list, two
+            genuinely stale Ansible docs finally deleted — then both
+            mediums got properly scoped before either got touched, and
+            the bigger one got built the same session.
+          </p>
+
+          <h2>Small first</h2>
+
+          <p>
+            The incident history section only ever had two entries, but
+            per-card collapse was worth doing now rather than later —
+            active incidents default open, resolved ones default
+            collapsed, same pattern real status pages use. And
+            <code>Ansible_Reference.md</code> and
+            <code>Ansible-Refresher.md</code> — both fully superseded
+            weeks ago by the consolidated capstone/fleet split — were
+            still sitting in the active project files, which is exactly
+            the kind of drift that caused the original documentation
+            mess in the first place. Deleted for real this time.
+          </p>
+
+          <h2>Scoping before building, again</h2>
+
+          <p>
+            Full-category history turned out to need more thought than
+            "add a route." Proxmox Nodes and Power get their 90-day bars
+            from Prometheus, which already scrapes independently of
+            whether anyone's looking at the page. Proxmox API and Zabbix
+            have no equivalent — building this meant the proxy itself
+            becoming that missing scraper, which is genuinely new
+            territory for this codebase, not a component tweak.
+          </p>
+
+          <p>
+            Three real decisions got worked through before any code:
+            where the status-derivation logic should live (duplicated
+            proxy-side, kept small on purpose, rather than standing up
+            shared-package tooling across two separate npm projects for
+            one small function), how often to poll (frequent, with a
+            worst-of-day rollup — deliberately <em>not</em> the same
+            "keep it simple" call made on the first decision, since these
+            two categories have zero other source of truth to fall back
+            on if a single sample misses something), and what to store it
+            in.
+          </p>
+
+          <p class="callout">
+            That last one didn't stay theoretical. Rather than guess
+            whether <code>node:sqlite</code> would work without the old
+            <code>--experimental-sqlite</code> flag, I exec'd straight
+            into the actual deployed proxy container and ran
+            <code>require('node:sqlite')</code> directly. <code>v22.23.1</code>,
+            confirmed working, zero new dependencies, zero Dockerfile
+            changes. Nice to settle an architecture decision with a real
+            terminal result instead of a version-number guess.
+          </p>
+
+          <h2>A bug found while scoping, not while building</h2>
+
+          <p>
+            Working out what the poller's status logic should mirror
+            meant actually reading the existing client adapter closely —
+            and it had a real bug. Nodes got filtered down to "online"
+            <em>before</em> the code that was supposed to decide
+            operational-vs-outage ever ran, which meant the outage branch
+            of that ternary could never execute. A genuinely offline
+            Proxmox node didn't show as down. It just silently
+            disappeared from the page.
+          </p>
+
+          <p>
+            Worth a real decision, not a silent pick: mirror that
+            behavior in the new poller, or fix it properly. Went with
+            fixing both — the poller and the live client adapter — since
+            building new history-tracking code that deliberately
+            reproduces a known gap felt worse than the small risk of the
+            live page and the history bars occasionally disagreeing about
+            a node that's actually down.
+          </p>
+
+          <h2>Building it</h2>
+
+          <p>
+            The poller reuses the proxy's own existing
+            <code>/proxmox</code> and <code>/zabbix</code> routes over
+            <code>localhost</code> rather than duplicating upstream auth
+            and TLS-bypass logic a second time — one source of truth for
+            "how to reach Proxmox," used by the browser and the poller
+            alike. SQLite handles the day-bucketed worst-of-day rollup,
+            anchored to the same UTC-midnight boundary the client's
+            history code already got fixed to use last session — not
+            repeating that exact mistake twice.
+          </p>
+
+          <p>
+            <code>tsx</code> doesn't type-check anything, just strips
+            types and runs — which is exactly why four real
+            <code>ts(18046)</code> errors sat quietly in the terminal
+            while local dev looked completely fine. <code>proxy/Dockerfile</code>'s
+            build stage runs actual <code>tsc</code>, which would have
+            failed the Docker build outright on deploy. Caught by
+            checking the Problems panel instead of trusting a clean
+            <code>npm run dev</code> — a good reminder that "runs
+            locally" and "type-checks" aren't the same claim when the
+            dev tool and the build tool don't agree on how strict to be.
+          </p>
+
+          <h2>Applying last session's lesson instead of relearning it</h2>
+
+          <p>
+            Incident history shipped working in dev and silently empty
+            in production, because nginx never got a forward rule for
+            the new route. That turned into an actual written checklist:
+            proxy route, client adapter, nginx forward rule, verify
+            through the public domain. This session, the nginx block for
+            <code>/history</code> went in <em>before</em> the first
+            deploy, not after discovering the same gap a second time.
+            Small thing, but exactly the kind of small thing that's easy
+            to skip under momentum — worth noticing that writing the
+            lesson down last time is what made it automatic this time.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            Confirmed live through the actual public domain, not just the
+            direct proxy port — today shows real data, every day before
+            it honestly says <code>no-data</code>, since there's nothing
+            to backfill from before the poller existed. Both scoped
+            mediums from a few sessions back are done now. The one
+            surviving open item — scripting Zabbix host registration —
+            is fleet-wide infrastructure work, not capstone-app work, so
+            it stays tracked with the rest of the Ansible roadmap instead
+            of here.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-24-2026.html">← Session 10</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
