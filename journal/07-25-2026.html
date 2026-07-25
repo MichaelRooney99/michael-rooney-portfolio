@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What a Scraper Actually Is, and How Mine Works — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What a scraper actually is, the pieces every one needs regardless of what it's scraping, what they're used for, and a walkthrough of a real one I already built and shipped — a background poller that gives my homelab status page real history for the two categories that never had any."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="What a Scraper Actually Is, and How Mine Works — Michael Rooney" />
+    <meta property="og:description" content="What a scraper actually is, the pieces every one needs, what they're used for, and a walkthrough of a real one already built and shipped in my homelab status page." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-25-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="What a Scraper Actually Is, and How Mine Works — Michael Rooney" />
+    <meta name="twitter:description" content="What a scraper actually is, the pieces every one needs, what they're used for, and a walkthrough of a real one already built and shipped." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-25-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-25-2026">July 25, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>What a Scraper Actually Is, and How Mine Works</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Birthday, and I wanted to spend part of it on something that
+            was purely curiosity rather than a to-do list item. "Scraper"
+            is a word I use constantly without ever having written down
+            what it actually means — so today's the day, and I've
+            already got a real one sitting in my own codebase to use as
+            the example instead of reaching for a toy demo.
+          </p>
+
+          <h2>What a scraper actually is</h2>
+
+          <p>
+            The word conjures a very specific image — a script pulling
+            prices off a shopping site, or a bot indexing the web — but
+            that's the most famous <em>instance</em> of the pattern, not
+            the whole definition. The general shape is much broader: a
+            scraper is anything that automatically checks a source of
+            data on its own schedule and pulls out a specific piece of
+            information, without a person manually visiting that source
+            each time.
+          </p>
+
+          <p class="callout">
+            Prometheus is a scraper. It's not usually described that way
+            in casual conversation, but the word is right there in its
+            own documentation — it "scrapes" metrics endpoints on an
+            interval. The mental leap that made the rest of this actually
+            click: a scraper isn't defined by parsing HTML. It's defined
+            by the pattern underneath — fetch, extract, repeat, on a
+            schedule nobody has to trigger by hand.
+          </p>
+
+          <h2>What every scraper actually needs</h2>
+
+          <p>
+            Strip away whatever's being scraped and there are really only
+            four pieces, every time:
+          </p>
+
+          <p>
+            <strong>A trigger.</strong> Something that decides
+            <em>when</em> to check — a timer firing every N minutes, a
+            cron schedule, or an event (a webhook, a file change).
+          </p>
+
+          <p>
+            <strong>A fetch step.</strong> Actually reaching the source —
+            a plain HTTP request for anything that exposes structured
+            data, or a full browser automation tool when the content only
+            exists after client-side JavaScript runs and there's no clean
+            API to ask instead.
+          </p>
+
+          <p>
+            <strong>An extraction step.</strong> Pulling the specific
+            thing out of whatever came back — parsing HTML for a price,
+            or deriving "this service is degraded" from a JSON field
+            that's really just a status code.
+          </p>
+
+          <p>
+            <strong>Somewhere to put the result.</strong> Optional in the
+            most trivial case, load-bearing in almost every real one —
+            without this, a scraper is just a fancy way to check
+            something once. The storage step is what turns "checked it"
+            into "here's a history of what it's been."
+          </p>
+
+          <h2>What they're actually used for</h2>
+
+          <p>
+            Search engines are the largest-scale version — the entire
+            business of indexing the web is a scraper run at a
+            civilization scale. Price comparison and shopping tools are
+            the most commonly cited example. Security tooling scrapes for
+            exposed secrets and broken links. Archival projects like the
+            Wayback Machine scrape snapshots of pages over time. And
+            monitoring and observability — Prometheus, uptime checkers,
+            the thing I actually built — scrape internal systems instead
+            of public websites, on a schedule measured in seconds or
+            minutes instead of once a day.
+          </p>
+
+          <h2>How one's actually implemented — the one I already have</h2>
+
+          <p>
+            My homelab status page has had real 90-day uptime history for
+            two of its four categories for a while now, because
+            Prometheus already scrapes those two independently. The other
+            two — Proxmox API and Zabbix — never had that, because
+            neither one has anything that scrapes them on its own. So a
+            few sessions back, I built one.
+          </p>
+
+          <p>
+            <code>proxy/src/poller.ts</code> is a small background job
+            that starts the moment the Express proxy comes up. The
+            trigger is the simplest possible one — <code>setInterval</code>,
+            firing every 15 minutes. The fetch step doesn't even talk to
+            Proxmox or Zabbix directly; it calls the proxy's own
+            already-existing <code>/proxmox</code> and <code>/zabbix</code>
+            routes over <code>localhost</code>, the same routes the
+            browser already uses — one source of truth for "how to reach
+            these systems," reused instead of duplicated. The extraction
+            step is a small, deliberately minimal function that turns
+            whatever came back into one of three words: operational,
+            degraded, or outage. And the storage step is
+            <code>proxy/src/db.ts</code>, writing each result into a
+            SQLite database using Node's own built-in <code>node:sqlite</code>
+            module — no new dependency, nothing to install, just a
+            standard library feature that happened to exist already.
+          </p>
+
+          <p>
+            That's genuinely the whole shape of it. Nothing about a
+            "real" scraper requires it to be large or clever — the four
+            pieces above, wired together, on a timer. The interesting
+            engineering decisions weren't in any single piece; they were
+            in the seams between them — how often to check, what to do
+            with a result that doesn't cleanly map to one of three
+            states, and how to keep 90 days of history without the
+            database growing forever. All small decisions, made one at a
+            time, that add up to something that quietly runs in the
+            background and just works.
+          </p>
+
+          <h2>Where this leaves me</h2>
+
+          <p>
+            A word I'd used a hundred times finally has an actual
+            definition behind it instead of a vague picture of a script
+            grabbing HTML — and it turns out I'd already built one of my
+            own without thinking of it in those terms. Good way to spend
+            part of a birthday: learning that something you already did
+            has a name.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-24-2026.html">← Previous: 07-24-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
