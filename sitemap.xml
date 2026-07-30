@@ -137,7 +137,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://michaelrooney.dev/capstone/index.html</loc>
+    <loc>https://michaelrooney.dev/capstone/capstone-index.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
@@ -226,6 +226,10 @@
   </url>
   <url>
     <loc>https://michaelrooney.dev/journal/07-25-2026b.html</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/capstone/07-29-2026.html</loc>
     <priority>0.6</priority>
   </url>
   </urlset>
