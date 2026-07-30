@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Half-Second Nobody's Supposed to See — Michael Rooney</title>
+    <meta
+      name="description"
+      content="How a dark/light theme toggle avoids a flash of the wrong theme on load — a synchronous inline script, the OS-level prefers-color-scheme preference, localStorage persistence, and how Tailwind v4's CSS-native @theme system makes the whole thing possible without touching every component."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Half-Second Nobody's Supposed to See — Michael Rooney" />
+    <meta property="og:description" content="How a theme toggle avoids a flash of the wrong theme on load, and how Tailwind v4's CSS-native @theme system makes it possible without touching every component." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-30-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The Half-Second Nobody's Supposed to See — Michael Rooney" />
+    <meta name="twitter:description" content="How a theme toggle avoids a flash of the wrong theme on load, and how Tailwind v4's @theme system makes it possible." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-30-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-30-2026">July 30, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Half-Second Nobody's Supposed to See</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Building a light/dark toggle for the status page, I said a
+            few things almost in passing — no flash of the wrong theme
+            on reload, the OS preference gets respected the first time
+            you ever visit, your choice sticks after that. Someone asked
+            me to actually explain those, rather than take them as given.
+            Fair ask — there are three separate ideas doing work there,
+            and one of them only became simple because of a genuinely
+            recent change to how Tailwind handles theming at all.
+          </p>
+
+          <h2>The problem, named properly</h2>
+
+          <p>
+            A page that decides its own colors in JavaScript has a
+            timing problem most people never notice until they build one.
+            The browser paints the page the instant it has enough CSS to
+            do so. If the "real" theme decision — read localStorage, check
+            the OS preference, pick light or dark — happens inside a React
+            component after the page has already mounted, there's a real
+            gap between "first paint" and "correct paint." For a fraction
+            of a second, the browser shows whatever the default CSS says,
+            then visibly snaps to the right theme once the JavaScript
+            catches up. On a page that should load in light mode for a
+            given visitor, that means a flash of dark before it corrects
+            itself. Small, but the kind of small that reads as broken the
+            moment you actually see it happen.
+          </p>
+
+          <h2>Fixing it by not letting the browser paint yet</h2>
+
+          <p>
+            The fix isn't clever, it's just early. A plain
+            <code>&lt;script&gt;</code> tag — not <code>type="module"</code>,
+            not <code>async</code>, not <code>defer</code> — sitting in
+            <code>&lt;head&gt;</code> blocks the browser from rendering
+            anything until it finishes running. Put the theme decision
+            inside one of those, ahead of any stylesheet, and the correct
+            theme is already set on the page before the first pixel ever
+            gets painted. There's no wrong frame to flash, because the
+            browser never renders a frame with the wrong answer in the
+            first place.
+          </p>
+
+          <pre><code>(function () {
+  var stored = localStorage.getItem('capstone-theme');
+  var theme =
+    stored === 'dark' || stored === 'light'
+      ? stored
+      : window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+})();</code></pre>
+
+          <p>
+            That same logic runs again inside a React hook once the app
+            actually mounts — deliberately kept as the same priority
+            order in both places rather than shared code, since the
+            inline version has to run before any JavaScript module has
+            loaded and can't import anything. Two copies, same decision,
+            timed differently on purpose.
+          </p>
+
+          <h2>Asking the OS instead of guessing</h2>
+
+          <p>
+            <code>window.matchMedia('(prefers-color-scheme: light)').matches</code>
+            is doing more work than it looks like. Every modern OS lets
+            someone set a system-wide light or dark preference, and the
+            browser exposes that choice to any page that asks — no
+            permission prompt, no async loading, just a synchronous
+            true-or-false read of something the visitor already decided
+            once, at the OS level, probably without ever thinking about
+            this specific page. Defaulting a new visitor to whichever
+            theme happens to be more convenient to code first is a small
+            but real disrespect of a preference they already stated
+            somewhere else. Asking costs one line.
+          </p>
+
+          <p class="callout">
+            The priority order matters and is easy to get backwards:
+            check for an explicit stored choice <em>first</em>, and only
+            fall back to the OS preference if there isn't one. Someone
+            who deliberately picked light mode on a dark-preferring
+            system made a real choice — the OS default should never
+            silently override something they already told the page
+            directly.
+          </p>
+
+          <h2>Making the choice stick</h2>
+
+          <p>
+            Once someone actually clicks the toggle,
+            <code>localStorage.setItem('capstone-theme', theme)</code>
+            writes that choice somewhere that survives a reload, a
+            closed tab, a restarted browser — unlike
+            <code>sessionStorage</code>, which clears the moment the tab
+            closes. Nothing exotic here; the interesting part isn't the
+            storage mechanism, it's that both the inline script and the
+            React hook read the exact same key with the exact same
+            fallback order, so they can never disagree with each other
+            about what the "current" theme actually is.
+          </p>
+
+          <h2>Where Tailwind actually enters this story</h2>
+
+          <p>
+            None of the above is Tailwind-specific — it would work
+            identically with plain CSS. The part that <em>is</em>
+            specific to this project's tooling is how the theme values
+            themselves get defined, and it's a genuinely new capability.
+            Tailwind v4 replaced its old JavaScript config file with a
+            CSS-native <code>@theme</code> block, and critically, values
+            inside <code>@theme</code> are allowed to be
+            <code>var()</code> references pointing at other CSS custom
+            properties — not just static colors.
+          </p>
+
+          <pre><code>@theme {
+  --color-capstone-bg: var(--theme-bg);
+  --color-capstone-text: var(--theme-text);
+}
+
+:root {
+  --theme-bg: #0e0d0b;
+  --theme-text: #f0ede8;
+}
+
+[data-theme="light"] {
+  --theme-bg: #faf7f2;
+  --theme-text: #201e1a;
+}</code></pre>
+
+          <p>
+            That indirection is the whole trick. Tailwind compiles real
+            utility classes from that <code>@theme</code> block —
+            <code>bg-capstone-bg</code>, <code>text-capstone-text</code> —
+            and their generated CSS is literally
+            <code>background-color: var(--color-capstone-bg)</code>. Since
+            that variable is itself defined as
+            <code>var(--theme-bg)</code>, and <code>--theme-bg</code>'s
+            actual value depends entirely on which CSS selector currently
+            matches the page (<code>:root</code> versus
+            <code>[data-theme="light"]</code>), flipping one HTML
+            attribute cascades through every element using that utility
+            class — instantly, with zero JavaScript re-render, because
+            the browser is just re-resolving a CSS variable the way it
+            always does.
+          </p>
+
+          <p>
+            Worth naming the alternative this replaces: Tailwind's older
+            <code>dark:</code> variant approach means writing two classes
+            on every themed element — <code>bg-white dark:bg-black</code>
+            — for every property that changes. That scales fine for a
+            handful of elements and gets genuinely unpleasant across a
+            real component tree, since every single element needs its own
+            explicit light-and-dark pair remembered and kept in sync by
+            hand. The token-based approach only requires writing the
+            utility once; which actual color it resolves to is entirely
+            the CSS cascade's problem, not something tracked per-element
+            in the markup.
+          </p>
+
+          <h2>Where this actually landed</h2>
+
+          <p>
+            Built this into the status page's theme toggle directly — one
+            <code>@theme</code> block mapping named tokens to CSS
+            variables, two selector blocks defining what those variables
+            actually equal in each mode, one inline script prevent the
+            flash, one hook to keep it in sync after mount. The
+            interesting realization wasn't any single piece — it's that
+            "avoid a flash," "respect the OS," and "remember the choice"
+            are three genuinely separate problems that happen to look
+            like one feature from the outside, and each one has a small,
+            specific, well-established answer once you see them as
+            distinct.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-25-2026b.html">← Previous: 07-25-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
