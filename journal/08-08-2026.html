@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Publishing Isn't the Same as Protecting — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What a Cloudflare Tunnel actually is under the hood, how it differs from opening a port or running a VPN, and a real gotcha worth knowing before you rely on one: publishing a route makes it public by default. Protecting it is a genuinely separate step."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Publishing Isn't the Same as Protecting — Michael Rooney" />
+    <meta property="og:description" content="What a Cloudflare Tunnel actually is, and a real gotcha: publishing a route makes it public by default — protecting it is a separate step." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-08-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Publishing Isn't the Same as Protecting — Michael Rooney" />
+    <meta name="twitter:description" content="What a Cloudflare Tunnel actually is, and why publishing a route isn't the same as protecting it." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-08-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-08-2026">August 8, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Publishing Isn't the Same as Protecting</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The homelab status page has run behind a Cloudflare Tunnel
+            since the very first deploy, without me ever really
+            explaining what that means. Setting up a new admin page
+            this week meant configuring the tunnel side of things
+            directly for the first time in a while, and it surfaced a
+            distinction worth writing down — one that would be an easy,
+            quiet mistake to make.
+          </p>
+
+          <h2>What a tunnel actually replaces</h2>
+
+          <p>
+            The traditional way to make something on your home network
+            reachable from the internet is port forwarding — telling
+            your router "traffic on port 443 goes to this specific
+            machine inside." That works, but it means your router now
+            has a real, permanent hole in it, sitting open and waiting,
+            whether anyone's using it in a given moment or not. Every
+            open port is a standing exposure.
+          </p>
+
+          <p>
+            A Cloudflare Tunnel flips the direction entirely. A small
+            background process (<code>cloudflared</code>) running on
+            your own infrastructure reaches <em>out</em> to Cloudflare
+            and holds that connection open — the same shape as any
+            outbound web request your browser makes every day. Nothing
+            on your router ever needs to accept an incoming connection.
+            When someone visits your public URL, Cloudflare routes
+            their request down that already-open outbound tunnel to
+            your machine. No open port, no NAT rule, no router config
+            at all.
+          </p>
+
+          <h2>The gotcha: publishing isn't protecting</h2>
+
+          <p class="callout">
+            Here's the part that isn't obvious going in, and it's an
+            easy thing to assume incorrectly: a tunnel route being
+            "published" — reachable at a public URL — says nothing
+            about who's allowed to reach it. By default, anyone on the
+            internet who knows or guesses the URL can hit a published
+            route. Access control is a genuinely separate layer, called
+            Cloudflare Access, and it has to be configured on purpose.
+            Skip that step and a route that feels private because it's
+            "just a tunnel" is, in practice, exactly as open as a plain
+            public website.
+          </p>
+
+          <p>
+            This mattered directly building the admin page this week —
+            the write-capable part of the project, the first place
+            anything here needed real access control. Publishing the
+            route was step one. Locking it down was a deliberate,
+            separate step two, done through a completely different part
+            of Cloudflare's dashboard.
+          </p>
+
+          <h2>What Access actually adds</h2>
+
+          <p>
+            Cloudflare Access sits in front of a published route and
+            checks every request against real identity before letting
+            it through — not a password baked into the app, an actual
+            login flow (email verification, or an OAuth provider) that
+            happens at Cloudflare's edge, before the request ever
+            reaches the origin server at all. The origin never has to
+            know how to authenticate anyone; it just quietly trusts
+            that anything reaching it already passed the check.
+          </p>
+
+          <p>
+            One detail worth knowing if you ever protect just part of a
+            site rather than all of it: Access policies can be scoped
+            to a specific path, not just an entire domain. The public
+            status page and its new admin section share one domain —
+            the policy only needed to apply to that one path prefix,
+            leaving everything else exactly as open and
+            unauthenticated as it already was. Get that path wrong,
+            even slightly, and you either lock out the wrong thing or
+            leave the actual sensitive part unprotected — worth
+            double-checking, not assuming it's right on the first try.
+          </p>
+
+          <h2>The actual lesson</h2>
+
+          <p>
+            "It's on a private tunnel" and "it's protected" feel like
+            they should mean the same thing, and they genuinely don't.
+            A tunnel solves exposure — no open ports, no direct line to
+            your router. It says nothing on its own about
+            authorization — who's actually allowed through. Worth
+            treating those as two separate questions every time,
+            especially the moment anything write-capable gets added to
+            a project that's otherwise been safely read-only.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-07-2026b.html">← Previous: 08-07-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

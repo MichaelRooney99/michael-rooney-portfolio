@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building the hybrid SSE nudge channel — the last item from 17-Frontend Polish and Realtime, closing out all three planned scope docs. A new /events route, a 20-second check loop deliberately decoupled from the 15-minute history poller, and a real Cloudflare idle-connection bug caught and fixed via a periodic keep-alive, confirmed live in both directions against real infrastructure."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate — Michael Rooney" />
+    <meta property="og:description" content="The hybrid SSE nudge channel, a real Cloudflare idle-timeout bug found in testing, and both directions confirmed live against production." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-06-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate — Michael Rooney" />
+    <meta name="twitter:description" content="The hybrid SSE nudge channel, a Cloudflare idle-timeout bug caught in testing, and both directions confirmed against real infrastructure." />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-06-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-06-2026">August 6, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The last item from <code>17-Frontend Polish and Realtime</code>
+            — and with it, the last item across all three scope docs
+            planned back on 07-26-2026. <code>15-</code>, <code>16-</code>,
+            and <code>17-</code> are all fully built as of this session.
+          </p>
+
+          <h2>Hybrid, not the impressive version</h2>
+
+          <p>
+            <code>17-</code> lays out two real options: full SSE, where
+            the proxy becomes the sole aggregator for all four data
+            sources and pushes complete state to every client, or a
+            hybrid nudge channel, where the existing client-side polling
+            stays exactly as it is and SSE only ever signals "something
+            changed, refetch now." Full SSE is the more architecturally
+            impressive answer — and it's also a genuine rearchitecture,
+            since today's aggregation logic (<code>services/index.ts</code>)
+            lives entirely in the browser, and Prometheus is something
+            only the browser has ever talked to directly, never the
+            proxy. Hybrid gets most of the actual user-facing win —
+            status changes feel close to instant instead of up to a
+            minute stale — without moving where that logic lives at all.
+            Went with hybrid, per the doc's own recommendation.
+          </p>
+
+          <h2>A real departure from what the doc suggested</h2>
+
+          <p>
+            <code>17-</code>'s text frames this as "the poller already
+            ticks independently, extend it" — implying the nudge check
+            could piggyback on <code>poller.ts</code>'s existing
+            15-minute history-recording tick. Didn't do that. That
+            interval is right for deciding how much 90-day history
+            granularity to keep, and completely wrong for "how fast does
+            a status change need to be noticed" — reusing it literally
+            would mean nudges arrive up to 15 minutes late, which is
+            <em>slower</em> than the 60-second polling this feature
+            exists to beat. The nudge checker got its own interval
+            instead — 20 seconds, decoupled entirely from history
+            recording. Worth naming clearly as a deliberate departure
+            from the doc's letter, in service of the doc's actual stated
+            goal.
+          </p>
+
+          <h2>Narrow on purpose</h2>
+
+          <p>
+            The nudge checker's Prometheus query only asks two things —
+            node up/down and UPS status flags — not the CPU, memory,
+            runtime, or load metrics the client's own display also
+            fetches. Those change on essentially every tick; including
+            them would mean nudging constantly, which is worse than no
+            nudge channel at all. A client getting told "refetch" every
+            20 seconds gets no real benefit over just polling every 20
+            seconds itself. The whole value of a nudge is that it only
+            fires on a genuine change.
+          </p>
+
+          <h2>The bug testing actually found</h2>
+
+          <p class="callout">
+            First real test — a plain <code>curl -N</code> against
+            <code>/events</code> — looked correct at first: connected,
+            went quiet, which is exactly what an open stream with
+            nothing new to report should look like. Left running a bit
+            longer, it died: <code>HTTP/2 stream ... INTERNAL_ERROR</code>.
+            Nothing in the proxy code or nginx config changed between
+            those two states — the connection simply sat idle too long.
+            Root cause: Cloudflare's own edge proxy has an idle-connection
+            timeout, well under two minutes, completely independent of
+            anything nginx or Express are configured to do. A real
+            production infrastructure detail, not something any local
+            dev test would ever have surfaced — this project doesn't
+            develop against the Cloudflare tunnel, only production
+            traffic goes through it.
+          </p>
+
+          <p>
+            Fix: a periodic <code>: keep-alive</code> SSE comment line,
+            written to every connected client every 15 seconds
+            regardless of whether anything real happened. Lines starting
+            with <code>:</code> are comments by the SSE spec —
+            <code>EventSource</code> ignores them entirely, so this never
+            surfaces as a fake nudge on the client side. Purely plumbing,
+            invisible to the actual feature. Caught a second, smaller
+            issue along the way: the initial connection write was a bare
+            newline, not valid SSE framing at all — harmless in practice
+            since browsers tolerate it, but worth fixing to an actual
+            comment line while already in this code.
+          </p>
+
+          <h2>Confirmed in both directions, against real infrastructure</h2>
+
+          <p>
+            Rather than fake a change purely at the database level, this
+            one got tested against something real: <code>node_exporter</code>
+            stopped on Murloc for a minute — not a full reboot, which
+            would have taken Vaultwarden, Vikunja, and Homelable down
+            with it for no reason the test needed. Prometheus's own
+            scrape cycle caught the drop, the nudge checker's next
+            20-second tick caught the change, and a second
+            <code>curl -N</code> terminal — left open the whole time —
+            printed a genuine <code>event: nudge</code> line the moment
+            it happened. Both browser tabs flipped to outage within the
+            expected window. Confirmed the recovery direction the same
+            way immediately after restarting <code>node_exporter</code>
+            — a second real <code>nudge</code> event, both tabs back to
+            operational. Direct evidence from the actual stream, not an
+            inference from what the UI happened to show.
+          </p>
+
+          <h2>Where this leaves the whole project</h2>
+
+          <p>
+            Every item across <code>15-</code>, <code>16-</code>, and
+            <code>17-</code> — the full plan sequenced back on
+            07-26-2026 — is built and confirmed live. The one item left
+            on the entire roadmap now is automated test coverage, which
+            was never part of that plan and hasn't been scoped yet.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-05-2026.html">← Session 17</a>
+          <a href="08-07-2026.html">Session 19 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

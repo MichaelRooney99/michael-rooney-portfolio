@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A Promise You Can Check Automatically — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What a .test.ts file actually does when it 'tests' its subject, why the naming convention and colocation matter, what a pass or fail actually means (and doesn't), whether every file deserves one, and why a small new lib/ folder turned out to be the right home for a function that didn't fit anywhere else."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="A Promise You Can Check Automatically — Michael Rooney" />
+    <meta property="og:description" content="What a test file actually does, what pass/fail means (and doesn't), whether every file deserves a test, and why a small new lib/ folder was the right call." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-07-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="A Promise You Can Check Automatically — Michael Rooney" />
+    <meta name="twitter:description" content="What a test file actually does, what pass/fail means, and why a small new lib/ folder was the right call." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-07-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-07-2026">August 7, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>A Promise You Can Check Automatically</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Added real automated tests to the status page this week —
+            the first in the whole project. Setting them up raised a
+            handful of genuinely reasonable questions that don't have
+            obvious answers if you've never worked with a test suite
+            before: what is a <code>.test.ts</code> file actually
+            doing, why does it sit right next to the code it tests,
+            what happens when it passes or fails, and why did one
+            function end up in a brand new folder nobody planned for.
+            Worth untangling all four.
+          </p>
+
+          <h2>What "testing" a file actually means</h2>
+
+          <p>
+            No magic, no simulation — a test file imports the real
+            function from the real file and calls it, the same way any
+            other code would, with input you made up on purpose and an
+            answer you already know is correct:
+          </p>
+
+          <pre><code>import { buildUpsUptimeDays } from './history'
+
+const result = buildUpsUptimeDays([
+  { metric: { status: 'LB' }, values: [[timestamp, '1']] },
+])
+
+expect(result[89].status).toBe('outage')</code></pre>
+
+          <p>
+            That's the entire idea. Run the actual code with a known
+            input, check the actual output against what it should be.
+            The value isn't in running it once — it's that the exact
+            same check runs again, automatically, every single time
+            that file changes in the future. If someone accidentally
+            flips a priority order or breaks a date calculation six
+            months from now, this fails immediately instead of quietly
+            shipping as a wrong status on a live page.
+          </p>
+
+          <h2>Why the name, and why right next to it</h2>
+
+          <p>
+            <code>.test.ts</code> is close to a universal convention —
+            the test runner needs some pattern to know which files are
+            tests and which are regular code, and using the near-standard
+            suffix means anyone who's ever touched a JavaScript project
+            already knows what they're looking at without reading any
+            config. Putting <code>history.test.ts</code> in the same
+            folder as <code>history.ts</code>, rather than a separate
+            <code>tests/</code> directory somewhere else, keeps the
+            relationship obvious from the file tree alone — and makes
+            it much harder to forget a test exists, since it's sitting
+            right there every time the real file gets opened.
+          </p>
+
+          <h2>What actually happens on pass or fail</h2>
+
+          <p>
+            Less than you'd expect, honestly — and that's worth being
+            upfront about. A test isn't a gate. Passing just prints a
+            checkmark; nothing runs differently afterward. Failing
+            prints a red line with exactly what was expected versus
+            what actually came back — genuinely useful, since it tells
+            you precisely which promise broke — but it doesn't block
+            anything on its own. Nothing today stops a broken commit
+            from still being deployed even with a failing test sitting
+            right there, unless a person actually looks at the terminal
+            output and decides to act on it. Wiring that enforcement in
+            — a deploy that refuses to proceed if the test suite fails
+            — is real, separate work, not something a test file grants
+            for free just by existing.
+          </p>
+
+          <h2>Does everything deserve a test?</h2>
+
+          <p>
+            Not automatically, and the honest answer is about cost, not
+            principle. The functions that got tested this round share
+            one thing: they're pure — same input, same output, every
+            time, nothing reaching out to a network or a database in
+            between. Code that wraps an API call is real and testable
+            too, but doing it meaningfully means faking the entire
+            network layer, and what you end up confirming is "did I
+            call the right URL," not "is the underlying logic correct."
+            That's a valid thing to test eventually — it's just a worse
+            hours-to-value trade than the pure functions, so it waited.
+          </p>
+
+          <h2>Why one function got its own new folder</h2>
+
+          <p>
+            A small uptime-percentage calculation lived inline for
+            months, and the natural first move was just to export it
+            for testing right where it already sat. A linter caught a
+            real problem with that: a file mixing a plain function
+            export alongside a UI component breaks a framework feature
+            called Fast Refresh, which needs a file to export components
+            and nothing else to safely hot-reload without a full page
+            reload. Fixing the actual lint error meant moving the
+            function out — and once it was out, the honest question
+            became: out to <em>where</em>? It wasn't a service adapter
+            (nothing about it talks to an API), and it wasn't a
+            component (no UI at all, just math). A new folder — the
+            conventional name for exactly this kind of thing is
+            <code>lib</code> — turned out to be less a workaround for
+            the lint error and more just where the function always
+            actually belonged.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+            <span></span>
+            <a href="08-06-2026.html">← Previous: 08-06-2026 Entry</a>
+            <a href="08-07-2026b.html">Next: 08-07-2026b Entry →</a>
+            <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 19 — The First Real Tests, and a Folder Nobody Planned For — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Automated test coverage, Phase 1 — Vitest wired into both packages, 23 tests targeting the three functions with real documented bug history in this project, a react-refresh lint catch that led to a new lib/ directory, and a scope doc for testing the deployment playbooks the same way."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 19 — The First Real Tests, and a Folder Nobody Planned For — Michael Rooney" />
+    <meta property="og:description" content="23 tests targeting real documented bug history, a react-refresh lint catch, a new lib/ directory, and a scope doc for testing the deployment playbooks next." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-07-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Session 19 — The First Real Tests, and a Folder Nobody Planned For — Michael Rooney" />
+    <meta name="twitter:description" content="23 tests targeting real bug history, a react-refresh lint catch, and a scope doc for the playbooks next." />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-07-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-07-2026">August 7, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 19 — The First Real Tests, and a Folder Nobody Planned For</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            With all three planned scope docs closed out, the only
+            remaining roadmap item was the one that had been sitting
+            unscoped the whole time: automated tests. Zero coverage
+            anywhere in this project, client or proxy — every real bug
+            documented in this journal was found by hand, after the
+            fact. This session is the first step toward that not being
+            true anymore.
+          </p>
+
+          <h2>A scope doc for something that's never had one</h2>
+
+          <p>
+            Unlike <code>15-</code>/<code>16-</code>/<code>17-</code>,
+            which all had scope docs written before any code, testing
+            had no doc at all — so this session opened with one:
+            <code>18-Automated Test Coverage</code>. The actual argument
+            it makes isn't "100% coverage" as an abstract goal. It's
+            narrower and more honest than that: every real bug this
+            project has ever had is now a candidate for a specific,
+            named regression test. That reframing did the actual
+            prioritization work — instead of picking test targets by
+            "what's easiest," the list became "what's already broken
+            once."
+          </p>
+
+          <h2>The tension the doc had to name explicitly</h2>
+
+          <p>
+            This project's own convention — internal adapter helpers
+            stay unexported, only the facade functions the app actually
+            needs get exported — is good API design and directly at odds
+            with testability. The functions most worth testing here are
+            exactly the small, pure, internal ones: status derivation,
+            day-bucketing, uptime-percent math. Resolution: a narrow,
+            explained exception. Pure functions with no I/O get exported
+            specifically for testing, each with a comment saying why —
+            not a silent violation of the convention, a documented one.
+          </p>
+
+          <h2>Three targets, all with real bug history</h2>
+
+          <p>
+            <code>utcMidnightSeconds</code> and <code>buildUptimeDays</code>
+            in <code>history.ts</code> are the exact logic that caused
+            the real day-boundary timezone bug on 07-24-2026 — a
+            direct regression test now runs two different times of day
+            through the same function and asserts an identical anchor.
+            <code>deriveAvailability</code> in <code>zabbix.ts</code> is
+            the canonical copy of logic duplicated three times across
+            this codebase, the same failure class as the
+            <code>nut_exporter</code>/<code>nut</code> job-name bug from
+            that same 07-24 session. <code>calculateUptimePercent</code>
+            hasn't caused a bug yet, but it's the same shape of
+            easy-to-get-subtly-wrong math the other two are — worth
+            covering before it does, not after.
+          </p>
+
+          <h2>The lint rule that reshaped the plan mid-session</h2>
+
+          <p class="callout">
+            The original plan exported <code>calculateUptimePercent</code>
+            straight from <code>App.tsx</code>, same file it already
+            lived in. ESLint's <code>react-refresh/only-export-components</code>
+            rule caught it immediately — a file that exports anything
+            besides React components can't be safely hot-reloaded by
+            Vite's Fast Refresh, so mixing a plain function export into
+            a component file breaks that entirely. Fix wasn't
+            suppressing the rule; it was moving the function to its own
+            file. That turned out to be the better outcome regardless
+            of the lint rule — a new <code>client/src/lib/</code>
+            directory, home for pure helpers that aren't a service
+            adapter and aren't a component, which is honestly what
+            this function always was.
+          </p>
+
+          <h2>Confirmed the way this session's own subject demands</h2>
+
+          <p>
+            Unlike command palette, auto-drafted incidents, or the SSE
+            nudge channel — all of which needed the real deployed site
+            to test meaningfully — this one runs entirely against local
+            source, no deployment involved at all. <code>npm test</code>:
+            <strong>23 passed, 3 test files, 0 failures.</strong> Genuinely
+            the fastest confirmation of any session so far, which is the
+            actual point of this kind of testing existing.
+          </p>
+
+          <h2>What doesn't happen automatically yet</h2>
+
+          <p>
+            Worth being honest about the actual current state: a passing
+            or failing test doesn't stop anything from running or
+            deploying right now. <code>npm test</code> only executes
+            when someone types it. That gap is exactly what led into the
+            second document this session produced —
+            <code>19-Deployment Testing and Playbook Safety</code>,
+            scoped but deliberately not built yet. It covers
+            <code>capstone_deploy.yml</code> and the broader fleet
+            playbooks with the same class of gap this project's Ansible
+            work has already hit once (<code>zabbix_agent.yml</code>'s
+            three-layer idempotency bug): four separate layers — static
+            linting, idempotency verification, a post-deploy smoke test,
+            and gating a deploy on this session's own test suite passing
+            — kept deliberately separate rather than one big "add CI"
+            task, since they solve genuinely different problems at very
+            different costs.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            Phase 1 of <code>18-</code> is built and confirmed. Phase 2
+            (proxy-side tests — <code>db.ts</code>'s day-bucketing, the
+            auto-drafted-incident threshold logic, <code>nudge.ts</code>'s
+            signature comparison) and Phase 3 (component/integration
+            tests, deliberately deprioritized) remain open, alongside the
+            newly-scoped <code>19-</code> — the next real candidate for a
+            session once it's sized.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-06-2026.html">← Session 18</a>
+          <a href="08-08-2026.html">Session 20 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

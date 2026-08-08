@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>One Hex Code, Two Different Verdicts — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What WCAG contrast ratios actually measure, why the same color can pass in one place and fail in another, and why 'it looks fine to me' isn't a real accessibility check — with a real example: one brand color that passed against a dark background and failed against a light one."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="One Hex Code, Two Different Verdicts — Michael Rooney" />
+    <meta property="og:description" content="What WCAG contrast ratios actually measure, and why the same color can pass against one background and fail against another — with a real example." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-04-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="One Hex Code, Two Different Verdicts — Michael Rooney" />
+    <meta name="twitter:description" content="Why the same color can pass WCAG contrast in one place and fail it in another, with a real example." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-04-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-04-2026">August 4, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>One Hex Code, Two Different Verdicts</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Retheming the status page this week, I picked one accent
+            color — a warm orange, <code>#c8622a</code> — and used it
+            everywhere: a focus ring, a chart line, a small label. It
+            looked good against the dark background. Then I added a
+            light theme, put the exact same color on a white card, and
+            it quietly failed an accessibility standard it had passed
+            twenty minutes earlier. Same hex code. Different verdict.
+            That contradiction is actually the whole lesson.
+          </p>
+
+          <h2>Contrast isn't a property of a color</h2>
+
+          <p>
+            The instinct is to think of a color as "accessible" or "not
+            accessible" on its own — as if some hex codes are simply
+            safer than others. That's not how the actual standard works.
+            The Web Content Accessibility Guidelines (WCAG) define
+            contrast as a <em>ratio between two colors</em> — the text
+            and whatever's directly behind it. A color has no contrast
+            rating by itself. It only has one in relation to a specific
+            background, and it can have a different rating against every
+            different background it's ever placed on.
+          </p>
+
+          <p>
+            That's exactly what happened here. The same orange scored
+            roughly <strong>5.2:1</strong> against a near-black card and
+            roughly <strong>4.0:1</strong> against a near-white one — one
+            color, two numbers, because the number was never really
+            describing the color. It was describing the relationship.
+          </p>
+
+          <h2>What the numbers actually mean</h2>
+
+          <p>
+            WCAG's contrast ratio ranges from 1:1 (identical colors,
+            genuinely invisible) to 21:1 (pure black on pure white, the
+            maximum possible). The commonly cited thresholds:
+          </p>
+
+          <ul>
+            <li><strong>4.5:1</strong> — WCAG AA minimum for normal-size text</li>
+            <li><strong>3:1</strong> — AA minimum for large text (roughly 24px regular, or 19px bold) and for meaningful UI graphics like icons and focus indicators</li>
+            <li><strong>7:1</strong> — the stricter AAA threshold for normal text</li>
+          </ul>
+
+          <p>
+            The size distinction matters more than it looks like it
+            should. A small label and a big heading in the exact same
+            color can land on opposite sides of "passing" purely because
+            of point size — larger text is more legible at a lower
+            contrast ratio, so the standard is genuinely more lenient
+            about it. Worth checking which bucket a given piece of text
+            actually falls into before assuming a number applies to it.
+          </p>
+
+          <h2>How the ratio actually gets calculated</h2>
+
+          <p>
+            Under the hood, it's not a difference between two hex codes
+            directly — it's built from something called
+            <strong>relative luminance</strong>, a measure of how bright
+            a color appears to the human eye, weighted because human
+            vision isn't equally sensitive to red, green, and blue.
+            Green contributes far more to perceived brightness than blue
+            does, which is why the official formula weights the three
+            channels very differently rather than just averaging them:
+          </p>
+
+          <pre><code>L = 0.2126 × R + 0.7152 × G + 0.0722 × B</code></pre>
+
+          <p>
+            (Each channel gets gamma-corrected into linear space first —
+            the full formula is a bit more involved than the line above,
+            but that's the core weighting, and it's the reason a
+            "medium brightness" green and a "medium brightness" blue at
+            the same raw RGB value don't read as equally bright.)
+          </p>
+
+          <p>
+            Once both colors have a luminance value, the contrast ratio
+            is just:
+          </p>
+
+          <pre><code>ratio = (L_lighter + 0.05) / (L_darker + 0.05)</code></pre>
+
+          <p class="callout">
+            None of this needs to be memorized or hand-calculated in
+            practice — browser DevTools' color picker shows a live
+            contrast ratio the moment you sample a color against its
+            actual background, and free tools like WebAIM's contrast
+            checker do the same from two hex codes directly. The value
+            of knowing the formula isn't doing the math by hand; it's
+            understanding <em>why</em> the same color can pass in one
+            spot and fail in another, so "it looks fine to me" stops
+            being treated as a real check.
+          </p>
+
+          <h2>Fixing it at the right layer</h2>
+
+          <p>
+            The tempting fix is local: find the one label that looked
+            off, darken it, move on. That works until the same base
+            color shows up somewhere else — a chart line, a focus ring,
+            a button — each one now needing the identical patch applied
+            by hand, with no guarantee whoever touches it next remembers
+            to check contrast again before reusing the "official" brand
+            color.
+          </p>
+
+          <p>
+            The better fix lives wherever the color is actually
+            <em>defined</em>, not wherever it happens to be
+            <em>used</em>. If a design system already has separate token
+            values for light and dark modes — which any project with a
+            real theme toggle needs anyway — the accent color deserves
+            its own light-specific value too, not just background and
+            text. One update at the source; every place referencing that
+            token inherits the fix automatically, and nobody has to
+            remember it exists.
+          </p>
+
+          <h2>Why this is worth caring about beyond one label</h2>
+
+          <p>
+            It's easy to file contrast compliance under "accessibility
+            checkbox" and mentally set it aside as somebody else's
+            problem. The honest framing is closer to: everyone's vision
+            is temporarily degraded sometimes — direct sunlight on a
+            phone screen, a cheap monitor with washed-out blacks, a
+            developer at 1am. Low contrast doesn't just exclude people
+            with diagnosed vision conditions; it makes an interface
+            measurably harder to read for literally everyone, in
+            conditions everyone eventually runs into. A number you can
+            calculate and defend beats "it looked fine on my monitor" —
+            for the same reason a lot of this build journal keeps
+            landing on the same lesson: query the real source, don't
+            trust the impression.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-02-2026.html">← Previous: 08-02-2026 Entry</a>
+          <a href="08-06-2026.html">Next: 08-06-2026 Entry →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

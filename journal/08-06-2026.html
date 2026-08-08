@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Difference Between Asking and Being Told — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What Server-Sent Events actually are, why a 'nudge' channel doesn't need to carry real data to be worth building, and a real production bug — Cloudflare silently killing an idle SSE connection — that no local dev test would ever have caught."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Difference Between Asking and Being Told — Michael Rooney" />
+    <meta property="og:description" content="What SSE actually is, why a signal-only nudge channel can be worth more than the data it doesn't carry, and a real Cloudflare bug found in testing." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-06-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The Difference Between Asking and Being Told — Michael Rooney" />
+    <meta name="twitter:description" content="What SSE actually is, why a nudge doesn't need to carry data, and a real Cloudflare bug found in testing." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-06-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-06-2026">August 6, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Difference Between Asking and Being Told</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Added real-time-feeling updates to the status page this
+            week, and the mechanism behind it — Server-Sent Events —
+            turned out to be a genuinely simple idea wearing an
+            intimidating name. Worth untangling, because the concept is
+            small and the practical gotcha that showed up in testing
+            was the kind no tutorial mentions.
+          </p>
+
+          <h2>Asking, versus being told</h2>
+
+          <p>
+            Ordinary HTTP is a conversation that ends every time: the
+            browser asks a question, the server answers, and the
+            connection closes. If the browser wants to know whether
+            anything's changed, its only option is to ask again —
+            which is exactly what polling is. Ask every 60 seconds,
+            get an answer, hang up, wait, ask again. It works, but
+            "up to 60 seconds behind" is baked into the design.
+          </p>
+
+          <p>
+            <strong>Server-Sent Events (SSE)</strong> flips that around.
+            The browser opens one connection and just leaves it open.
+            The server doesn't have to wait to be asked — it can write
+            a message down that same connection the instant it actually
+            has something worth saying. Same underlying HTTP, just used
+            differently: instead of a question-and-answer that repeats
+            forever, it's one open line the server can speak into
+            whenever it wants.
+          </p>
+
+          <p>
+            A few things about SSE specifically, since they explain real
+            decisions in how this got built:
+          </p>
+
+          <ul>
+            <li><strong>One-directional.</strong> Server → browser only. If a browser needs to talk back over the same channel, that's a job for WebSockets instead — SSE is the simpler tool for the simpler job of "server occasionally says something."</li>
+            <li><strong>Plain text over plain HTTP</strong> — not a special protocol. No new library needed on the server side; a normal HTTP response that just never closes and periodically writes a line of text.</li>
+            <li><strong>Auto-reconnecting, built into the browser.</strong> The browser's own <code>EventSource</code> object notices a dropped connection and retries on its own. Writing that reconnect logic by hand is exactly the kind of thing a heavier real-time protocol would ask for and SSE doesn't.</li>
+          </ul>
+
+          <h2>The signal doesn't have to be the data</h2>
+
+          <p>
+            The tempting version of this feature pushes the actual
+            updated status straight through the open connection — the
+            server does all the work, the browser just displays
+            whatever arrives. That's the "impressive" answer, and it's
+            also a bigger architectural commitment than it looks: it
+            means relocating whatever combines multiple data sources
+            into one coherent picture from the browser to the server,
+            a piece of logic that, in this project, lived entirely
+            client-side.
+          </p>
+
+          <p>
+            The version actually built here is smaller on purpose. The
+            open connection carries one bare signal — <em>something
+            changed, go check</em> — and the browser still does the
+            real fetch itself, the same way it always did. The existing
+            once-a-minute polling doesn't go away; it stays exactly as
+            a fallback. The nudge's only job is making the browser do
+            that fetch sooner than it otherwise would have.
+          </p>
+
+        </div>
+
+        <svg width="100%" viewBox="0 0 680 284" role="img" style="margin: 2rem 0;">
+          <title>How a nudge channel works</title>
+          <desc>A server checks for status changes every 20 seconds and broadcasts a bare signal over an open connection; the browser receives it and simply fetches fresh data the normal way, sooner than its next scheduled poll.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+
+          <text x="40" y="52" fill="var(--muted)" font-size="12">Server — every 20s</text>
+          <g>
+            <rect x="40" y="66" width="170" height="56" rx="8" fill="var(--bg-raised)" stroke="var(--border)" stroke-width="1"/>
+            <text x="125" y="90" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="500">Check for changes</text>
+            <text x="125" y="108" text-anchor="middle" fill="var(--muted)" font-size="12">vs last known state</text>
+          </g>
+          <g>
+            <rect x="250" y="66" width="170" height="56" rx="8" fill="var(--bg-raised)" stroke="var(--border)" stroke-width="1"/>
+            <text x="335" y="90" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="500">Something changed?</text>
+            <text x="335" y="108" text-anchor="middle" fill="var(--muted)" font-size="12">real comparison</text>
+          </g>
+          <g>
+            <rect x="460" y="66" width="170" height="56" rx="8" fill="var(--bg-raised)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="545" y="90" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="500">Broadcast nudge</text>
+            <text x="545" y="108" text-anchor="middle" fill="var(--muted)" font-size="12">open SSE connection</text>
+          </g>
+
+          <line x1="210" y1="94" x2="248" y2="94" stroke="var(--muted)" stroke-width="1" marker-end="url(#arrow)"/>
+          <line x1="420" y1="94" x2="458" y2="94" stroke="var(--muted)" stroke-width="1" marker-end="url(#arrow)"/>
+          <text x="440" y="80" text-anchor="middle" fill="var(--muted)" font-size="12">yes</text>
+
+          <path d="M545 122 L545 150 L125 150 L125 184" fill="none" stroke="var(--accent)" stroke-width="1" marker-end="url(#arrow)"/>
+          <text x="330" y="140" text-anchor="middle" fill="var(--muted)" font-size="12">one open connection, no new request</text>
+
+          <text x="40" y="174" fill="var(--muted)" font-size="12">Browser — this tab</text>
+          <g>
+            <rect x="40" y="186" width="170" height="56" rx="8" fill="var(--bg-raised)" stroke="var(--border)" stroke-width="1"/>
+            <text x="125" y="210" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="500">Receives signal</text>
+            <text x="125" y="228" text-anchor="middle" fill="var(--muted)" font-size="12">no data attached</text>
+          </g>
+          <g>
+            <rect x="250" y="186" width="170" height="56" rx="8" fill="var(--bg-raised)" stroke="var(--border)" stroke-width="1"/>
+            <text x="335" y="210" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="500">Fetches fresh data</text>
+            <text x="335" y="228" text-anchor="middle" fill="var(--muted)" font-size="12">same request as always</text>
+          </g>
+          <g>
+            <rect x="460" y="186" width="170" height="56" rx="8" fill="var(--bg-raised)" stroke="var(--border)" stroke-width="1"/>
+            <text x="545" y="210" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="500">UI updates</text>
+            <text x="545" y="228" text-anchor="middle" fill="var(--muted)" font-size="12">seconds, not a minute</text>
+          </g>
+
+          <line x1="210" y1="214" x2="248" y2="214" stroke="var(--muted)" stroke-width="1" marker-end="url(#arrow)"/>
+          <line x1="420" y1="214" x2="458" y2="214" stroke="var(--muted)" stroke-width="1" marker-end="url(#arrow)"/>
+        </svg>
+
+        <div class="prose">
+
+          <h2>The bug that only production could show</h2>
+
+          <p>
+            First real test of this was almost embarrassingly simple —
+            open a raw connection to the new endpoint and watch it. It
+            connected fine, then sat silent, which is exactly correct
+            behavior for a stream with nothing new to report. Left
+            running a little longer, it died on its own with an
+            obscure-looking HTTP/2 error, no code change, no request
+            made — it just stopped.
+          </p>
+
+          <p class="callout">
+            The actual cause had nothing to do with the code: Cloudflare's
+            own edge network — sitting in front of this site for
+            unrelated reasons, mainly SSL and tunneling — kills a
+            connection that's gone quiet for too long, on its own
+            schedule, regardless of what the origin server intends. A
+            connection meant to stay open indefinitely met infrastructure
+            that has an opinion about "indefinitely." This is exactly the
+            kind of thing that never shows up in local development,
+            since local dev never goes anywhere near the production
+            edge network at all — it only exists once real traffic is
+            actually flowing through it.
+          </p>
+
+          <p>
+            The fix is almost anticlimactic once you know the cause: the
+            server now writes a small, meaningless line of text down the
+            connection every 15 seconds, just often enough to keep
+            looking "active" to the infrastructure sitting between it
+            and the browser. The browser's own SSE handling already
+            knows to ignore lines like that by design — they're
+            explicitly defined as comments in the SSE spec, not data —
+            so nothing about the actual feature changes. It's pure
+            plumbing, invisible to anything the user sees, and it's the
+            difference between "works for a minute" and "works."
+          </p>
+
+          <h2>Where it landed</h2>
+
+          <p>
+            Confirmed in both directions against a real service, not
+            just a screenshot: stopped, watched a genuine change get
+            detected and broadcast, watched a browser tab update within
+            seconds; restarted, watched the same thing happen in
+            reverse. Full build notes — the architecture decisions
+            behind the hybrid approach specifically, the reasoning for
+            giving the change-detection loop its own interval rather
+            than reusing an existing one — are in the
+            <a href="../capstone/08-06-2026.html">capstone journal entry</a>
+            for this session.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-04-2026.html">← Previous: 08-04-2026 Entry</a>
+          <a href="08-07-2026.html">Next: 08-07-2026 Entry →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

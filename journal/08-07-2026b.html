@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Duplication Isn't the Enemy — Silent Drift Is — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Why 'don't repeat yourself' is incomplete advice, why the obvious fix for duplicated code isn't always the right one, and why setting a concrete, falsifiable trigger for revisiting an architecture decision beats 'keep an eye on it' every time."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Duplication Isn't the Enemy — Silent Drift Is — Michael Rooney" />
+    <meta property="og:description" content="Why the obvious fix for duplicated code isn't always the right one, and why a concrete trigger beats 'keep an eye on it' for revisiting an architecture decision." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-07-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Duplication Isn't the Enemy — Silent Drift Is — Michael Rooney" />
+    <meta name="twitter:description" content="Why the obvious fix for duplicated code isn't always right, and why a concrete trigger beats 'keep an eye on it.'" />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-07-2026b.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-07-2026">August 7, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Duplication Isn't the Enemy — Silent Drift Is</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            One small function in the status page's proxy — read a
+            Zabbix host's interface, decide if it's up or down — exists
+            in three separate copies across the codebase. A second
+            function, deciding "what's the overall status across
+            everything," is about to become a fourth duplicate of a
+            different kind. The instinctive reaction to hearing that is
+            "just share the code" — and working through why that
+            instinct is wrong here, specifically, turned into a more
+            useful lesson than the actual feature that prompted it.
+          </p>
+
+          <h2>DRY is a slogan, not a rule</h2>
+
+          <p>
+            "Don't repeat yourself" is one of the first principles
+            anyone learns writing code, usually before they've written
+            enough code to know when it doesn't apply. It's good advice
+            for the case it was written for — the same logic, copy-pasted
+            within one codebase, drifting because nobody remembered to
+            update both spots. It says nothing about the actual question
+            that matters here: what does removing the duplication
+            <em>cost</em>, and is that cost smaller than the problem
+            duplication is causing?
+          </p>
+
+          <h2>The "obvious" fix wasn't actually cheap</h2>
+
+          <p>
+            A shared package sounds like the correct engineering answer
+            — one function, one source of truth, no drift possible.
+            Working through what it would actually require here changed
+            the picture entirely: both halves of this project deploy as
+            separate Docker containers, each building from its own
+            subfolder as the build context. A shared package means code
+            living <em>outside</em> both of those folders — which Docker
+            can't reach into on its own. Making that work means
+            restructuring both Dockerfiles, the compose file that wires
+            them together, and probably the Ansible playbooks that
+            deploy the whole thing. That's a real infrastructure
+            project, not an import statement, and it was being
+            considered to save maybe twenty lines of duplicated logic
+            total. The math didn't remotely work.
+          </p>
+
+          <h2>The actual problem was never the duplication itself</h2>
+
+          <p>
+            The one real bug this exact situation ever caused wasn't
+            "two copies exist." It was two copies existing with
+            <strong>no way to notice</strong> when they stopped agreeing
+            with each other — a mismatched value silently shipped to
+            production and only got caught by someone eyeballing a
+            dashboard that looked wrong. That reframing is the actual
+            useful part: duplication is a manageable, even reasonable
+            cost. Duplication nobody can detect drifting is the real
+            liability, and those are two different problems with two
+            different price tags to fix.
+          </p>
+
+          <p class="callout">
+            The fix that mattered wasn't eliminating the duplication —
+            it was eliminating the silence around it. A small shared
+            file of expected input/output pairs, checked independently
+            by each copy's own test suite, costs almost nothing and
+            turns "these two might have quietly drifted apart" into "a
+            test would immediately go red if they had." No shared code,
+            no build changes, no infrastructure — just an agreement,
+            written down once, that both sides get held to automatically
+            from then on.
+          </p>
+
+          <h2>A trigger beats a worry</h2>
+
+          <p>
+            The part of this that felt genuinely new wasn't the
+            duplication decision itself — it was deciding, on purpose,
+            <em>what would actually change the decision later.</em> The
+            easy version is "we'll keep an eye on it as the project
+            grows," which sounds responsible and means nothing concrete
+            — there's no moment where "keeping an eye on it" resolves
+            into an actual decision, just a vague, growing unease that
+            eventually gets acted on reactively, usually in the middle
+            of debugging something that's already broken.
+          </p>
+
+          <p>
+            The alternative: name two specific, checkable conditions
+            ahead of time. A genuinely new kind of thing needing to be
+            duplicated a third time — not another copy of what's already
+            duplicated, an actual new concept joining the list. Or a real
+            bug slipping through despite the cheap fix already being in
+            place, proving the cheap fix wasn't sufficient. Either one is
+            a plain yes-or-no question anyone can answer later without
+            re-litigating the whole argument from scratch. The decision
+            gets made once, calmly, ahead of time — not repeatedly, under
+            pressure, after something's already gone wrong.
+          </p>
+
+          <h2>Why this is worth remembering past this one project</h2>
+
+          <p>
+            None of this is really about Zabbix status codes. It's a
+            small, concrete example of a bigger and genuinely
+            transferable habit: most architecture decisions aren't
+            "right" or "wrong" in the abstract, they're trade-offs
+            between two real costs, and the correct call depends on
+            which cost is bigger <em>right now</em>, at this project's
+            actual size — not which one sounds more disciplined in
+            principle. Writing down the specific condition that would
+            flip the trade-off is what turns a decision into something
+            that can actually be revisited on purpose later, instead of
+            something that just quietly rots until it becomes a
+            problem.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-07-2026.html">← Previous: 08-07-2026 Entry</a>
+          <a href="08-08-2026.html">Next: 08-08-2026 Entry →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

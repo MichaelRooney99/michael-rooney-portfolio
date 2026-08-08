@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Shortcut Everyone Already Knows How to Use — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building a Cmd+K / Ctrl+K / '/' command palette from scratch, no library — the three real pieces (a guarded global keydown listener, a flat filterable list with keyboard nav, focus management on open) and a state-sync bug ESLint's react-hooks/set-state-in-effect rule will probably catch you on too."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Shortcut Everyone Already Knows How to Use — Michael Rooney" />
+    <meta property="og:description" content="Building a Cmd+K command palette from scratch — the guarded keydown listener, keyboard nav, focus management, and a state-sync bug you'll probably hit too." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-02-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The Shortcut Everyone Already Knows How to Use — Michael Rooney" />
+    <meta name="twitter:description" content="Building a Cmd+K command palette from scratch, no library — three real pieces, and a state-sync bug you'll probably hit too." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-02-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-02-2026">August 2, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Shortcut Everyone Already Knows How to Use</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Added a command palette to the status page this week —
+            <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>/</kbd>,
+            type to search, arrow keys to move, Enter to jump. The
+            appeal isn't novelty — it's that most people who'd ever use
+            one already know exactly how, because GitHub, Linear,
+            Notion, Slack, and a dozen other tools all settled on the
+            same shortcut years ago. Building your own doesn't need a
+            library. It's three genuinely separate small problems that
+            happen to look like one feature, and each one has a short,
+            specific answer.
+          </p>
+
+          <h2>Problem one: catching the keypress without breaking everything else</h2>
+
+          <p>
+            The naive version — a global <code>keydown</code> listener
+            checking for <code>Cmd/Ctrl+K</code> or <code>/</code> — works
+            fine until someone's typing in an actual text field elsewhere
+            on the page and types a literal slash. The listener needs a
+            guard: check what the event actually fired on, and skip
+            <code>/</code> specifically (not the modifier shortcut, which
+            never collides with typing) if focus is inside an input,
+            textarea, or contenteditable element.
+          </p>
+
+          <pre><code>function handleKeyDown(event) {
+  const target = event.target
+  const isTypingTarget =
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target?.isContentEditable
+
+  const isCmdK = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k'
+  const isSlash = event.key === '/' && !isTypingTarget
+
+  if (isCmdK || isSlash) {
+    event.preventDefault()
+    openPalette()
+  }
+}</code></pre>
+
+          <p>
+            Worth writing this guard even on a page with zero text inputs
+            today. It costs nothing, and it's exactly the kind of thing
+            that's invisible until the day a form gets added and
+            <code>/</code> silently stops being usable inside it.
+          </p>
+
+          <h2>Problem two: a flat list that filters and navigates by keyboard</h2>
+
+          <p>
+            The palette itself is a search box plus a list, and the list
+            needs three behaviors: filter as you type, move a highlighted
+            row with the arrow keys, and activate whatever's highlighted
+            on Enter. None of this needs a state machine — three pieces
+            of <code>useState</code> cover it: the query string, the
+            highlighted index, and the (memoized) filtered results.
+          </p>
+
+          <pre><code>const [query, setQuery] = useState('')
+const [activeIndex, setActiveIndex] = useState(0)
+
+const filtered = useMemo(() => {
+  const q = query.trim().toLowerCase()
+  if (!q) return allItems
+  return allItems.filter(item => item.label.toLowerCase().includes(q))
+}, [allItems, query])
+
+function handleKeyDown(event) {
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    setActiveIndex(i => Math.min(i + 1, filtered.length - 1))
+  }
+  if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    setActiveIndex(i => Math.max(i - 1, 0))
+  }
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    runItem(filtered[activeIndex])
+  }
+  if (event.key === 'Escape') onClose()
+}</code></pre>
+
+          <p>
+            If your palette searches more than one kind of thing — my
+            version searches services, categories, and incidents in one
+            project — resist the urge to build three separate lists with
+            three separate selected-indexes. Flatten everything into one
+            array of <code>{'{'} type, label, action {'}'}</code> items up
+            front, tag each one with a small type badge in the UI if you
+            want the visual grouping, and let the arrow keys move through
+            one combined list. Three synchronized selection states is a
+            genuinely worse problem than one flat array.
+          </p>
+
+          <h2>Problem three: focus has to land somewhere on open</h2>
+
+          <p>
+            A modal that opens without moving keyboard focus into it is a
+            real accessibility miss — a keyboard or screen-reader user's
+            focus stays wherever it was, silently, behind an overlay they
+            may not even know appeared. Fix is one line, in a
+            mount-only effect:
+          </p>
+
+          <pre><code>const inputRef = useRef(null)
+
+useEffect(() => {
+  inputRef.current?.focus()
+}, [])</code></pre>
+
+          <p>
+            Pair that with <code>role="dialog"</code>,
+            <code>aria-modal="true"</code>, and a label on the container,
+            plus <code>role="listbox"</code>/<code>role="option"</code> on
+            the results — cheap to add, and it's the difference between a
+            palette that works for everyone and one that only works for
+            people using a mouse.
+          </p>
+
+          <h2>The bug you'll probably also hit</h2>
+
+          <p>
+            Here's the one that actually cost time. The obvious way to
+            reset the highlighted row whenever the search query changes
+            is a <code>useEffect</code> watching <code>query</code>,
+            calling <code>setActiveIndex(0)</code> inside it. If your
+            project has the newer <code>eslint-plugin-react-hooks</code>
+            rules enabled, <code>react-hooks/set-state-in-effect</code>
+            will flag that immediately.
+          </p>
+
+          <pre><code>// Flagged: calling setState synchronously inside an effect
+useEffect(() => {
+  setActiveIndex(0)
+}, [query])</code></pre>
+
+          <p class="callout">
+            The rule's reasoning: an effect that calls <code>setState</code>
+            synchronously causes React to commit once, run the effect,
+            then commit <em>again</em> — a cascading extra render for
+            something that didn't need a render cycle in between at all.
+            React's own docs describe the correct version as
+            <em>adjusting state during render</em>: track the previous
+            value of whatever you're watching in a piece of state, and
+            when it differs from the current value, call
+            <code>setState</code> directly in the render body — not
+            inside <code>useEffect</code> — the moment they diverge.
+          </p>
+
+          <pre><code>const [activeIndex, setActiveIndex] = useState(0)
+const [prevQuery, setPrevQuery] = useState(query)
+
+if (query !== prevQuery) {
+  setPrevQuery(query)
+  setActiveIndex(0)
+}</code></pre>
+
+          <p>
+            It reads strangely the first time — calling
+            <code>setState</code> outside any hook, right in the middle
+            of a component function — but it's an officially sanctioned
+            pattern specifically for this shape of problem: state
+            syncing to a prop or another piece of state, not state
+            reacting to something outside React entirely (the system
+            clock, <code>window</code> size, <code>localStorage</code> —
+            those are what <code>useEffect</code> or
+            <code>useSyncExternalStore</code> are actually for). Worth
+            keeping the distinction straight, because the fix looks
+            similar on the surface and is genuinely a different tool for
+            a different job.
+          </p>
+
+          <h2>Where it landed</h2>
+
+          <p>
+            Live now on the status page — try <kbd>/</kbd> or
+            <kbd>Cmd</kbd>+<kbd>K</kbd> at
+            <a href="https://status.michaelrooney.dev" target="_blank" rel="noopener noreferrer">status.michaelrooney.dev</a>.
+            Full build notes, including the part specific to that
+            project (lifting a component's local collapse state so the
+            palette could reach into it), are in the
+            <a href="../capstone/08-02-2026.html">capstone journal entry</a>
+            for this session. The three pieces above generalize to
+            basically anything with a list worth jumping to — a docs
+            site, an admin panel, a personal dashboard. None of it needs
+            a dependency.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+            <span></span>
+            <a href="07-30-2026.html">← Previous: 07-30-2026 Entry</a>
+            <a href="08-04-2026.html">Next: 08-04-2026 Entry →</a>
+            <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
