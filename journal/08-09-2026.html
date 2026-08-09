@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A Fixture Is Just Test Data With a Job — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What a fixture actually is in testing — not a mock, not a stub, just plain input/output data with a specific job: catching drift between two copies of logic that live in different places and can't share code directly."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="A Fixture Is Just Test Data With a Job — Michael Rooney" />
+    <meta property="og:description" content="What a fixture is, why it's different from just 'more tests,' and the real bug it's designed to prevent — a value mismatch nobody catches until production." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-09-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="A Fixture Is Just Test Data With a Job — Michael Rooney" />
+    <meta name="twitter:description" content="What a fixture is, and the real drift bug it's designed to prevent." />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-09-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-09-2026">August 9, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>A Fixture Is Just Test Data With a Job</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            "Fixture-based parity check" had been sitting in a scope doc
+            since early August, written down as the fix for a real
+            problem and never actually built. Finally building it made
+            something click that I hadn't really understood before —
+            a fixture isn't a special kind of test. It's just data, doing
+            a specific job that regular tests don't.
+          </p>
+
+          <h2>The problem it exists to solve</h2>
+
+          <p>
+            The status page has one small function —
+            <code>deriveOverallStatus</code> — that decides the overall
+            health banner: outage beats degraded beats "everything's
+            fine," anything else falls back to unknown. Simple logic.
+            The catch is that it needs to exist in two places that can't
+            share code directly — the browser, and the Express proxy
+            behind it — because the proxy has no way to import from the
+            client's bundle. So there are two separate, hand-written
+            copies of the same three-line decision, living in different
+            files, in different packages.
+          </p>
+
+          <p class="callout">
+            That's exactly the situation that already caused a real bug
+            in this project once — a different pair of duplicated logic
+            drifted apart silently (one copy checked for a Prometheus
+            job named <code>nut_exporter</code>, the other checked for
+            <code>nut</code>) and nobody noticed until it showed up wrong
+            in production. Two copies of the same idea, no way to know
+            if they ever stop agreeing.
+          </p>
+
+          <h2>What a fixture actually is</h2>
+
+          <p>
+            Not a mock. Not a stub. Not a testing framework feature at
+            all, really — just a plain file of example inputs and their
+            correct answers. In this case, a JSON file sitting at the
+            repo root:
+          </p>
+
+          <p>
+            <code>{ "statuses": ["operational", "outage"], "expected": "outage" }</code>
+          </p>
+
+          <p>
+            One file, sitting outside both packages so it isn't "owned"
+            by either one. Both the client's test suite and the proxy's
+            read the exact same file and check that their own local
+            copy of the logic still produces the fixture's expected
+            answer. Not similar tests written twice by hand — the
+            literal same input/output pairs, checked independently.
+          </p>
+
+          <h2>Why this beats "just write more tests"</h2>
+
+          <p>
+            Two test files that happen to cover the same logic, written
+            separately, can drift the exact same way the logic itself
+            drifted — someone updates one copy's test cases and forgets
+            the other, and now both suites are green while quietly
+            testing two different definitions of "correct." A shared
+            fixture removes that possibility structurally. There's only
+            one definition of what the right answer is for a given
+            input, in one file, and if either copy of the actual logic
+            stops matching it, that suite fails — immediately, not
+            eventually, not "whenever someone happens to compare them
+            side by side."
+          </p>
+
+          <h2>The part that surprised me</h2>
+
+          <p>
+            Writing the fixture file itself took ten minutes. Getting it
+            to actually load in the client's test file took longer than
+            expected — not because the concept was hard, but because
+            reading a file off disk works differently depending on how
+            a package is built. The proxy runs as plain CommonJS, where
+            <code>__dirname</code> just exists. The client builds through
+            Vite as ESM, which has no <code>__dirname</code> at all — the
+            real equivalent is <code>import.meta.url</code>, and getting
+            there meant actually understanding why the two packages
+            needed different code to do the identical job of "find this
+            file relative to me," not just copy-pasting until the red
+            squiggle went away.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-08-2026b.html">← Previous: 08-08-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

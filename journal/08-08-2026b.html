@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CI and CD Are Not One Thing — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What Continuous Integration and Continuous Deployment actually mean as separate concepts, why 'add CI/CD' undersells how different they are, and the real constraint that shaped a whole architecture decision: hosted CI runners can't reach a homelab behind an outbound-only tunnel."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="CI and CD Are Not One Thing — Michael Rooney" />
+    <meta property="og:description" content="Why 'CI/CD' is really two separate decisions, and the real reason one half is easy and the other isn't, for a homelab behind an outbound-only tunnel." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-08-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="CI and CD Are Not One Thing — Michael Rooney" />
+    <meta name="twitter:description" content="Why 'CI/CD' is really two separate decisions, and why one half is easy while the other genuinely isn't." />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-08-2026b.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-08-2026">August 8, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>CI and CD Are Not One Thing</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            "Add CI/CD to the project" was on the capstone roadmap for
+            weeks before it actually got built, filed as one item. It
+            isn't one item. Building it made that obvious fast, and it's
+            worth writing down why, because the difference ended up
+            deciding a real architecture question rather than just being
+            a naming nitpick.
+          </p>
+
+          <h2>CI: does the code work, before anyone merges it</h2>
+
+          <p>
+            Continuous Integration means running checks automatically on
+            every push — tests, linting, a real build — rather than
+            trusting that whoever's committing remembered to run
+            everything locally first. For the status page, that's
+            <code>npm test</code> on both the client and the proxy,
+            linting, and a real production-style build. For the Ansible
+            side, it's <code>ansible-lint</code> against every playbook.
+          </p>
+
+          <p>
+            The thing that makes CI genuinely easy to add: none of it
+            needs real infrastructure. Checking out a copy of the repo
+            and running tests against it happens entirely inside
+            whatever machine GitHub hands the workflow — no credentials,
+            no network path into anything private, no secrets stored
+            anywhere. Safe by construction, not just carefully
+            configured to be safe.
+          </p>
+
+          <h2>CD: does the code actually get deployed, automatically</h2>
+
+          <p>
+            Continuous Deployment is the part people usually picture when
+            they hear "CI/CD" — merge to <code>main</code>, and the real
+            thing updates itself, no one has to SSH in and run a
+            playbook by hand. That's a completely different problem than
+            CI, and for this project specifically, a much bigger one.
+          </p>
+
+          <p class="callout">
+            GitHub's hosted runners execute in GitHub's own cloud. They
+            have no path into a private LAN sitting behind a home router
+            and a Cloudflare tunnel — and the tunnel is outbound-only by
+            design, the same decision that keeps every port on this
+            homelab closed to the internet. Nothing initiates an inbound
+            connection from GitHub's cloud to the capstone VM. A standard
+            "deploy on merge" workflow just can't run on a hosted runner
+            here, full stop — not a configuration problem to solve, the
+            same "no open ports" decision holding firm against a new tool
+            that assumes otherwise.
+          </p>
+
+          <h2>What actually shipped</h2>
+
+          <p>
+            CI, fully — both repos, real checks, required before
+            anything merges. CD stayed explicitly undecided, not
+            skipped by accident. Three real options exist (a self-hosted
+            runner on the Ansible control node, a tunneled webhook behind
+            the same Cloudflare Access setup the admin page already uses,
+            or just keeping deploys manual with CI as a pre-check) — and
+            the two automated ones both mean giving something outside
+            the LAN a real way to trigger code execution inside it. That's
+            not a decision to make casually or by default; it's the kind
+            of call that should follow a real threat-model pass, not
+            precede one.
+          </p>
+
+          <h2>The bug CI found on its first real run</h2>
+
+          <p>
+            The very first workflow run failed immediately —
+            <code>working-directory: client</code> pointed at a folder
+            that didn't actually exist. Every scope doc written for this
+            project, every "monorepo structure" diagram, described
+            <code>client/</code> and <code>proxy/</code> as sibling
+            folders. The real repo didn't match — <code>proxy/</code>
+            genuinely was nested, but the client app had been sitting at
+            the repo root the entire time, silently wrong in every
+            document describing it, never caught because nothing had
+            ever actually executed against those exact paths before a
+            real CI workflow tried. That's most of the actual value of
+            automated checks, in one small example — not catching a bug
+            in the application logic, catching a structural assumption
+            that had been quietly false the whole time.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-08-2026.html">← Previous: 08-08-2026 Entry</a>
+          <a href="08-09-2026.html">Next: 08-09-2026 Entry →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
