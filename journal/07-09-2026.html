@@ -1,31 +1,47 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
   <head>
-    <meta charset='UTF-8' />
-    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>The Math of a Shutdown Daemon — Michael Rooney</title>
     <meta
-      name='description'
-      content='Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot.'
+      name="description"
+      content="Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot."
     />
-    <meta name='robots' content='index, follow' />
-    <meta name='author' content='Michael Rooney' />
-    <meta property='og:type' content='article' />
-    <meta property='og:title' content='The Math of a Shutdown Daemon — Michael Rooney' />
-    <meta property='og:description' content='Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot.' />
-    <meta property='og:url' content='https://michaelrooney.dev/journal/07-09-2026.html' />
-    <meta property='og:site_name' content='Michael Rooney' />
-    <meta name='twitter:card' content='summary' />
-    <meta name='twitter:title' content='The Math of a Shutdown Daemon — Michael Rooney' />
-    <meta name='twitter:description' content='Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot.' />
-    
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Math of a Shutdown Daemon — Michael Rooney" />
+    <meta property="og:description" content="Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/07-09-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The Math of a Shutdown Daemon — Michael Rooney" />
+    <meta name="twitter:description" content="Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot." />
+
     <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
-    <link rel='canonical' href='https://michaelrooney.dev/journal/07-09-2026.html' />
-    <link rel='stylesheet' href='../css/styles.css' />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/07-09-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Math of a Shutdown Daemon",
+      "description": "Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot.",
+      "datePublished": "2026-07-09",
+      "url": "https://michaelrooney.dev/journal/07-09-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
   </head>
 
   <body>
-    <a href='#main' class='skip-link'>Skip to main content</a>
+    <a href="#main" class="skip-link">Skip to main content</a>
 
     <header>
       <nav class="nav" role="navigation" aria-label="Primary">
@@ -44,24 +60,24 @@
       </nav>
     </header>
 
-    <main id='main'>
-      <a href='../journal.html' class='back-link reveal'>← Back to Journal</a>
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
 
       <article>
-        <header class='entry-header reveal'>
-          <div class='entry-meta'>
-            <time datetime='07-09-2026'>July 9, 2026</time>
-            <span class='tag tag-homelab'>Homelab</span>
-            <span class='tag tag-learning'>Learning</span>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-09-2026">July 9, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
           </div>
           <h1>The Math of a Shutdown Daemon</h1>
         </header>
 
-        <div class='prose'>
+        <div class="prose">
           <p>
-            Brought the sixth node online today. I reused the name <code>dega</code> for it, configured it as a dedicated Docker host, and dropped it cleanly onto the isolated VLAN 20 subnet at <code>10.10.20.54</code>. 
+            Brought the sixth node online today. I reused the name <code>dega</code> for it, configured it as a dedicated Docker host, and dropped it cleanly onto the isolated VLAN 20 subnet at <code>10.10.20.54</code>.
           </p>
-          
+
           <p>
             The isolation is deliberate — this node exists to host the capstone status page once it's public via a Cloudflare tunnel, and a public-facing box has no business sitting on the same subnet as Vaultwarden or the NUT server. That reasoning gets its own writeup tomorrow. Today was just getting the node itself into a healthy, fleet-managed state before anything gets deployed on it.
           </p>
@@ -71,7 +87,7 @@
           </p>
 
           <p>
-            Then I ran the NUT client configuration, and the system instantly blew up. 
+            Then I ran the NUT client configuration, and the system instantly blew up.
           </p>
 
           <p>
@@ -79,40 +95,39 @@
           </p>
 
           <p>
-            When writing the <code>nut_slaves.yml</code> configuration playbook, I hardcoded a baseline directive: <code>MINSUPPLIES 1</code>. But on a netclient node acting purely as a secondary monitor, the declared power monitoring value for the remote host link is set explicitly to 0. Since 0 is less than 1, the daemon treats the configuration as a logic error and halts execution instantly. 
+            When writing the <code>nut_slaves.yml</code> configuration playbook, I hardcoded a baseline directive: <code>MINSUPPLIES 1</code>. But on a netclient node acting purely as a secondary monitor, the declared power monitoring value for the remote host link is set explicitly to 0. Since 0 is less than 1, the daemon treats the configuration as a logic error and halts execution instantly.
           </p>
 
           <p>
-            The funny thing about infrastructure management is the quiet liabilities. The other secondary nodes in the cluster—<code>network</code>, <code>shasta</code>, <code>murloc</code>, and <code>pbs</code>—had been reporting healthy for weeks simply because their active run states predated the change, or they hadn't cleanly recycled their processes against the updated template parameters. Had any node experienced an unplanned restart, the monitor would have crashed out exactly like the fresh install. 
+            The funny thing about infrastructure management is the quiet liabilities. The other secondary nodes in the cluster—<code>network</code>, <code>shasta</code>, <code>murloc</code>, and <code>pbs</code>—had been reporting healthy for weeks simply because their active run states predated the change, or they hadn't cleanly recycled their processes against the updated template parameters. Had any node experienced an unplanned restart, the monitor would have crashed out exactly like the fresh install.
           </p>
 
-          <p class='callout'>
+          <p class="callout">
             A playbook applying cleanly doesn't mean the configuration is functionally sound, it just means the syntax was valid. A restarted daemon is the only true test of a configuration file.
           </p>
 
           <p>
-            I fixed the root problem inside the Ansible logic by dropping the template requirements down to a proper <code>MINSUPPLIES 0</code> alignment. To ensure the fix held, I pushed the playbook fleet-wide to force a template rewrite and daemon restart across all secondary nodes. 
+            I fixed the root problem inside the Ansible logic by dropping the template requirements down to a proper <code>MINSUPPLIES 0</code> alignment. To ensure the fix held, I pushed the playbook fleet-wide to force a template rewrite and daemon restart across all secondary nodes.
           </p>
-          
+
           <p>
             While validating fleet consistency, <code>network</code> hit an apt-cache locking hang. With a 1,700-hour uptime, it hadn't touched its package repositories in months and timed out on the cache refresh. After manually clearing the locks and refreshing the chains, the final audit run cleared completely. A full, unified wall of green across all subnets, with all six nodes tracking their power states perfectly.
           </p>
-
         </div>
 
-        <nav class='entry-nav' aria-label='Entry navigation'>
+        <nav class="entry-nav" aria-label="Entry navigation">
           <span></span>
-          <a href='07-02-2026.html'>← Previous: 07-02-2026 Entry</a>
-          <a href='07-10-2026.html'>Next: 07-10-2026 Entry →</a>          
+          <a href="07-02-2026.html">← Previous: 07-02-2026 Entry</a>
+          <a href="07-10-2026.html">Next: 07-10-2026 Entry →</a>
           <span></span>
         </nav>
       </article>
     </main>
 
-    <footer role='contentinfo'>
+    <footer role="contentinfo">
       <span>© 2026 Michael Rooney</span>
       <span>Front-End Developer</span>
     </footer>
-    <script src='../js/main.js' defer></script>
+    <script src="../js/main.js" defer></script>
   </body>
 </html>

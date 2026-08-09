@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Optimizing for an Audience That Doesn't Click — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What SEO actually optimizes for, why AEO is a different target rather than a rebrand of the same thing, and applying both to a small personal portfolio with Person and BlogPosting schema."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Optimizing for an Audience That Doesn't Click — Michael Rooney" />
+    <meta property="og:description" content="What SEO actually optimizes for, why AEO is a different target rather than a rebrand of the same thing, and applying both to a small personal portfolio with Person and BlogPosting schema." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-09-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Optimizing for an Audience That Doesn't Click — Michael Rooney" />
+    <meta name="twitter:description" content="What SEO actually optimizes for, why AEO is a different target rather than a rebrand of the same thing, and applying both to a small personal portfolio with Person and BlogPosting schema." />
+
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-09-2026b.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Optimizing for an Audience That Doesn't Click",
+      "description": "What SEO actually optimizes for, why AEO is a different target rather than a rebrand of the same thing, and applying both to a small personal portfolio with Person and BlogPosting schema.",
+      "datePublished": "2026-08-09",
+      "url": "https://michaelrooney.dev/journal/08-09-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-09-2026">August 9, 2026</time>
+            <span class="tag tag-learning">Learning</span>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Optimizing for an Audience That Doesn't Click</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Spent part of today wiring structured data into this site —
+            a <code>Person</code> schema block on the homepage, a
+            batch-scripted <code>BlogPosting</code> block on every journal
+            entry. Small, mechanical changes. But doing them forced a
+            question I'd been fuzzy on for a while: what is SEO actually
+            optimizing <em>for</em>, and is "AEO" a real second thing or
+            just a rebrand chasing a trend cycle?
+          </p>
+
+          <h2>What SEO has always quietly assumed</h2>
+
+          <p>
+            Traditional SEO optimizes for one specific behavior: a person
+            types a query, gets a results page, and clicks a link. Every
+            classic lever — title tags, meta descriptions, canonical URLs,
+            a submitted sitemap — exists to influence two things: whether
+            your page shows up in that list, and whether it's compelling
+            enough to earn the click once it does. The click is the whole
+            model. Rank high, write a description that sells the click,
+            done.
+          </p>
+
+          <p>
+            That assumption held up for two decades because there wasn't
+            really another way to get information out of a search engine.
+            You typed words, you got ten blue links, you clicked one. The
+            page you landed on <em>was</em> the answer.
+          </p>
+
+          <h2>Where the model breaks</h2>
+
+          <p>
+            AI-powered search doesn't work that way anymore. Ask an AI
+            answer engine a question and it doesn't hand you ten links —
+            it reads several sources, synthesizes an answer, and shows
+            you the answer directly, sometimes with a citation, sometimes
+            without one. The page never gets visited. The "result" is a
+            paragraph the engine wrote after reading your page, not your
+            page itself.
+          </p>
+
+          <p>
+            That's the actual distinction between SEO and AEO, and it's
+            more specific than "SEO but for robots." SEO optimizes for
+            being <em>chosen</em> from a list. AEO optimizes for being
+            <em>quoted</em> inside an answer you'll never see a click
+            for. Same underlying technical foundation — crawlability,
+            structured data, a site that isn't actively hostile to
+            parsing — but a different finish line. A page can rank
+            beautifully and still never get pulled into a synthesized
+            answer, because ranking and being extractable turned out to
+            be two different properties of a page, not one.
+          </p>
+
+          <h2>What that means for something as small as this site</h2>
+
+          <p>
+            It's tempting to treat AEO as enterprise-scale marketing
+            noise — irrelevant to a portfolio site with an audience of
+            recruiters and one instructor. Mostly, that's true. Nobody's
+            asking an AI model to recommend a front-end developer the way
+            they'd ask it to compare CRM software. But the underlying
+            practices aren't wasted even at this scale, because they're
+            really just entity clarity — making it unambiguous
+            <em>who</em> this site is about and <em>what</em> each page
+            is, in a format a machine can parse without guessing.
+          </p>
+
+          <p>
+            The <code>Person</code> schema does that at the site level —
+            one declaration that "Michael Rooney," this domain, this
+            GitHub, this LinkedIn, are all the same entity, rather than
+            leaving that inference to prose parsing. The
+            <code>BlogPosting</code> schema does the same thing per
+            entry — headline, author, publish date, description, all in
+            a format that doesn't require an engine to reconstruct
+            structure from a wall of HTML. Whether or not either one ever
+            gets cited by an AI answer engine, they cost almost nothing
+            to add and they make the site's own shape more explicit — to
+            a crawler, and honestly to a human skimming the source too.
+          </p>
+
+          <h2>The part that's still just SEO</h2>
+
+          <p>
+            One thing that didn't change: the actual writing still has
+            to be worth surfacing. Schema tells a machine what a page
+            <em>is</em>. It says nothing about whether the content is any
+            good. Structured data can make a mediocre page easier to
+            find and easier to misquote — it can't make it worth quoting.
+            That part's still just... writing something true and clear
+            enough that someone else, human or model, thinks it's worth
+            repeating.
+          </p>
+
+        </div>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2025 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
