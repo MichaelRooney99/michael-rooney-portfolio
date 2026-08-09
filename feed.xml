@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Michael Rooney — Journal</title>
+    <link>https://michaelrooney.dev/journal.html</link>
+    <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Aug 2026 22:51:46 GMT</lastBuildDate>
+    <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time</title>
+      <link>https://michaelrooney.dev/capstone/08-09-2026d.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026d.html</guid>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Incident history moved into its own column, separate from category status — and a real breakpoint mistake caught by actually looking at the result, not just the code.]]></description>
+    </item>
+    <item>
+      <title>Session 23 — The Badge, the Fixture, and the Gap We Finally Closed</title>
+      <link>https://michaelrooney.dev/capstone/08-09-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026c.html</guid>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The embeddable status badge, built and confirmed live — then a real fixture-based parity test closing a gap flagged since 18- was first scoped, confirmed green in CI.]]></description>
+    </item>
+    <item>
+      <title>Optimizing for an Audience That Doesn't Click</title>
+      <link>https://michaelrooney.dev/journal/08-09-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-09-2026b.html</guid>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What SEO actually optimizes for, why AEO is a different target rather than a rebrand of the same thing, and applying both to a small personal portfolio with Person and BlogPosting schema.]]></description>
+    </item>
+    <item>
+      <title>Session 22 — GitHub Actions, and a Folder That Never Existed</title>
+      <link>https://michaelrooney.dev/capstone/08-09-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026b.html</guid>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building real CI for both repos surfaced a structural mismatch every scope doc had wrong, a deliberate vault-secret tradeoff, and a permanently-failing check fixed properly.]]></description>
+    </item>
+    <item>
+      <title>A Fixture Is Just Test Data With a Job</title>
+      <link>https://michaelrooney.dev/journal/08-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-09-2026.html</guid>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What a fixture is, why it's different from just 'more tests,' and the real bug it's designed to prevent — a value mismatch nobody catches until production.]]></description>
+    </item>
+    <item>
+      <title>Session 21 — Security Hardening, and the Proxy That Trusted Everyone</title>
+      <link>https://michaelrooney.dev/capstone/08-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026.html</guid>
+      <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A secrets audit that found something bigger than a leaked credential — three unrestricted authenticated proxies — fixed with real allowlists, confirmed live.]]></description>
+    </item>
+    <item>
+      <title>CI and CD Are Not One Thing</title>
+      <link>https://michaelrooney.dev/journal/08-08-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-08-2026b.html</guid>
+      <pubDate>Sat, 08 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Why 'CI/CD' is really two separate decisions, and the real reason one half is easy and the other isn't, for a homelab behind an outbound-only tunnel.]]></description>
+    </item>
+    <item>
+      <title>Publishing Isn't the Same as Protecting</title>
+      <link>https://michaelrooney.dev/journal/08-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-08-2026.html</guid>
+      <pubDate>Sat, 08 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What a Cloudflare Tunnel actually is, and a real gotcha: publishing a route makes it public by default — protecting it is a separate step.]]></description>
+    </item>
+    <item>
+      <title>Session 20 — Manual Incident Authoring, and Two Routing Bugs Nginx Was Hiding</title>
+      <link>https://michaelrooney.dev/capstone/08-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-08-2026.html</guid>
+      <pubDate>Sat, 08 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The last big workflow gap, closed — with a real dedup bug caught before shipping, Cloudflare Access with zero application code, and two genuine nginx routing bugs found in production.]]></description>
+    </item>
+    <item>
+      <title>Duplication Isn't the Enemy — Silent Drift Is</title>
+      <link>https://michaelrooney.dev/journal/08-07-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-07-2026b.html</guid>
+      <pubDate>Fri, 07 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Why the obvious fix for duplicated code isn't always the right one, and why a concrete trigger beats 'keep an eye on it' for revisiting an architecture decision.]]></description>
+    </item>
+    <item>
+      <title>A Promise You Can Check Automatically</title>
+      <link>https://michaelrooney.dev/journal/08-07-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-07-2026.html</guid>
+      <pubDate>Fri, 07 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What a test file actually does, what pass/fail means (and doesn't), whether every file deserves a test, and why a small new lib/ folder was the right call.]]></description>
+    </item>
+    <item>
+      <title>Session 19 — The First Real Tests, and a Folder Nobody Planned For</title>
+      <link>https://michaelrooney.dev/capstone/08-07-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-07-2026.html</guid>
+      <pubDate>Fri, 07 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[23 tests targeting real documented bug history, a react-refresh lint catch, a new lib/ directory, and a scope doc for testing the deployment playbooks next.]]></description>
+    </item>
+    <item>
+      <title>The Difference Between Asking and Being Told</title>
+      <link>https://michaelrooney.dev/journal/08-06-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-06-2026.html</guid>
+      <pubDate>Thu, 06 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What SSE actually is, why a signal-only nudge channel can be worth more than the data it doesn't carry, and a real Cloudflare bug found in testing.]]></description>
+    </item>
+    <item>
+      <title>Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate</title>
+      <link>https://michaelrooney.dev/capstone/08-06-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-06-2026.html</guid>
+      <pubDate>Thu, 06 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The hybrid SSE nudge channel, a real Cloudflare idle-timeout bug found in testing, and both directions confirmed live against production.]]></description>
+    </item>
+    <item>
+      <title>Session 17 — Auto-Drafted Incidents, and the Build Assumption That Wasted Twenty Minutes</title>
+      <link>https://michaelrooney.dev/capstone/08-05-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-05-2026.html</guid>
+      <pubDate>Wed, 05 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A new drafted-incidents table, threshold detection re-derived from real data, a live production test end to end, and a stale build assumption that cost real time.]]></description>
+    </item>
+    <item>
+      <title>One Hex Code, Two Different Verdicts</title>
+      <link>https://michaelrooney.dev/journal/08-04-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-04-2026.html</guid>
+      <pubDate>Tue, 04 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What WCAG contrast ratios actually measure, and why the same color can pass against one background and fail against another — with a real example.]]></description>
+    </item>
+    <item>
+      <title>Session 16 — A Full Restyle, and the One Color That Didn't Pass</title>
+      <link>https://michaelrooney.dev/capstone/08-04-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-04-2026.html</guid>
+      <pubDate>Tue, 04 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A component-by-component token replacement, real portfolio typography, and a WCAG contrast failure caught in the accent color and fixed at the source.]]></description>
+    </item>
+    <item>
+      <title>The Shortcut Everyone Already Knows How to Use</title>
+      <link>https://michaelrooney.dev/journal/08-02-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-02-2026.html</guid>
+      <pubDate>Sun, 02 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building a Cmd+K command palette from scratch — the guarded keydown listener, keyboard nav, focus management, and a state-sync bug you'll probably hit too.]]></description>
+    </item>
+    <item>
+      <title>Session 15 — A Command Palette, and the Same Bug Caught Twice</title>
+      <link>https://michaelrooney.dev/capstone/08-02-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-02-2026.html</guid>
+      <pubDate>Sun, 02 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A hand-rolled Cmd+K command palette, reusing the existing detail view and adding a new category filter — plus a lint rule that caught the same state-sync mistake in two different components.]]></description>
+    </item>
+    <item>
+      <title>Session 14 — Click Into a Node, See What It's Actually Doing</title>
+      <link>https://michaelrooney.dev/capstone/07-31-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-31-2026.html</guid>
+      <pubDate>Fri, 31 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Response-time tracking and a per-service detail view, built together — a hand-rolled line chart, a real Prometheus job-name bug, and confirming both data paths independently.]]></description>
+    </item>
+    <item>
+      <title>The Half-Second Nobody's Supposed to See</title>
+      <link>https://michaelrooney.dev/journal/07-30-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-30-2026.html</guid>
+      <pubDate>Thu, 30 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[How a theme toggle avoids a flash of the wrong theme on load, and how Tailwind v4's CSS-native @theme system makes it possible without touching every component.]]></description>
+    </item>
+    <item>
+      <title>Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch</title>
+      <link>https://michaelrooney.dev/capstone/07-30-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-30-2026.html</guid>
+      <pubDate>Thu, 30 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building the color-token system and light/dark toggle — Tailwind v4's @theme directive, an anti-flash script, and real contrast bugs a manual test caught.]]></description>
+    </item>
+    <item>
+      <title>Session 12 — Four Small Things, One Real Lint Chain</title>
+      <link>https://michaelrooney.dev/capstone/07-29-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-29-2026.html</guid>
+      <pubDate>Wed, 29 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A dynamic tab title and favicon, skeleton loading states, a days-since-last-incident counter, documented public API routes, and a genuine three-layer ESLint purity chase.]]></description>
+    </item>
+    <item>
+      <title>Three Small Lies a Working Ansible Collection Told Me</title>
+      <link>https://michaelrooney.dev/journal/07-25-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-25-2026b.html</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Scripting Zabbix host registration with community.zabbix — a changed auth model, a become setting that breaks over an API connection, and a template permission scope that isn't the host permission scope.]]></description>
+    </item>
+    <item>
+      <title>What a Scraper Actually Is, and How Mine Works</title>
+      <link>https://michaelrooney.dev/journal/07-25-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-25-2026.html</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What a scraper actually is, the pieces every one needs, what they're used for, and a walkthrough of a real one already built and shipped in my homelab status page.]]></description>
+    </item>
+    <item>
+      <title>Session 11 — Giving Every Category Real History</title>
+      <link>https://michaelrooney.dev/capstone/07-25-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-25-2026.html</guid>
+      <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Scoping and building full-category uptime history for Proxmox API and Zabbix — a proxy-side snapshot poller, a dead-code bug found along the way, and a checklist applied before deploying instead of after.]]></description>
+    </item>
+    <item>
+      <title>Scope Isn't Overhead — It's the Actual Work</title>
+      <link>https://michaelrooney.dev/journal/07-24-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-24-2026.html</guid>
+      <pubDate>Fri, 24 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[What 'scope' actually means, why it matters more than the build itself, and a repeatable process for scoping a project or feature yourself.]]></description>
+    </item>
+    <item>
+      <title>Session 10 — Incident History, and Five Bugs on the Way There</title>
+      <link>https://michaelrooney.dev/capstone/07-24-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-24-2026.html</guid>
+      <pubDate>Fri, 24 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building incident history end to end, and the trail of real bugs it took to get there — tooling, timezones, filenames, and a missing nginx route.]]></description>
+    </item>
+    <item>
+      <title>Chasing a Blue Line That Wasn't There</title>
+      <link>https://michaelrooney.dev/journal/07-21-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-21-2026.html</guid>
+      <pubDate>Tue, 21 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A pass through the site's mobile experience — full-card project links that surfaced a real hidden-link bug, a nav hamburger rolled out across all 33 pages, a missing data-label attribute, and a debugging detour into a blue underline that turned out to be a stale phone cache.]]></description>
+    </item>
+    <item>
+      <title>Google IT Support, Done — Network+, Still Waiting</title>
+      <link>https://michaelrooney.dev/journal/07-19-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-19-2026.html</guid>
+      <pubDate>Sun, 19 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Finishing the Google IT Support certificate on top of a 45+ hour work week, the capstone build, and capstone-adjacent research — and being honest about why the Network+ exam itself is still just sitting there unscheduled.]]></description>
+    </item>
+    <item>
+      <title>Session 9 — Real History, and Two Loose Ends Tied Off</title>
+      <link>https://michaelrooney.dev/capstone/07-18-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-18-2026.html</guid>
+      <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Wiring the 90-day uptime bars to real Prometheus data, fixing a cloudflared idempotency gap, rewriting the Ansible reference doc, and tracing a fleet-wide monitoring gap to a physical rack rebuild.]]></description>
+    </item>
+    <item>
+      <title>Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away</title>
+      <link>https://michaelrooney.dev/capstone/07-16-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-16-2026.html</guid>
+      <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Taking the capstone status page live — the missing Dockerfiles, a single-origin nginx reverse proxy, a crash-looping proxy container, a leaked password, and a silently missing Prometheus category caught only after going public.]]></description>
+    </item>
+    <item>
+      <title>Session 7 — A VM, a VLAN, and a Backwards Firewall Rule</title>
+      <link>https://michaelrooney.dev/capstone/07-12-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-12-2026.html</guid>
+      <pubDate>Sun, 12 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug that broke Layer 2 entirely, three cloudflared token mistakes, and an OPNsense firewall rule that had source and destination reversed.]]></description>
+    </item>
+    <item>
+      <title>Giving the Capstone a Real Home</title>
+      <link>https://michaelrooney.dev/journal/07-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-10-2026.html</guid>
+      <pubDate>Fri, 10 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Standing up Dega as an isolated VLAN 20 node built specifically to host the capstone status page — retargeted Ansible playbooks, scoped firewall pinholes for the proxy's outbound calls, and the VM-vs-LXC decision that came from taking the isolation seriously.]]></description>
+    </item>
+    <item>
+      <title>The Math of a Shutdown Daemon</title>
+      <link>https://michaelrooney.dev/journal/07-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-09-2026.html</guid>
+      <pubDate>Thu, 09 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Deploying a secure Docker host on VLAN 20 for the capstone project uncovered a configuration conflict inside the NUT automation templates, proving that what looks fine static can easily break on boot.]]></description>
+    </item>
+    <item>
+      <title>Teaching the Lab to Talk Trash</title>
+      <link>https://michaelrooney.dev/journal/07-02-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/07-02-2026.html</guid>
+      <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A pure-fun side project — a small Flask relay that adds snark to Grafana alerts and Proxmox/PBS notifications before forwarding them to Discord, plus an SSH lockout on a freshly provisioned LXC and a first look at Proxmox's Handlebars webhook templating.]]></description>
+    </item>
+    <item>
+      <title>Two Hours to Spare</title>
+      <link>https://michaelrooney.dev/journal/06-30-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/06-30-2026.html</guid>
+      <pubDate>Tue, 30 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A wildcard cert renewal that failed silently until the real Certbot log revealed the actual cause — a Proxmox-level DNS misconfiguration pointing an LXC at Tailscale's resolver instead of the LAN, unrelated to the Cloudflare token I spent an hour chasing first.]]></description>
+    </item>
+    <item>
+      <title>Zabbix Online, Switch Offline</title>
+      <link>https://michaelrooney.dev/journal/06-27-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/06-27-2026.html</guid>
+      <pubDate>Sat, 27 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Completing Zabbix monitoring for all five Proxmox nodes — 606 items collecting — and discovering the Netgear GS308Ev4 doesn't support SNMP.]]></description>
+    </item>
+    <item>
+      <title>Session 6 — Zabbix Adapter and Four Live Data Sources</title>
+      <link>https://michaelrooney.dev/capstone/06-27-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-27-2026.html</guid>
+      <pubDate>Sat, 27 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building the Zabbix client adapter, debugging a Zabbix 7.x API change that moved agent availability into the interfaces object, and wiring the fourth data source into a fully operational status page.]]></description>
+    </item>
+    <item>
+      <title>Connection Reset by Peer</title>
+      <link>https://michaelrooney.dev/journal/06-20-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/06-20-2026.html</guid>
+      <pubDate>Sat, 20 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Deploying Zabbix Agent 2 across all five Proxmox nodes via Ansible — a version mismatch with the server, a 404 from a repo path that changed between Zabbix versions, and a missing log directory that crash-looped the service after the upgrade.]]></description>
+    </item>
+    <item>
+      <title>Session 5 — Zabbix, Debugging, and a Deliberate Deferral</title>
+      <link>https://michaelrooney.dev/capstone/06-17-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-17-2026.html</guid>
+      <pubDate>Wed, 17 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Wiring up the Zabbix proxy route, debugging a wrong IP, fixing TypeScript strict mode errors, and making a deliberate decision to defer Zabbix configuration in favor of deployment momentum.]]></description>
+    </item>
+    <item>
+      <title>Session 4 — Proxmox Adapter and Debugging</title>
+      <link>https://michaelrooney.dev/capstone/06-11-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-11-2026.html</guid>
+      <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Wiring up the Proxmox adapter, debugging NaN metrics, a missing Sys.Audit permission, and learning that the /nodes endpoint doesn't return what you think it does.]]></description>
+    </item>
+    <item>
+      <title>Session 3 — The Proxy Layer</title>
+      <link>https://michaelrooney.dev/capstone/06-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-10-2026.html</guid>
+      <pubDate>Wed, 10 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building an Express proxy to keep Proxmox API credentials off the browser — what a backend-for-frontend is, why CORS exists, and how dotenv keeps secrets out of source code.]]></description>
+    </item>
+    <item>
+      <title>Session 2 — Hook, Components, and First Live Render</title>
+      <link>https://michaelrooney.dev/capstone/06-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-09-2026.html</guid>
+      <pubDate>Tue, 09 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[TanStack Query hook, four UI components, and the first live render — six services pulling real data from Prometheus and NUT, plus debugging a label key mismatch in the UPS adapter.]]></description>
+    </item>
+    <item>
+      <title>Session 1 — Scaffold, Dependencies, and Data Layer</title>
+      <link>https://michaelrooney.dev/capstone/06-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-08-2026.html</guid>
+      <pubDate>Mon, 08 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4, TanStack Query provider, and the complete typed data layer talking to Prometheus and NUT before any UI exists.]]></description>
+    </item>
+    <item>
+      <title>N10-009 Study Notes: Review &amp; What's Next</title>
+      <link>https://michaelrooney.dev/journal/n10-009-05.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/n10-009-05.html</guid>
+      <pubDate>Tue, 02 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A full review of the N10-009 exam domains, what to focus on in the final week, and what the path to CCNA looks like from here.]]></description>
+    </item>
+    <item>
+      <title>N10-009 Study Notes: Troubleshooting</title>
+      <link>https://michaelrooney.dev/journal/n10-009-04.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/n10-009-04.html</guid>
+      <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A practical walkthrough of Network+ domain 5 — the troubleshooting methodology, tools, and common failure scenarios — anchored to real homelab debugging sessions.]]></description>
+    </item>
+    <item>
+      <title>N10-009 Study Notes: Security &amp; Operations</title>
+      <link>https://michaelrooney.dev/journal/n10-009-03.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/n10-009-03.html</guid>
+      <pubDate>Sun, 31 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A practical walkthrough of Network+ domains 3 and 4 — firewalls, VPNs, AAA, SNMP, monitoring, and high availability — anchored to a real homelab.]]></description>
+    </item>
+    <item>
+      <title>N10-009 Study Notes: Network Implementation</title>
+      <link>https://michaelrooney.dev/journal/n10-009-02.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/n10-009-02.html</guid>
+      <pubDate>Sun, 31 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A practical walkthrough of Network+ domain 2 — Ethernet, switching, VLANs, STP, wireless, and virtualization networking — anchored to a real five-node homelab.]]></description>
+    </item>
+    <item>
+      <title>N10-009 Study Notes: Networking Concepts</title>
+      <link>https://michaelrooney.dev/journal/n10-009-01.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/n10-009-01.html</guid>
+      <pubDate>Thu, 28 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A practical walkthrough of Network+ domain 1 — the OSI model, IP addressing, subnetting, routing, and DNS — anchored to a real five-node homelab.]]></description>
+    </item>
+    <item>
+      <title>Going Dark for a Bit</title>
+      <link>https://michaelrooney.dev/journal/05-23-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-23-2026.html</guid>
+      <pubDate>Thu, 28 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The Network+ voucher is purchased. The exam is soon. Here's where the homelab stands, what I'm studying, and why CCNA is next.]]></description>
+    </item>
+    <item>
+      <title>Overdue Housekeeping</title>
+      <link>https://michaelrooney.dev/journal/05-16-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-16-2026.html</guid>
+      <pubDate>Sat, 16 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Splitting the project list into a dedicated portfolio showcase, wiring up new coursework projects, stripping the sitemap back to basics, and consolidating a scattered local repo structure.]]></description>
+    </item>
+    <item>
+      <title>One Place for Secrets</title>
+      <link>https://michaelrooney.dev/journal/05-14-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-14-2026.html</guid>
+      <pubDate>Thu, 14 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Deploying Vaultwarden as a self-hosted password manager — working through a Node 0 networking dead end, landing on Murloc, and using the existing Tailscale exit node for resilient access.]]></description>
+    </item>
+    <item>
+      <title>Two More Eyes</title>
+      <link>https://michaelrooney.dev/journal/05-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-09-2026.html</guid>
+      <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Deploying Zabbix for infrastructure state monitoring and Homelable for interactive topology visualization — plus the PostgreSQL loopback issue that took longer to find than it should have.]]></description>
+    </item>
+    <item>
+      <title>Automation Infrastructure</title>
+      <link>https://michaelrooney.dev/journal/05-07-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-07-2026.html</guid>
+      <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Standing up Ansible as a permanent part of the homelab — control node, inventory, vault, and the first playbooks enforcing consistent state across all five nodes.]]></description>
+    </item>
+    <item>
+      <title>Configuration as Code</title>
+      <link>https://michaelrooney.dev/journal/05-03-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-03-2026.html</guid>
+      <pubDate>Sun, 03 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Standing up an Ansible LXC, writing the first real playbooks, and using the process to audit NUT configs that turned out to have enough inconsistencies to warrant a full standardization pass.]]></description>
+    </item>
+    <item>
+      <title>Proactive Alerts</title>
+      <link>https://michaelrooney.dev/journal/05-02-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/05-02-2026.html</guid>
+      <pubDate>Sat, 02 May 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Moving beyond passive dashboards to a proactive alerting system for Proxmox and UPS infrastructure.]]></description>
+    </item>
+    <item>
+      <title>Metrics, Finally</title>
+      <link>https://michaelrooney.dev/journal/04-30-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-30-2026.html</guid>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Standing up Prometheus and Grafana across the homelab, debugging a peaNUT UPS integration that turned out to be running on dummy data, and learning why USB HID devices and LXC containers don't get along.]]></description>
+    </item>
+    <item>
+      <title>The Call</title>
+      <link>https://michaelrooney.dev/journal/04-29-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-29-2026.html</guid>
+      <pubDate>Wed, 29 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The networking conversation I'd been building toward for months finally happened. What I learned, what it means, and where it points next.]]></description>
+    </item>
+    <item>
+      <title>Restructuring the Infrastructure</title>
+      <link>https://michaelrooney.dev/journal/04-25-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-25-2026.html</guid>
+      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Moving the backup server to dedicated bare metal, replacing a cluster node, adding UPS monitoring and temperature visibility — a significant infrastructure milestone.]]></description>
+    </item>
+    <item>
+      <title>Never Locked Out Again</title>
+      <link>https://michaelrooney.dev/journal/04-23-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-23-2026b.html</guid>
+      <pubDate>Thu, 23 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[After getting locked out of a Proxmox node tonight, I fixed the structural problem — migrating the Tailscale exit node out of OPNsense's failure domain and installing Tailscale directly on the host for permanent out-of-band access.]]></description>
+    </item>
+    <item>
+      <title>The VM That Wouldn't Start</title>
+      <link>https://michaelrooney.dev/journal/04-23-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-23-2026.html</guid>
+      <pubDate>Thu, 23 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A Proxmox kernel update, a stopped OPNsense VM, a stale ISO reference, and why physical console access is worth more than you think.]]></description>
+    </item>
+    <item>
+      <title>Monitoring Every Node</title>
+      <link>https://michaelrooney.dev/journal/04-19-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-19-2026.html</guid>
+      <pubDate>Sun, 19 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Installing Glances on four Proxmox nodes, wiring its REST API into the Homepage dashboard, and the pip dependency conflict that made it more interesting than expected.]]></description>
+    </item>
+    <item>
+      <title>Chasing Ghosts, Finding Watts</title>
+      <link>https://michaelrooney.dev/journal/04-16-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-16-2026.html</guid>
+      <pubDate>Thu, 16 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A long afternoon chasing phantom reboots on a Proxmox node — ruling out everything, finding nothing definitive, and accidentally building out full UPS monitoring along the way.]]></description>
+    </item>
+    <item>
+      <title>A Tour of the Homelab</title>
+      <link>https://michaelrooney.dev/journal/04-11-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-11-2026.html</guid>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A visual walkthrough of a four-node Proxmox homelab — network architecture, infrastructure services, monitoring, and backups.]]></description>
+    </item>
+    <item>
+      <title>Network Segmentation — VLANs in the Homelab</title>
+      <link>https://michaelrooney.dev/journal/04-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-10-2026.html</guid>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Implementing VLAN segmentation with OPNsense and a managed switch — the concept, the configuration, and why network isolation matters.]]></description>
+    </item>
+    <item>
+      <title>Upgrading a Node the Right Way</title>
+      <link>https://michaelrooney.dev/journal/04-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-09-2026.html</guid>
+      <pubDate>Thu, 09 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Swapping out a Proxmox cluster node for faster hardware — live VM migration, hardware replacement, and what the process teaches about infrastructure resilience.]]></description>
+    </item>
+    <item>
+      <title>Studying With Something at Stake</title>
+      <link>https://michaelrooney.dev/journal/04-05-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-05-2026.html</guid>
+      <pubDate>Sun, 05 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Focused Network+ study with a real deadline — a conversation with a networking manager at my employer, and what two weeks of preparation actually looks like.]]></description>
+    </item>
+    <item>
+      <title>A Door Opens</title>
+      <link>https://michaelrooney.dev/journal/04-02-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-02-2026.html</guid>
+      <pubDate>Thu, 02 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[An email from my company's Network Engineering Manager — what it means, how I responded, and what the next two weeks look like.]]></description>
+    </item>
+    <item>
+      <title>Planka, Persistence, and Layered Proxies</title>
+      <link>https://michaelrooney.dev/journal/04-01-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/04-01-2026.html</guid>
+      <pubDate>Wed, 01 Apr 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Two days troubleshooting Planka's websocket issue through a reverse proxy — what broke, what fixed it, and what the process taught me about layered NGINX configs.]]></description>
+    </item>
+    <item>
+      <title>Real Backups, Finally</title>
+      <link>https://michaelrooney.dev/journal/03-28-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-28-2026.html</guid>
+      <pubDate>Sat, 28 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Deploying Proxmox Backup Server on a homelab node — datastores, deduplication, retention policies, and why backups matter before you need them.]]></description>
+    </item>
+    <item>
+      <title>25 Certifications and a Full-Time Job</title>
+      <link>https://michaelrooney.dev/journal/03-26-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-26-2026.html</guid>
+      <pubDate>Thu, 26 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A look at six months of self-directed learning — 25+ credentials across infrastructure, development, design, and project management, built around a full-time job and a family.]]></description>
+    </item>
+    <item>
+      <title>Building a Homelab Dashboard</title>
+      <link>https://michaelrooney.dev/journal/03-25-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-25-2026.html</guid>
+      <pubDate>Wed, 25 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Setting up Homepage dashboard with live Proxmox stats, wildcard SSL, and the YAML config workflow that comes with it.]]></description>
+    </item>
+    <item>
+      <title>Rebuilding the Portfolio</title>
+      <link>https://michaelrooney.dev/journal/03-22-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-22-2026.html</guid>
+      <pubDate>Sat, 21 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A full restyle of michaelrooney.dev — new typography, warm dark theme, and a public journal section.]]></description>
+    </item>
+    <item>
+      <title>Home Lab Infrastructure</title>
+      <link>https://michaelrooney.dev/journal/03-21-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-21-2026.html</guid>
+      <pubDate>Sat, 21 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A summary of my experiences building and maintaining a home lab infrastructure for learning and experimentation.]]></description>
+    </item>
+    <item>
+      <title>CI/CD in the Real World</title>
+      <link>https://michaelrooney.dev/journal/03-20-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-20-2026.html</guid>
+      <pubDate>Fri, 20 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Mapping all eight CI/CD pipeline phases to actual homelab infrastructure for a coursework assignment.]]></description>
+    </item>
+    <item>
+      <title>Fixing What I Broke</title>
+      <link>https://michaelrooney.dev/journal/03-16-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/03-16-2026.html</guid>
+      <pubDate>Mon, 16 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A Proxmox firewall cleanup broke OPNsense. What happened, how I fixed it, and what I learned.]]></description>
+    </item>
+  </channel>
+</rss>
