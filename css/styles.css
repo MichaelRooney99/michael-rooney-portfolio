@@ -616,6 +616,32 @@ button:focus-visible {
   background: rgba(200, 98, 42, 0.1);
 }
 
+.load-more-btn {
+  display: block;
+  margin: 2.5rem auto 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  padding: 0.55rem 1.8rem;
+  font-size: 0.72rem;
+  font-family: var(--sans);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.load-more-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(200, 98, 42, 0.1);
+}
+
+.load-more-btn.hidden {
+  display: none;
+}
+
 .entry-list {
   list-style: none;
   display: flex;

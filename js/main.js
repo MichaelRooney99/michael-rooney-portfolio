@@ -103,30 +103,58 @@ if (!prefersReducedMotion && window.matchMedia("(pointer: fine)").matches) {
   });
 }
 
-/* ── Journal Tag Filtering ── */
-const filterBtns = document.querySelectorAll(".filter-btn");
-const entryItems = document.querySelectorAll(".entry-list li");
-const noResults  = document.querySelector(".no-results");
+/* ── Journal Tag Filtering + Pagination ── */
+const filterBtns  = document.querySelectorAll(".filter-btn");
+const entryItems  = document.querySelectorAll(".entry-list li");
+const noResults   = document.querySelector(".no-results");
+const loadMoreBtn = document.querySelector(".load-more-btn");
+
+const PAGE_SIZE = 10;
+let currentFilter = "all";
+let revealCount = PAGE_SIZE;
+
+function getMatches(filter) {
+  return Array.from(entryItems).filter((item) => {
+    const tags = item.dataset.tags || "";
+    return filter === "all" || tags.includes(filter);
+  });
+}
+
+function renderEntries() {
+  const matches = getMatches(currentFilter);
+
+  entryItems.forEach((item) => item.classList.add("hidden"));
+  matches.slice(0, revealCount).forEach((item) => item.classList.remove("hidden"));
+
+  if (noResults) {
+    noResults.classList.toggle("visible", matches.length === 0);
+  }
+
+  if (loadMoreBtn) {
+    loadMoreBtn.classList.toggle("hidden", revealCount >= matches.length);
+  }
+}
 
 if (filterBtns.length) {
   filterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const filter = btn.dataset.filter;
-
       filterBtns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
-      let visible = 0;
-      entryItems.forEach((item) => {
-        const tags = item.dataset.tags || "";
-        const match = filter === "all" || tags.includes(filter);
-        item.classList.toggle("hidden", !match);
-        if (match) visible++;
-      });
-
-      if (noResults) {
-        noResults.classList.toggle("visible", visible === 0);
-      }
+      currentFilter = btn.dataset.filter;
+      revealCount = PAGE_SIZE;
+      renderEntries();
     });
   });
+}
+
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener("click", () => {
+    revealCount += PAGE_SIZE;
+    renderEntries();
+  });
+}
+
+if (entryItems.length) {
+  renderEntries();
 }
