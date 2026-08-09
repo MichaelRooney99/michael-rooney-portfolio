@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 21 — Security Hardening, and the Proxy That Trusted Everyone — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A secrets audit that was supposed to be the cheap, boring layer of security hardening turned up something bigger — three unrestricted, fully-authenticated passthrough proxies. Fixed with real allowlists, nginx-level security headers, rate limiting, and a clean git-history audit, all confirmed live against production."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 21 — Security Hardening, and the Proxy That Trusted Everyone — Michael Rooney" />
+    <meta property="og:description" content="A secrets audit that found something bigger than a leaked credential — three unrestricted authenticated proxies — fixed with real allowlists, confirmed live." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-09-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Session 21 — Security Hardening, and the Proxy That Trusted Everyone — Michael Rooney" />
+    <meta name="twitter:description" content="A routine secrets audit found three unrestricted authenticated proxies — fixed with real allowlists, confirmed live in production." />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-09-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-09-2026">August 9, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 21 — Security Hardening, and the Proxy That Trusted Everyone</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <code>22-Security Hardening</code> was scoped as four
+            layers, with the secrets audit expected to be the cheap,
+            boring one — the layer where "nothing's actually wrong" was
+            a completely acceptable outcome. It found the biggest
+            single finding of this entire project instead.
+          </p>
+
+          <h2>What "audit the secrets" actually turned up</h2>
+
+          <p class="callout">
+            <code>.gitignore</code> and logging were both genuinely
+            clean — no leaked credential, nothing dumped into logs that
+            shouldn't be there. But looking closely at how
+            <code>/proxmox</code>, <code>/zabbix</code>, and
+            <code>/prometheus</code> were actually built revealed
+            something worse than a leak: all three were unrestricted,
+            fully-authenticated passthrough proxies. Any path under
+            <code>/proxmox/*</code> forwarded straight to the real
+            Proxmox API with the real token attached. Any JSON-RPC
+            method sent to <code>/zabbix</code> forwarded to the real
+            Zabbix instance with a real session token. Any path under
+            <code>/prometheus/*</code> hit the real Prometheus install
+            directly. The app's own code only ever called a handful of
+            specific read-only endpoints — nothing enforced that
+            boundary. The public internet had, in practice, whatever
+            access those real credentials actually granted.
+          </p>
+
+          <h2>Why this mattered more than the original plan</h2>
+
+          <p>
+            The scope doc's original order put rate limiting first.
+            This finding jumped the queue on purpose — a rate limiter
+            slows down repeated abuse, it doesn't stop one well-aimed
+            request through a door that was never locked in the first
+            place. Fixed with real allowlists: each proxy restricted to
+            the exact paths or methods the app's own client code
+            actually calls, everything else rejected with a 403 before
+            it ever reaches the real upstream.
+          </p>
+
+          <h2>A real architectural correction along the way</h2>
+
+          <p>
+            The original plan assumed security headers meant adding
+            <code>helmet.js</code> to the Express proxy — a reasonable
+            default assumption that turned out to be wrong for this
+            project's actual architecture. The proxy never serves the
+            HTML page; nginx does, in this single-origin setup. A CSP
+            only means something on the response that delivers the
+            page — setting it on the proxy's JSON API responses would
+            have protected nothing. Headers moved to nginx instead,
+            which turned out to be strictly better: one place to
+            configure, coverage for both the static page and every
+            proxied API response, and zero new npm dependency.
+          </p>
+
+          <h2>Confirmed against real production, same standard as always</h2>
+
+          <p>
+            The allowlists were tested with real requests the app never
+            makes — a Proxmox config path, an unused Zabbix method, an
+            unused Prometheus endpoint — each correctly returning this
+            project's own 403 instead of the real backend's response.
+            Rate limiting was tested with a real 150-request loop
+            against <code>/incidents</code>: exactly 60 clean responses
+            (matching the configured burst), then a genuine
+            leaky-bucket refill pattern afterward — textbook behavior,
+            not noise. The git-history check for a committed
+            <code>.env</code> came back clean too, though only after
+            catching a real mistake mid-session — the first check ran
+            against the wrong repo entirely (the Ansible playbooks
+            repo, not <code>homelab-status</code>), caught before it
+            got trusted as the real answer.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            <code>22-</code> is done — three of four original layers
+            plus a finding the original scope doc never anticipated.
+            Only Dependabot remains, still deliberately deferred to
+            <code>23-</code>, where it costs almost nothing once any
+            GitHub Actions presence exists.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-08-2026.html">← Session 20</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
