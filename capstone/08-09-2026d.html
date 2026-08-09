@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building 25-Incident List Layout — a real two-column split for incident history, separate from the category status list. The first breakpoint choice (lg, 1024px) turned out wrong in practice, caught by actually looking at a tablet-width screenshot rather than trusting the original guess. Fixed with a tapering aside width and a wider container, confirmed at three real viewport tiers plus a command palette retest."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time — Michael Rooney" />
+    <meta property="og:description" content="Incident history moved into its own column, separate from category status — and a real breakpoint mistake caught by actually looking at the result, not just the code." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-09-2026d.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time — Michael Rooney" />
+    <meta name="twitter:description" content="Incident history moved into its own column — and a real breakpoint mistake caught by actually looking at the result." />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-09-2026d.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-09-2026">August 9, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <code>25-Incident List Layout</code> — small, mostly-CSS, per
+            the doc's own framing. No new data, no new routes, nothing
+            beyond what <code>App.tsx</code> already renders. The whole
+            job was pulling <code>IncidentList</code> and
+            <code>DaysSinceIncident</code> out of the single stacked
+            column they'd shared with everything else since the very
+            first render, into their own aside — separate from category
+            status, the way real status-page products separate "what's
+            happening right now" from "current state of each component."
+          </p>
+
+          <h2>What actually moved</h2>
+
+          <p>
+            A CSS grid split at the container level — main content on
+            one side, an <code>&lt;aside&gt;</code> holding both
+            incident-related widgets stacked together on the other.
+            <code>OverallHealth</code> stayed exactly where it was, full
+            width above the split — it's a summary of everything, not
+            specific to either column. Deliberately kept the aside's
+            markup <em>first</em> in source order and used CSS
+            <code>order</code> to visually move it to the right at
+            desktop widths — meant the underlying DOM never actually
+            restructured, just got told to render differently depending
+            on screen size. On a stacked mobile view, that same source
+            order means incidents render above the category list,
+            matching exactly how the page already looked before this
+            session touched anything.
+          </p>
+
+          <h2>The breakpoint that looked fine and wasn't</h2>
+
+          <p class="callout">
+            First pass used a <code>1024px</code> breakpoint for the
+            split, since that's a reasonable default and nothing in this
+            project had established a real convention to follow — the
+            existing restyle work covered color and typography, never
+            an actual layout decision like this one. Looked correct in
+            the desktop screenshot. Turned out wrong the moment a
+            tablet-width screenshot came back: the split doesn't kick in
+            until <code>1024px</code>, so anything narrower — a real
+            tablet, even some laptops in a smaller window — got the
+            single-column mobile layout instead, which was never the
+            intent.
+          </p>
+
+          <p>
+            Fixed by lowering the actual split point to <code>768px</code>,
+            with the aside's own width tapering — narrower at tablet
+            width, widening again once the screen genuinely has desktop
+            room. A fixed aside width across every screen above the
+            breakpoint would've meant a tablet either cramped the main
+            column or wasted space it didn't have to spare — scaling it
+            in two steps kept both tiers actually comfortable instead of
+            picking one number and hoping it worked everywhere.
+          </p>
+
+          <h2>The one that was just taste, not a bug</h2>
+
+          <p>
+            Once the breakpoint itself was right, the layout still felt
+            visually tight at desktop — not a functional problem, a
+            genuine "this doesn't feel done" instinct worth trusting.
+            Turned out the header, the two-column split, and the overall
+            page were all sharing one container width the whole time —
+            widening that one container (not the columns individually)
+            gave everything more room to breathe at once, since the
+            header was never actually narrower than the grid below it,
+            it just read that way once the grid felt cramped next to it.
+          </p>
+
+          <h2>Confirmed at three tiers, not two</h2>
+
+          <p>
+            A layout with a tapering width across two breakpoints isn't
+            a simple on/off toggle — checked mobile (stacked, incidents
+            above categories), tablet (two columns, tighter aside), and
+            full desktop (two columns, wider aside), not just "does it
+            look right on my monitor." Also re-tested the command
+            palette's incident-jump specifically, since
+            <code>IncidentList</code> sitting in a genuinely different
+            position on the page changes where <code>scrollIntoView</code>
+            actually lands — confirmed it still finds and expands the
+            right card.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-09-2026c.html">← Session 23</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
