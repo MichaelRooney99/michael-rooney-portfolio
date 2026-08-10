@@ -2,27 +2,39 @@
 """
 generate_rss_feed.py
 
-Builds a single RSS 2.0 feed (feed.xml) from every journal/ and capstone/
-entry, by reading the same og:title / og:description / og:url / <time
-datetime> values already sitting in each file's <head> — no new content
-to write, just repackaging what's already there.
+Builds a single RSS 2.0 feed (feed.xml) AND sitemap.xml from every
+journal/ and capstone/ entry, by reading the same og:title /
+og:description / og:url / <time datetime> values already sitting in
+each file's <head> — no new content to write, just repackaging what's
+already there. One collection pass, two outputs, so "what pages exist"
+can't drift between the feed and the sitemap the way it could when they
+were maintained separately.
 
 Entries are sorted newest-first by date, with same-day entries ordered by
 filename suffix (e.g. 08-09-2026, then b, then c, then d) so the feed
 reads in the same order a human would expect from the site itself.
 
+sitemap.xml's <lastmod> comes from each file's last git commit date, not
+filesystem mtime — mtime resets on every fresh clone/checkout and stops
+meaning "when the content last changed" the moment that happens. Falls
+back to filesystem mtime only if git isn't available (not a repo, or an
+uncommitted file) so the script still works standalone.
+
 Usage:
-    python generate_rss_feed.py --dry-run     # print the feed, don't write it
-    python generate_rss_feed.py               # write feed.xml to repo root
+    python generate_rss_feed.py --dry-run          # print both, write nothing
+    python generate_rss_feed.py                    # write feed.xml + sitemap.xml
+    python generate_rss_feed.py --feed-only         # write feed.xml only
+    python generate_rss_feed.py --sitemap-only      # write sitemap.xml only
 
 Run from the repo root (the directory containing journal/ and capstone/).
 Re-run any time a new entry is added — safe to run repeatedly, it always
-rebuilds the whole feed from current files rather than appending.
+rebuilds both files from current files rather than appending.
 """
 
 import argparse
 import html
 import re
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -32,6 +44,8 @@ SITE_LINK = "https://michaelrooney.dev/journal.html"
 SITE_DESCRIPTION = "Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens."
 FEED_SELF_URL = "https://michaelrooney.dev/feed.xml"
 
+SITEMAP_BASE_URL = "https://michaelrooney.dev"
+
 SKIP_FILENAMES = {
     "journal.html",
     "capstone-index.html",
@@ -40,6 +54,16 @@ SKIP_FILENAMES = {
 }
 
 TARGET_DIRS = ["journal", "capstone"]
+
+# Static/index pages that don't belong in the RSS feed (they're not dated
+# entries) but do belong in the sitemap. Path is relative to repo root;
+# priority is sitemap-only, roughly reflecting how central each page is.
+STATIC_PAGES = [
+    {"path": "index.html", "priority": "1.0"},
+    {"path": "journal.html", "priority": "0.8"},
+    {"path": "portfolio-showcase.html", "priority": "0.8"},
+    {"path": "capstone/capstone-index.html", "priority": "0.8"},
+]
 
 OG_TITLE_RE = re.compile(r'<meta property="og:title" content="([^"]*)"')
 OG_DESC_RE = re.compile(r'<meta property="og:description" content="([^"]*)"')
@@ -78,6 +102,37 @@ def strip_site_suffix(title: str) -> str:
     return SITE_SUFFIX_RE.sub("", title).strip()
 
 
+def git_last_commit_date(path: Path) -> str | None:
+    """Return the ISO date (YYYY-MM-DD) of the last commit touching this
+    file, or None if git isn't available / the file isn't tracked yet
+    (e.g. staged but never committed). Caller falls back to mtime."""
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%cs", "--", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+
+    output = result.stdout.strip()
+    return output if output else None
+
+
+def lastmod_for(path: Path) -> str:
+    """Git commit date if available, else filesystem mtime, always as
+    YYYY-MM-DD. Real content-change signal first, best-effort fallback
+    second — never raises, since a missing lastmod is worse for
+    debugging than a slightly-off one, but a crashed run is worse still."""
+    git_date = git_last_commit_date(path)
+    if git_date:
+        return git_date
+
+    mtime = path.stat().st_mtime
+    return datetime.fromtimestamp(mtime, tz=timezone.utc).strftime("%Y-%m-%d")
+
+
 def collect_entries():
     entries = []
     root = Path(".")
@@ -114,6 +169,7 @@ def collect_entries():
                 "url": url_match.group(1),
                 "pub_date": pub_date,
                 "filename": html_file.stem,  # used as a same-day tiebreaker
+                "path": html_file,
             })
 
     # Newest first: by date, then by filename (so same-day 'b'/'c'/'d' suffixes
@@ -153,25 +209,75 @@ def build_rss(entries) -> str:
 """
 
 
+def build_sitemap(entries) -> str:
+    urls = []
+
+    # Static/index pages first — highest priority, least frequently changed.
+    for page in STATIC_PAGES:
+        path = Path(page["path"])
+        if not path.is_file():
+            print(f"  SKIPPED sitemap entry {path} — file not found")
+            continue
+        loc = f"{SITEMAP_BASE_URL}/{page['path']}"
+        lastmod = lastmod_for(path)
+        urls.append(f"""  <url>
+    <loc>{escape(loc)}</loc>
+    <lastmod>{lastmod}</lastmod>
+    <priority>{page['priority']}</priority>
+  </url>""")
+
+    # Every journal/capstone entry — same og:url already parsed for RSS,
+    # so a page can't end up in one output and not the other.
+    for entry in entries:
+        lastmod = lastmod_for(entry["path"])
+        urls.append(f"""  <url>
+    <loc>{escape(entry['url'])}</loc>
+    <lastmod>{lastmod}</lastmod>
+    <priority>0.6</priority>
+  </url>""")
+
+    urls_xml = "\n".join(urls)
+
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{urls_xml}
+</urlset>
+"""
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Generate feed.xml from journal/capstone entries.")
-    parser.add_argument("--dry-run", action="store_true", help="Print the feed without writing feed.xml.")
+    parser = argparse.ArgumentParser(description="Generate feed.xml and sitemap.xml from journal/capstone entries.")
+    parser.add_argument("--dry-run", action="store_true", help="Print output without writing any files.")
+    parser.add_argument("--feed-only", action="store_true", help="Only generate feed.xml.")
+    parser.add_argument("--sitemap-only", action="store_true", help="Only generate sitemap.xml.")
     args = parser.parse_args()
+
+    do_feed = not args.sitemap_only
+    do_sitemap = not args.feed_only
 
     print("Scanning entries...")
     entries = collect_entries()
-    print(f"\nCollected {len(entries)} entries for the feed.")
+    print(f"\nCollected {len(entries)} entries.")
 
-    rss_xml = build_rss(entries)
+    if do_feed:
+        rss_xml = build_rss(entries)
+        if args.dry_run:
+            print("\n--- DRY RUN: feed.xml would contain ---\n")
+            print(rss_xml)
+        else:
+            Path("feed.xml").write_text(rss_xml, encoding="utf-8")
+            print(f"\nWrote feed.xml with {len(entries)} items to repo root.")
+            print("Don't forget to add this to <head> on journal.html and index.html if not already present:")
+            print('  <link rel="alternate" type="application/rss+xml" title="Michael Rooney — Journal" href="/feed.xml" />')
 
-    if args.dry_run:
-        print("\n--- DRY RUN: feed.xml would contain ---\n")
-        print(rss_xml)
-    else:
-        Path("feed.xml").write_text(rss_xml, encoding="utf-8")
-        print(f"\nWrote feed.xml with {len(entries)} items to repo root.")
-        print("Don't forget to add this to <head> on journal.html and index.html if not already present:")
-        print('  <link rel="alternate" type="application/rss+xml" title="Michael Rooney — Journal" href="/feed.xml" />')
+    if do_sitemap:
+        sitemap_xml = build_sitemap(entries)
+        if args.dry_run:
+            print("\n--- DRY RUN: sitemap.xml would contain ---\n")
+            print(sitemap_xml)
+        else:
+            Path("sitemap.xml").write_text(sitemap_xml, encoding="utf-8")
+            print(f"\nWrote sitemap.xml with {len(STATIC_PAGES) + len(entries)} URLs to repo root.")
 
 
 if __name__ == "__main__":
