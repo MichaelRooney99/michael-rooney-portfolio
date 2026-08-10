@@ -284,6 +284,77 @@ p {
 }
 
 /* ─────────────────────────────────────────
+   PIVOT PAIRS (About section — replaces the
+   old parallel skills table on the homepage)
+───────────────────────────────────────── */
+.pivot-pairs {
+  display: flex;
+  flex-direction: column;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.pivot-pair {
+  display: grid;
+  grid-template-columns: 1fr auto 1.4fr;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.pivot-pairs .pivot-pair:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.pivot-leadership {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.pivot-arrow {
+  color: var(--accent);
+  font-size: 1.1rem;
+  justify-self: center;
+}
+
+.pivot-technical {
+  font-size: 0.92rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .pivot-pair {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: left;
+  }
+
+  .pivot-arrow {
+    justify-self: start;
+    transform: rotate(90deg);
+    margin: 0.15rem 0;
+  }
+}
+
+/* ─────────────────────────────────────────
+   BLOCKQUOTE (About section pull quote)
+───────────────────────────────────────── */
+blockquote {
+  border-left: 2px solid var(--accent-dim);
+  padding-left: 1.5rem;
+  margin: 2.5rem 0 1rem;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+  max-width: 56ch;
+}
+
+/* ─────────────────────────────────────────
    WORK / PROJECTS
 ───────────────────────────────────────── */
 .project {
