@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smoke Test Doesn't Mean What the Exit Code Thinks It Means — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What a smoke test actually is, where the term comes from, and why deploy tooling's own success signal — the exit code — is a proxy for working, not proof of it."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Smoke Test Doesn't Mean What the Exit Code Thinks It Means — Michael Rooney" />
+    <meta property="og:description" content="A deploy command returning success only proves the command ran — a smoke test is the difference between that and actually asking the deployed thing if it's working." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-10-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Smoke Test Doesn't Mean What the Exit Code Thinks It Means — Michael Rooney" />
+    <meta name="twitter:description" content="A deploy command returning success only proves the command ran, not that the thing it started is actually working." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-10-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-10-2026">August 10, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Smoke Test Doesn't Mean What the Exit Code Thinks It Means</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            "Add a smoke test" has been sitting on a scope doc for
+            weeks, filed as one item in a list of four testing layers.
+            Getting to it made the term worth actually unpacking, rather
+            than treating it as a synonym for "test."
+          </p>
+
+          <h2>Where the name comes from</h2>
+
+          <p>
+            Hardware, originally. Power something on and watch for
+            smoke. No smoke, move on to real testing. Smoke, stop
+            immediately — something's fundamentally wrong, no point
+            running detailed diagnostics on it yet. Software borrowed
+            the term directly: fast, shallow, and specifically meant to
+            catch catastrophic failure before trusting anything deeper.
+          </p>
+
+          <h2>The gap it actually closes</h2>
+
+          <p>
+            Deploy tooling almost universally measures success by exit
+            codes — did the command that started the thing return
+            <code>0</code>. That's a real signal, but it's a proxy for
+            "it worked," not proof of it. A container can start cleanly,
+            report success, and crash-loop three seconds later. The
+            command that launched it already returned before that
+            happened. As far as the deploy tool is concerned, nothing
+            went wrong.
+          </p>
+
+          <p class="callout">
+            This isn't hypothetical for this project specifically — it's
+            the exact, already-documented bug in the capstone's own
+            deploy playbook. <code>docker compose up</code>'s exit
+            behavior decided whether Ansible reported the deploy as
+            successful, with nothing actually confirming the site was
+            serving requests afterward. A smoke test is the direct fix:
+            hit the app's own <code>/health</code> endpoint right after
+            the deploy step, and fail the whole play loudly if it
+            doesn't come back healthy. Turns "the container started"
+            into "the container started <em>and the app is actually
+            answering requests</em>."
+          </p>
+
+          <h2>Not a replacement for a real test suite</h2>
+
+          <p>
+            Worth being precise about the boundary, since it's easy to
+            blur. A real test suite runs before a deploy, against the
+            code, and can be as thorough and slow as it needs to be. A
+            smoke test runs after, against the real live thing, and
+            asks exactly one narrow question: did this specific deploy
+            actually work. It's not trying to catch a subtle logic bug —
+            that's what the test suite upstream is for. It's trying to
+            catch "the site is completely broken and nobody noticed
+            yet," which is a much lower, much more urgent bar.
+          </p>
+
+          <h2>Why it comes last in the actual build order</h2>
+
+          <p>
+            A smoke test only means something once there's a real
+            <code>/health</code> endpoint to check and a real deploy
+            pipeline to attach it to — which is exactly why it's sitting
+            downstream of the earlier pieces of this same project rather
+            than being the first thing built. Testing the deploy outcome
+            before the deploy process itself is trustworthy would just
+            be adding a check on top of something already known to have
+            gaps.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-09-2026b.html">← Previous: 08-09-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
