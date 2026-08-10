@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 10 Aug 2026 13:41:04 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 10 Aug 2026 20:59:25 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable</title>
+      <link>https://michaelrooney.dev/capstone/08-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-10-2026.html</guid>
+      <pubDate>Mon, 10 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Phase 2 of automated test coverage closed for real — db.ts tested against a real in-memory database, and two pure decision functions extracted specifically to make untestable logic testable.]]></description>
+    </item>
     <item>
       <title>Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time</title>
       <link>https://michaelrooney.dev/capstone/08-09-2026d.html</link>

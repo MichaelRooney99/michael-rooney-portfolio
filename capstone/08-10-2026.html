@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Finishing 18-Automated Test Coverage's Phase 2 — real tests against an in-memory SQLite database for the day-bucketing rollup, a pure decision function extracted from the auto-incident threshold logic, and the same extraction applied to the nudge channel's signature comparison. 66 tests total across both packages, all three targeting real prior bug classes rather than easy coverage."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable — Michael Rooney" />
+    <meta property="og:description" content="Phase 2 of automated test coverage closed for real — db.ts tested against a real in-memory database, and two pure decision functions extracted specifically to make untestable logic testable." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-10-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable — Michael Rooney" />
+    <meta name="twitter:description" content="Phase 2 of automated test coverage closed for real — a real database, and two pure decision functions extracted specifically to make untestable logic testable." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-10-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable",
+      "description": "Finishing 18-Automated Test Coverage's Phase 2 — real tests against an in-memory SQLite database, and two pure decision functions extracted specifically to make previously untestable logic testable.",
+      "datePublished": "2026-08-10",
+      "url": "https://michaelrooney.dev/capstone/08-10-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-10-2026">August 10, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <code>18-Automated Test Coverage</code>'s Phase 2 had three
+            items left on it — <code>db.ts</code>'s day-bucketing,
+            the auto-drafted-incident threshold logic in
+            <code>poller.ts</code>, and <code>nudge.ts</code>'s own
+            signature comparison. All three closed this session, each
+            for a genuinely different reason, which is worth writing
+            down rather than treating as one undifferentiated "add
+            tests" task.
+          </p>
+
+          <h2>Testing a real database instead of mocking one</h2>
+
+          <p>
+            <code>getDayBucketedHistory</code> isn't a pure function —
+            it queries a real SQLite connection. Mocking that connection
+            would only prove "the right SQL got called," not that the
+            actual worst-of-day rollup logic behaves correctly. Instead,
+            the test suite points <code>node:sqlite</code> at
+            <code>:memory:</code> for the whole run — a real database,
+            fully isolated, fast enough that the tradeoff barely exists.
+            Nine tests came out of it: single readings mapping to the
+            right day, no-data days staying honest rather than guessed,
+            the worst-of-day rollup actually picking the worst reading
+            regardless of what order they arrived in, and a specific
+            edge case worth calling out — an <code>unknown</code>
+            reading is deliberately excluded from the severity ranking
+            entirely, not treated as some low-severity status. A day
+            with only an <code>unknown</code> reading shows
+            <code>no-data</code>, same as a day with nothing recorded at
+            all, and an <code>unknown</code> reading sitting alongside a
+            real outage the same day doesn't hide that outage.
+          </p>
+
+          <h2>Extracting a decision so it can be asked a question directly</h2>
+
+          <p>
+            The auto-incident threshold logic was buried inside a
+            function that also queried the database twice and wrote to
+            it — testing it as it was would have meant testing all of
+            that machinery just to reach one small decision. Pulled the
+            actual decision out into its own function,
+            <code>decideIncidentAction</code>, taking exactly the two
+            facts the decision depends on — recent readings, and whether
+            an incident's already active — and returning one of three
+            plain outcomes. No database, no mocking, just a function you
+            can ask a direct question and check the answer. The original
+            function still exists, now just orchestration: fetch the two
+            facts, ask the pure function what to do, act on the answer.
+          </p>
+
+          <p>
+            Eight tests came out of that extraction, and the two that
+            matter most aren't the obvious "outage drafts an incident"
+            cases — they're the two that guard against the wrong kind of
+            eagerness. A service flapping between outage and operational
+            readings shouldn't draft a new incident on a single bad tick,
+            and it shouldn't get auto-resolved early just because its
+            most recent reading happened to look fine. Both directions,
+            covered explicitly.
+          </p>
+
+          <h2>The same pattern, a third time, for a different reason</h2>
+
+          <p>
+            <code>nudge.ts</code>'s signature comparison had a real but
+            subtle correctness question buried in it: what should happen
+            on the very first check after a proxy restart, when there's
+            no previous signature to compare against at all? Treating a
+            missing baseline as "the status changed" would broadcast a
+            nudge to every connected client the moment the proxy comes
+            back online — even though nothing has actually changed,
+            there's just nothing yet to compare. Extracted into
+            <code>compareSignature</code>, which treats that case as its
+            own outcome, <code>'initial'</code>, distinct from both
+            <code>'changed'</code> and <code>'unchanged'</code>. Three
+            tests, small function, real correctness question it exists
+            specifically to answer.
+          </p>
+
+          <h2>Where the numbers land</h2>
+
+          <p>
+            34 tests in the proxy now — 17 in <code>nudge.test.ts</code>,
+            9 in <code>db.test.ts</code>, 8 in
+            <code>poller.test.ts</code> — alongside the 32 already
+            covering the client. 66 total, and every one of them targets
+            something that's either already caused a real bug in this
+            project, or represents a genuine correctness question rather
+            than coverage for its own sake. That's <code>18-</code>'s
+            Phase 2 fully closed. Phase 3 — component and integration
+            tests — stays exactly where it was: real, useful, and
+            deliberately not urgent.
+          </p>
+
+          <p>
+            One practical unlock worth naming: <code>19-Deployment
+            Testing and Playbook Safety</code>'s Layer 4 — gating a
+            deploy on the test suite actually passing — was explicitly
+            waiting on this. Gating a deploy against 23 client-only
+            tests was always a thinner safety net than gating it against
+            tests that also cover the proxy that same deploy is shipping
+            — including, now, the exact check that would have caught the
+            real <code>nut_exporter</code>/<code>nut</code> drift this
+            project already hit once. That path's open now.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-09-2026d.html">← Previous: 08-09-2026d Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
