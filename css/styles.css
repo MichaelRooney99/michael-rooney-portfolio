@@ -284,6 +284,13 @@ p {
 }
 
 /* ─────────────────────────────────────────
+   ABOUT SECTION HEADING SPACING
+───────────────────────────────────────── */
+#about h3 {
+  margin-top: 3.5rem;
+}
+
+/* ─────────────────────────────────────────
    PIVOT PAIRS (About section — replaces the
    old parallel skills table on the homepage)
 ───────────────────────────────────────── */
@@ -337,6 +344,19 @@ p {
     transform: rotate(90deg);
     margin: 0.15rem 0;
   }
+}
+
+/* ─────────────────────────────────────────
+   JOURNAL SECTION ASIDE QUOTE
+───────────────────────────────────────── */
+.journal-aside {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--muted);
+  max-width: 52ch;
+  line-height: 1.6;
+  margin-top: 1.5rem;
 }
 
 /* ─────────────────────────────────────────
