@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Fleet Got Slower Overnight, and Nothing Was Wrong — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A real incident, chased through seven layers of the stack — from a suspiciously uniform response-time jump across an entire homelab fleet, down to a single Ansible task and a hardware sensor nobody had read before. What made it findable wasn't luck, it was refusing to trust any layer without checking the one underneath it."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Fleet Got Slower Overnight, and Nothing Was Wrong — Michael Rooney" />
+    <meta property="og:description" content="Chasing a real, alarming-looking performance regression across an entire homelab fleet down to its actual, benign cause — one layer of verification at a time." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-11-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Fleet Got Slower Overnight, and Nothing Was Wrong — Michael Rooney" />
+    <meta name="twitter:description" content="Chasing a real, alarming-looking performance regression across an entire homelab fleet down to its actual, benign cause." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-11-2026.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Fleet Got Slower Overnight, and Nothing Was Wrong",
+      "description": "A real incident, chased through seven layers of the stack, from a suspiciously uniform response-time jump across an entire homelab fleet down to a single Ansible task and a hardware sensor nobody had read before.",
+      "datePublished": "2026-08-11",
+      "url": "https://michaelrooney.dev/journal/08-11-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-11-2026">August 11, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Fleet Got Slower Overnight, and Nothing Was Wrong</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Checked the status page's own service-detail charts out of
+            simple habit and saw something that looked genuinely
+            alarming — every monitored node's response time had roughly
+            doubled or tripled, holding steady at the new, worse number
+            instead of spiking and recovering. My first assumption was
+            that some Ansible work from the day before had broken
+            something on the network. It hadn't. What actually happened
+            took seven separate checks to find, and every one of those
+            checks mattered — skipping any of them would have led
+            somewhere wrong.
+          </p>
+
+          <h2>Ruling out the obvious first suspect</h2>
+
+          <p>
+            Timed the actual application path directly — the proxy
+            talking to the Proxmox API, the proxy talking to its own
+            internal route. Both came back under 12 milliseconds.
+            Whatever was slow, it wasn't the app itself.
+          </p>
+
+          <h2>Finding out what the number even was</h2>
+
+          <p>
+            The chart showing "response time" turned out not to measure
+            a network round-trip at all — for this particular category
+            of service, it was Prometheus's own scrape-duration metric,
+            how long the monitoring system itself took to collect data
+            from each machine. A completely different thing than what I
+            assumed I was looking at, and worth actually confirming
+            rather than guessing, because every theory downstream of a
+            wrong assumption here would have been chasing the wrong
+            problem entirely.
+          </p>
+
+          <h2>The clue that broke the first theory</h2>
+
+          <p>
+            My working theory was a routing problem specific to one
+            isolated part of the network. One machine on that isolated
+            segment was supposed to be the control case — unaffected,
+            proving the theory. It wasn't unaffected. It showed the
+            exact same jump as everything else. That one data point
+            killed the theory outright, which was the right outcome —
+            better to have a theory die cleanly against real evidence
+            than to quietly ignore the one result that didn't fit.
+          </p>
+
+          <h2>Checking whether the collector itself was struggling</h2>
+
+          <p>
+            If every target looks slower to the thing measuring them,
+            the measuring tool itself is worth checking. It wasn't —
+            near-zero CPU usage, comfortable memory, nothing under any
+            real load. Ruled out.
+          </p>
+
+          <h2>The graph that actually pinned it down</h2>
+
+          <p class="callout">
+            Pulling up the monitoring system's own historical graph
+            showed something genuinely useful — not a gradual drift, a
+            clean, sudden step at one exact timestamp, then a flat
+            plateau afterward. A discrete jump at a known moment is a
+            different kind of clue than "things have felt off lately" —
+            it points at a specific event, not a vague trend, and a
+            specific event can be cross-referenced against exactly what
+            was happening at that moment.
+          </p>
+
+          <p>
+            What was happening at that moment: real infrastructure
+            automation work, run against every affected machine at
+            once. That timing match, on its own, wasn't proof — but it
+            was specific enough to actually test.
+          </p>
+
+          <h2>Confirming the bottleneck at the actual source</h2>
+
+          <p>
+            Timed the raw metrics endpoint directly on three separate
+            machines, bypassing the collector and the network entirely.
+            All three landed within a few milliseconds of each other,
+            and matched almost exactly what the collector had been
+            recording. That's the moment this stopped being a theory —
+            the slowdown was real, measurable, and located precisely: on
+            the machines themselves, in the collection step, not
+            anywhere upstream.
+          </p>
+
+          <h2>The actual mechanism</h2>
+
+          <p>
+            One task in that automation, designed to run exactly once
+            per machine ever, had never actually fired before —
+            gated behind a marker file that hadn't existed on any of
+            these hosts until that exact session. Running it for the
+            first time loaded additional hardware-sensor kernel
+            modules. A monitoring flag that had been quietly enabled for
+            weeks — reading temperature and fan sensors — suddenly had
+            real sensor files to read that it didn't have access to
+            before. More data per collection cycle, more time per
+            cycle. Simple, once you can see it. Not visible at all from
+            three levels up, which is exactly why each of the checks
+            above had to happen.
+          </p>
+
+          <h2>Trusting the fix meant checking the data, not just the timing</h2>
+
+          <p>
+            Confirming the mechanism wasn't the end of it. Unattended
+            hardware-sensor detection across six different machines with
+            different hardware is exactly the kind of operation that can
+            misread a chip and quietly report garbage that still "looks
+            successful." Explaining why the numbers changed doesn't
+            prove the new numbers are actually correct — those are two
+            separate claims, and only checking the first one would have
+            left a real gap. Pulled the actual sensor readings from
+            every affected machine and checked them by eye: believable
+            temperatures, sensible spread between readings, nothing
+            reporting an impossible value. Two small, cosmetic oddities
+            showed up — a placeholder value in an unused firmware field,
+            and one particular sensor reading an identical number on
+            every machine — and both turned out to be well-known
+            driver/firmware quirks, not something specific to any one
+            box, confirmed by the fact that they appeared identically
+            everywhere rather than on just one.
+          </p>
+
+          <h2>What actually made this findable</h2>
+
+          <p>
+            Nothing about this investigation relied on a lucky guess.
+            Every step either confirmed something or ruled something
+            out, in order, and the theory that turned out to be right
+            wasn't the first one tried — it only survived because the
+            earlier, more obvious theories got tested against real data
+            and failed. A genuinely alarming-looking symptom — an entire
+            fleet apparently degrading at once — turned out to be a
+            real, permanent, and completely benign side effect: the
+            infrastructure is now actually reporting hardware health
+            data it never exposed before. That's not a bug fixed. It's
+            a new capability, temporarily disguised as a regression,
+            until it got checked properly.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-10-2026.html">← Previous: 08-10-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
