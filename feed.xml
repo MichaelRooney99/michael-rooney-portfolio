@@ -5,7 +5,7 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 11 Aug 2026 16:11:30 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 12 Aug 2026 01:12:25 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>The Fleet Got Slower Overnight, and Nothing Was Wrong</title>
@@ -13,6 +13,13 @@
       <guid isPermaLink="true">https://michaelrooney.dev/journal/08-11-2026.html</guid>
       <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Chasing a real, alarming-looking performance regression across an entire homelab fleet down to its actual, benign cause — one layer of verification at a time.]]></description>
+    </item>
+    <item>
+      <title>Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See</title>
+      <link>https://michaelrooney.dev/capstone/08-11-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-11-2026.html</guid>
+      <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Gating the capstone deploy on its own tests — a Docker build-stage decision, a watch-mode gotcha, a fixture file unreachable across a build boundary, and both directions confirmed for real.]]></description>
     </item>
     <item>
       <title>Session 27 — Proving the Smoke Test Actually Smokes</title>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Closing out the capstone's deploy-safety work with its final piece — gating the live deploy on the app's own test suite. A real build-stage-vs-host-Node decision, a watch-mode ambiguity in a bare npm test, a fixture file that turned out to be structurally unreachable across a Docker build boundary, and both the pass and fail paths confirmed against real infrastructure."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See — Michael Rooney" />
+    <meta property="og:description" content="Gating the capstone deploy on its own tests — a Docker build-stage decision, a watch-mode gotcha, a fixture file unreachable across a build boundary, and both directions confirmed for real." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-11-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See — Michael Rooney" />
+    <meta name="twitter:description" content="Gating the capstone deploy on its own tests — a build-stage decision, a watch-mode gotcha, an unreachable fixture file, and both directions confirmed for real." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-11-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See",
+      "description": "Gating the capstone deploy on its own test suite — a Docker build-stage decision, a watch-mode gotcha, a fixture file unreachable across a build boundary, and both the pass and fail paths confirmed against real infrastructure.",
+      "datePublished": "2026-08-11",
+      "url": "https://michaelrooney.dev/capstone/08-11-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-11-2026">August 11, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The last piece of a deploy-safety effort built over the past
+            couple of sessions — static linting, idempotency checks, a
+            post-deploy smoke test, and now the final layer: gate the
+            live deploy on the app's own test suite actually passing.
+            Small in scope on paper, but it needed a real decision before
+            any code, and it surfaced a genuine structural gap that had
+            nothing to do with the tests themselves.
+          </p>
+
+          <h2>Where should the tests actually run</h2>
+
+          <p>
+            The capstone VM's provisioned role has stayed narrowly
+            Docker and cloudflared since it was first set up — no Node
+            toolchain on the host itself. Three real options: install
+            Node on the host directly, run the tests from the Ansible
+            control node against a separate checkout, or run them
+            inside each service's own Docker build stage — the same
+            stage the real deploy image is built from, dev dependencies
+            and all. Went with the Docker build stage. Installing Node
+            on the host works against a design choice that's held since
+            the deployment pipeline was first built. Testing a separate
+            checkout on the control node means testing a sibling of the
+            deployed commit, not the commit itself — exactly the kind of
+            gap this project has spent this whole stretch trying to
+            close, not one worth reopening for convenience.
+          </p>
+
+          <h2>A bare npm test is not a safe gate</h2>
+
+          <p>
+            Both the client and proxy define their <code>test</code>
+            script as plain <code>vitest</code>, which defaults to watch
+            mode and only skips it via TTY or CI-environment detection.
+            Running that inside <code>docker run --rm</code> — no TTY,
+            no guaranteed <code>CI</code> variable — wasn't something
+            worth trusting for a task meant to gate a real deploy.
+            Swapped in <code>npx vitest run</code> explicitly. No
+            ambiguity, no dependency on detection logic behaving the way
+            it's assumed to.
+          </p>
+
+          <h2>The fixture that didn't know its own address</h2>
+
+          <p>
+            First real run against the built images failed on the proxy
+            side — <code>ENOENT</code>, looking for a JSON fixture file
+            that clearly existed in the repo. A set of shared test
+            fixtures live at the repo root, read independently by both
+            the client and the proxy's own copies of a small status-
+            deriving function, specifically so the two implementations
+            can never silently drift apart. But each service's Docker
+            build context had been scoped to its own folder a few
+            sessions back, for unrelated reasons — which meant that
+            shared, sibling directory was never in scope to get copied
+            into either image in the first place. Not a bug in the test
+            itself — a real structural consequence of two separate
+            decisions from earlier in the project that had simply never
+            been run against each other until now.
+          </p>
+
+          <p>
+            Fix was a bind mount, not a copy — mounting the real
+            fixtures directory into each container at test-run time
+            rather than baking it into either image. Keeps the single
+            shared source of truth intact; neither Dockerfile needed to
+            change at all.
+          </p>
+
+          <h2>Both directions, confirmed for real</h2>
+
+          <p>
+            Pass path first — both images built and run by hand against
+            real infrastructure, the full suite green on both sides,
+            fixture mount working correctly. Then the fail path, same
+            discipline used to verify the smoke test earlier this week:
+            a scratch branch, one deliberately wrong expected value in a
+            real fixture-driven test, pushed for real, deployed for real
+            with the target branch overridden on the command line rather
+            than touching anything committed.
+          </p>
+
+          <p>
+            The deploy's own recap told the whole story — five tasks
+            completed, one failed, and every task after the failing test
+            simply absent from the run, not skipped. The environment
+            file never written, the running stack never touched, the
+            live site never at risk. Eight of the fixture cases failed
+            with the deliberately wrong value; everything else in the
+            same run stayed fully green, confirming the break was scoped
+            exactly where it was supposed to be. Deleted the scratch
+            branch, ran the deploy clean afterward — full pass, health
+            check good, smoke test good, tunnel active.
+          </p>
+
+          <p>
+            The deploy-safety work is now fully closed — four layers,
+            built and confirmed, most of them against a real
+            deliberately-broken state as well as a real passing one.
+            What's left on the roadmap is a final architecture write-up,
+            saved deliberately for last, and whatever gets picked up
+            next with no particular schedule behind it.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-10-2026c.html">← Session 27</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
