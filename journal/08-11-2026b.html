@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A Comment Can Be Perfectly Honest and Still Be Wrong — Michael Rooney</title>
+    <meta
+      name="description"
+      content="What started as a mechanical cleanup — stripping private planning-doc references out of a whole codebase's comments — turned into a real lesson about what different kinds of technical documentation are actually for, after the sweep surfaced a genuinely broken feature hiding behind a comment that had never once lied."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="A Comment Can Be Perfectly Honest and Still Be Wrong — Michael Rooney" />
+    <meta property="og:description" content="A repo-wide comment cleanup surfaced a genuinely broken feature hiding behind a comment that accurately described behavior the code never actually implemented." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-11-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="A Comment Can Be Perfectly Honest and Still Be Wrong — Michael Rooney" />
+    <meta name="twitter:description" content="A repo-wide comment cleanup surfaced a genuinely broken feature hiding behind a comment that accurately described behavior the code never actually implemented." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-11-2026b.html" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "A Comment Can Be Perfectly Honest and Still Be Wrong",
+      "description": "A repo-wide comment cleanup, done mostly as a mechanical formality, surfaced a genuinely broken feature hiding behind a comment that had never once lied about what it was describing.",
+      "datePublished": "2026-08-11",
+      "url": "https://michaelrooney.dev/journal/08-11-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-11-2026">August 11, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>A Comment Can Be Perfectly Honest and Still Be Wrong</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The task going in felt almost clerical: a full pass through
+            the capstone codebase's comments, replacing every reference
+            to a private planning document with an explanation that
+            stands on its own. Nothing about the code was supposed to
+            change. It was a writing task, not an engineering one.
+          </p>
+
+          <p>
+            Doing it properly meant actually reading every comment in
+            every file, start to finish, instead of skimming for the
+            pattern being removed. That's the part that mattered. One
+            comment, in the config that routes traffic to the backend,
+            described exactly what a particular live-update connection
+            needed to work correctly — the specific settings, the exact
+            reasoning for each one. It was a genuinely good comment.
+            It was also describing something that had never been built.
+            The setting it explained didn't exist anywhere in the file.
+          </p>
+
+          <h2>A broken feature with a perfect alibi</h2>
+
+          <p>
+            A quick, direct check against the live site confirmed it —
+            the connection that was supposed to power near-instant
+            status updates had been silently falling back to a static
+            page since the day it shipped. Not degraded. Not
+            intermittent. Never once worked.
+          </p>
+
+          <p>
+            Nobody noticed because two separate, individually good
+            decisions combined into exactly the wrong outcome. The
+            client-side code treats a failed live-update connection as
+            routine — no console error, no visible complaint, just a
+            quiet retry — because a dropped connection reconnecting on
+            its own really is normal and shouldn't look like a problem.
+            And the page has a slower fallback built in specifically so
+            a missing live-update connection never breaks anything, just
+            makes updates arrive a little later. Both of those are the
+            right calls in isolation. Together, they meant a completely
+            dead feature was indistinguishable, from the outside, from a
+            healthy one quietly running on its backup plan.
+          </p>
+
+          <h2>The actual lesson, separated from the bug</h2>
+
+          <p>
+            The bug itself got fixed in twenty minutes once it was
+            found. The more interesting part is what it means for
+            comments generally. A comment is a claim about the code, not
+            a guarantee. It can be written by someone who fully
+            understood what needed to happen, worded with total
+            precision, and still describe a world that the actual code
+            never caught up to. Reading the comment told me what
+            <em>should</em> happen. Only checking the real, running
+            system told me what actually did.
+          </p>
+
+          <p>
+            That distinction turns out to generalize past this one bug.
+            A comment in the code, a changelog entry, an architecture
+            decision record, a runbook — these are all different tools
+            solving different problems, and none of them are the system
+            itself. A comment explains why a piece of code looks the way
+            it does, for whoever reads that code next. A changelog is a
+            record of what changed and when, for tracing how something
+            got to its current state. A decision record is the reasoning
+            behind a choice, so the same debate doesn't happen twice
+            without anyone remembering why it was settled the first
+            time. All of them are worth keeping current, and none of
+            them are a substitute for actually going and checking the
+            thing they describe.
+          </p>
+
+          <h2>Why this is worth writing down at all</h2>
+
+          <p>
+            This project has been as much about learning how to build
+            software properly as it has been about the status page
+            itself, and today felt like one of the clearer examples of
+            that — a task that looked like tidying turned into a real
+            finding, purely because doing it thoroughly meant actually
+            reading the thing instead of trusting that it was probably
+            fine. That habit doesn't feel like it belongs to any one
+            project. It's the kind of thing worth carrying into whatever
+            comes after this one.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-11-2026.html">← Previous: 08-11-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
