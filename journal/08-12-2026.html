@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What a Webhook Actually Asks of You — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building a real webhook receiver for the first time — what changes when a server calls you instead of the other way around, why concurrency and authentication stop being optional the moment you're listening instead of asking, and how a small alert relay turned into the accidental proving ground for all of it."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="What a Webhook Actually Asks of You — Michael Rooney" />
+    <meta property="og:description" content="Building a real webhook receiver for the first time — what changes when a server calls you instead of the other way around, and what that actually demands of the thing listening." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-12-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="What a Webhook Actually Asks of You — Michael Rooney" />
+    <meta name="twitter:description" content="Building a real webhook receiver for the first time — what changes when a server calls you instead of the other way around." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-12-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "What a Webhook Actually Asks of You",
+      "description": "Building a real webhook receiver for the first time — what changes when a server calls you instead of the other way around, and what that demands of the thing listening.",
+      "datePublished": "2026-08-12",
+      "url": "https://michaelrooney.dev/journal/08-12-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-12-2026">August 12, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>What a Webhook Actually Asks of You</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Every piece of monitoring in this homelab so far has worked
+            the same way: something checks, on a schedule. Prometheus
+            scrapes a target. A dashboard polls an endpoint. The whole
+            capstone status page is built around that model — ask,
+            wait, ask again. A webhook flips that around entirely, and
+            building a real one for the first time this week made clear
+            how much that flip actually changes, not just in theory but
+            in what the code has to account for.
+          </p>
+
+          <h2>The difference isn't speed, it's who's in charge</h2>
+
+          <p>
+            The instinct is to think of a webhook as just a faster kind
+            of polling — instead of asking every sixty seconds, you get
+            told immediately. That's true, but it undersells what
+            actually changed. With polling, the client decides when to
+            check, how often, and what to do if a check fails — all the
+            control lives on the side asking the question. A webhook
+            hands that control to whoever's on the other end. Something
+            external decides when your server hears from it, and your
+            server's job is just to already be listening, correctly,
+            whenever that happens. That's a real shift in where
+            responsibility sits, not just a change in latency.
+          </p>
+
+          <h2>What "already listening" turns out to demand</h2>
+
+          <p>
+            Two things stopped being optional the moment a server
+            existed specifically to receive calls from somewhere else,
+            rather than to answer questions on its own terms.
+          </p>
+
+          <p>
+            The first was concurrency. Nothing about a webhook guarantees
+            only one delivery arrives at a time — a person could push
+            twice in quick succession, a retry could fire while the
+            first attempt is still running. A receiver that just runs
+            whatever it's told, whenever it's told, has no way to
+            recognize "I'm already doing this" and will happily start a
+            second deploy on top of a first one. The fix was a simple
+            lock file — check first, refuse if busy, release when done —
+            but the need for it only exists because something is now
+            listening instead of asking.
+          </p>
+
+          <p>
+            The second was authentication, and specifically the kind
+            that doesn't assume a human. Every access control this
+            project had built before this point assumed a person
+            logging in — an email, an OTP, a browser. A webhook caller
+            is a machine with no browser and nothing to click. Trusting
+            it can't work the same way trusting a person does; it needs
+            a credential a machine can present in a header, checked at
+            the edge before the request ever reaches anything real.
+          </p>
+
+          <h2>The response itself is a real design decision, not a formality</h2>
+
+          <p>
+            One instinct while building this that turned out to be
+            wrong, briefly: have the receiver do the work and then
+            respond once it's actually done, so the caller gets a real
+            answer. That's backwards for a webhook specifically. The
+            thing that triggered it is often waiting on a fixed timeout,
+            and the actual work here — a full deploy, tests included —
+            takes far longer than that timeout allows. The correct shape
+            is to acknowledge the delivery immediately, then do the real
+            work afterward, separately, reporting the outcome through a
+            different channel entirely rather than the original
+            response. Confirming this wasn't just an assumption — it's
+            the documented recommendation for exactly this situation,
+            which was a good, small confirmation that the instinct
+            landed on the right design for reasons that generalize
+            beyond this one project.
+          </p>
+
+          <h2>An old alert relay became the accidental proving ground</h2>
+
+          <p>
+            The "report the outcome separately" piece needed somewhere
+            to actually report to, and the obvious answer was a small
+            Flask relay already sitting in the homelab, built months ago
+            for a completely unrelated, mostly-for-fun purpose — turning
+            backup notifications into something with a little more
+            personality. Wiring one new route into that existing file
+            surfaced three real problems that had nothing to do with
+            webhooks specifically: a data structure that had gone
+            missing during editing, a duplicate function definition, and
+            a stubborn character-encoding issue that kept corrupting the
+            same two symbols through several attempts at fixing it,
+            eventually solved by just not using those characters at all
+            rather than continuing to fight whatever was mangling them.
+          </p>
+
+          <p>
+            None of those were webhook problems. They were just bugs,
+            the kind that only show up by actually running code and
+            watching what happens to it, and they happened to surface
+            because a small, previously-quiet file suddenly had real
+            weight riding on it for the first time.
+          </p>
+
+          <h2>What actually proved it worked</h2>
+
+          <p>
+            Not that the receiver started cleanly, and not that a
+            manual test curl came back with the right status code.
+            Those were necessary steps, but the real proof was
+            deliberately triggering a real deploy with a real, planted
+            failure in it, and watching the whole chain — trigger,
+            authentication, the receiver, the deploy, a genuine failure,
+            an automatic recovery, and a notification landing in the
+            right place — actually happen, once, for real, before ever
+            trusting the mechanism against something that mattered.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-11-2026b.html">← Previous: 08-11-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
