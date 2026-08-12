@@ -5,8 +5,22 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 12 Aug 2026 02:33:41 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 12 Aug 2026 15:12:30 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 30 — Three Kinds of Testing, and What Broke Along the Way</title>
+      <link>https://michaelrooney.dev/capstone/08-12-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-12-2026.html</guid>
+      <pubDate>Wed, 12 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Three different testing techniques, deliberately chosen for breadth over padding — hook testing, real user-interaction simulation, and mocked async data — plus two real bugs the tests themselves had.]]></description>
+    </item>
+    <item>
+      <title>A Comment Can Be Perfectly Honest and Still Be Wrong</title>
+      <link>https://michaelrooney.dev/journal/08-11-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-11-2026b.html</guid>
+      <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A repo-wide comment cleanup surfaced a genuinely broken feature hiding behind a comment that accurately described behavior the code never actually implemented.]]></description>
+    </item>
     <item>
       <title>Session 29 — The Comment Describing a Route That Was Never Built</title>
       <link>https://michaelrooney.dev/capstone/08-11-2026b.html</link>
