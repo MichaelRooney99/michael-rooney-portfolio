@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 12 Aug 2026 01:12:25 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 12 Aug 2026 01:50:48 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 29 — The Comment Describing a Route That Was Never Built</title>
+      <link>https://michaelrooney.dev/capstone/08-11-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-11-2026b.html</guid>
+      <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A comment describing how a live-update route should behave turned out to be the only place that behavior existed — the route itself was never actually wired up. Found, confirmed, and fixed against real production.]]></description>
+    </item>
     <item>
       <title>The Fleet Got Slower Overnight, and Nothing Was Wrong</title>
       <link>https://michaelrooney.dev/journal/08-11-2026.html</link>
