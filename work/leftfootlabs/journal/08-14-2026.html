@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Building the Thing Before the Store — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Why the Rack Planner comes before a leftfootLabs storefront — a product-first sequencing decision, and what building it is meant to prove before there's anything to sell."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Building the Thing Before the Store — Michael Rooney" />
+    <meta property="og:description" content="Why the Rack Planner comes before a leftfootLabs storefront, and what building it is meant to prove before there's anything to sell." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/08-14-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Building the Thing Before the Store — Michael Rooney" />
+    <meta name="twitter:description" content="Why the Rack Planner comes before a leftfootLabs storefront, and what building it is meant to prove before there's anything to sell." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/08-14-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Building the Thing Before the Store",
+      "description": "Why the Rack Planner comes before a leftfootLabs storefront, and what building it is meant to prove before there's anything to sell.",
+      "datePublished": "2026-08-14",
+      "url": "https://michaelrooney.dev/work/leftfootlabs/journal/08-14-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-14-2026">August 14, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Building the Thing Before the Store</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            leftfootLabs has a domain now and a design that's been through
+            enough OpenSCAD iterations to actually print well — bolted
+            flanges, slide-in side panels, a footprint mark on the foot
+            that's more than just decoration. What it doesn't have yet is
+            a store, and that's deliberate. Before anyone can buy a rack
+            kit, I want a tool that proves the kit is worth buying in the
+            first place.
+          </p>
+
+          <p>
+            That tool is the Rack Planner — an interactive tool for laying
+            out a homelab rack, checking that everything actually fits,
+            and estimating how long a UPS keeps it running under real
+            load. It's not a storefront feature bolted onto a shop. It's
+            the thing that comes first, on purpose, because a "does this
+            fit" tool is more useful to a stranger deciding whether to
+            trust a small print shop than a product page ever will be.
+          </p>
+
+          <h2>Why the ordering matters</h2>
+
+          <p>
+            It would be easy to treat the planner as a nice-to-have and
+            just stand up a Shopify store with photos of the kit. That's
+            the faster path to something that looks finished. It's also
+            the weaker one. A planner that lets someone drag their actual
+            gear into a rack layout and see a leftfootLabs kit genuinely
+            fit — before they've spent a dollar — does more to earn trust
+            than any amount of product copy. The store can come later,
+            once there's something worth linking a "buy" button to.
+          </p>
+
+          <p>
+            There's a second reason, less about the product and more
+            about what I actually want out of building it: the planner
+            forces engineering ground the capstone never touched.
+            Accounts, saved state, a real constraint problem in getting
+            devices to fit correctly in a rack elevation — not just
+            reading live data and displaying it, but modeling something
+            and storing what a user did with it. Sticking with the same
+            React/TypeScript/Express stack the capstone already proved
+            out was a deliberate choice too — the point isn't to prove I
+            can learn a new framework, it's to get real repetition on the
+            one I just spent months learning, while the actual novelty
+            comes from the problem itself.
+          </p>
+
+          <h2>What "before the storefront" actually means</h2>
+
+          <p>
+            Concretely: a rack elevation you can place real devices into,
+            a power budget that adds up what's plugged in, and a runtime
+            estimate for how long a UPS holds that load — built from
+            actual discharge behavior pulled off my own SX950U rather
+            than a generic linear formula, because if I'm going to claim
+            a number means something, I want to have actually measured
+            it. Shareable snapshot links first, accounts after, kept
+            deliberately minimal — a username and a properly hashed
+            password, nothing more collected than what's needed. No
+            storefront integration at all yet. That's explicitly staged
+            for later, once there's a product worth selling through one.
+          </p>
+
+          <p>
+            Right now this is still on paper — the shape of the thing is
+            scoped, the open decisions are closed, and the first real
+            session is data collection, not code: pulling a real
+            discharge curve off the UPS before the runtime estimator gets
+            written at all. Nothing here is built yet. This entry is the
+            marker for why it's getting built in this order, so that six
+            months from now, if the sequencing looks strange out of
+            context, there's a record of it not being an accident.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
