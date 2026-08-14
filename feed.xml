@@ -5,8 +5,36 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Thu, 13 Aug 2026 16:10:45 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 14 Aug 2026 16:41:14 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Reading a Codebase by Its Layers, Not Its Files</title>
+      <link>https://michaelrooney.dev/journal/08-13-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-13-2026c.html</guid>
+      <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Hooks, components, and services live in different folders for a real reason — and the one small file that quietly makes almost all of it possible.]]></description>
+    </item>
+    <item>
+      <title>NULL Isn't Nothing</title>
+      <link>https://michaelrooney.dev/journal/08-13-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-13-2026b.html</guid>
+      <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Three new database columns added to a table with real existing data. Two could safely be left NULL. The third would have caused a silent bug — and the reason comes down to one word in a WHERE clause.]]></description>
+    </item>
+    <item>
+      <title>Session 33 — Reading My Own Code Like a Reviewer, Not the Author</title>
+      <link>https://michaelrooney.dev/capstone/08-13-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-13-2026b.html</guid>
+      <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A full walk through the capstone codebase — client and most of the proxy — catching real misreadings along the way and surfacing two genuinely open design questions.]]></description>
+    </item>
+    <item>
+      <title>The Browser Asks Permission First</title>
+      <link>https://michaelrooney.dev/journal/08-13-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-13-2026.html</guid>
+      <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A walkthrough of CORS and preflight requests, plus a related lesson on why a server's own logs and its response to the outside world are often deliberately different things.]]></description>
+    </item>
     <item>
       <title>Session 32 — One Push, Three Networks, Zero Commands</title>
       <link>https://michaelrooney.dev/capstone/08-13-2026.html</link>

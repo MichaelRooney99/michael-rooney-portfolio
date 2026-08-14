@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reading a Codebase by Its Layers, Not Its Files — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Hooks, components, and services all live in different folders for a reason that only becomes obvious once you trace how data actually moves through an application — and the one file that quietly makes almost every piece of it possible, sitting between the HTML page and the app that renders into it."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Reading a Codebase by Its Layers, Not Its Files — Michael Rooney" />
+    <meta property="og:description" content="Hooks, components, and services live in different folders for a real reason — and the one small file that quietly makes almost all of it possible." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-13-2026c.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Reading a Codebase by Its Layers, Not Its Files — Michael Rooney" />
+    <meta name="twitter:description" content="Hooks, components, and services live in different folders for a real reason, and one small file quietly makes almost all of it possible." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-13-2026c.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Reading a Codebase by Its Layers, Not Its Files",
+      "description": "Hooks, components, and services live in different folders for a real reason — traced through how data actually moves through an application, and the one small file that quietly makes almost all of it possible.",
+      "datePublished": "2026-08-13",
+      "url": "https://michaelrooney.dev/journal/08-13-2026c.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-13-2026">August 13, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Reading a Codebase by Its Layers, Not Its Files</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A frontend codebase organized into folders like
+            <code>services/</code>, <code>hooks/</code>, and
+            <code>components/</code> can look, from the outside, like
+            an arbitrary filing system — just different drawers for
+            different kinds of files. It isn't. Each folder represents a
+            genuinely different responsibility, and understanding what's
+            allowed to call what turns out to explain most of how the
+            application actually behaves.
+          </p>
+
+          <h2>Services: no React, no opinions about display</h2>
+
+          <p>
+            The services layer's entire job is fetching real data and
+            reshaping it into a consistent, predictable shape — nothing
+            about how or where that data eventually gets shown. These
+            files don't know a single thing about React. They're plain
+            functions: given a real API call, return normalized data.
+            That narrowness is deliberate — it means the exact same
+            fetching-and-shaping logic could be reused in a completely
+            different UI framework without changing a line, because
+            nothing here assumes anything about rendering at all.
+          </p>
+
+          <h2>Hooks: the bridge between plain data and a living React tree</h2>
+
+          <p>
+            Hooks are where services actually meet React. A hook calls
+            into the services layer, but wraps that call in real React
+            state — is this loading, did it error, has new data arrived
+            — and exposes all of that back out in a form components can
+            actually consume. This is also where library-level behavior
+            gets configured — how often to refetch, how long data stays
+            considered fresh, how many times to retry a failure — real
+            decisions, not defaults left untouched.
+          </p>
+
+          <h2>Components: rendering, and — sometimes — their own direct line to a hook</h2>
+
+          <p>
+            Components take data and turn it into what actually appears
+            on screen. The instinct is to assume all data flows one way
+            — a top-level component fetches everything and hands it
+            down as props to everyone underneath it. That's often true,
+            but not a hard rule here: some components reach directly
+            into their own hook, fetching their own data independently,
+            rather than waiting on something above them to hand it down.
+            A modal that only needs its own data the moment it opens is
+            a natural fit for that — no reason to make an unrelated
+            parent component responsible for data only one specific
+            child actually needs.
+          </p>
+
+          <h2>The file that makes almost all of it possible, and easy to skip past</h2>
+
+          <p>
+            It's tempting to assume the plain HTML page just loads the
+            main application component directly. It doesn't — there's a
+            real, separate file sitting between them, and it's doing
+            more than just bootstrapping. That file is where a shared
+            data-fetching client actually gets created and wrapped
+            around the entire application, once. Every single hook
+            anywhere in the app that relies on that shared client — and
+            most of the interesting ones do — is silently depending on
+            this one small file having wrapped things correctly.
+            Overlooking that link doesn't just mean missing a small
+            technical detail — it means missing the one piece that
+            explains why data-fetching hooks scattered across a dozen
+            different components all get to share caching and
+            deduplication behavior without ever having to coordinate
+            with each other directly. None of them know about each
+            other. They're all just quietly plugged into the same thing,
+            set up once, in a file easy to skip right past.
+          </p>
+
+          <h2>Why the layering matters more than it looks like it should</h2>
+
+          <p>
+            None of this is really about folder names. It's about being
+            able to answer a real question quickly: if something's
+            broken, which layer does the actual problem live in? Wrong
+            data on screen — check the service doing the fetching first,
+            before assuming the component rendering it is at fault. A
+            component behaving strangely when it should be caching data
+            — check whether it's actually inside the shared provider
+            everything else depends on. The folder structure isn't
+            decoration. It's a map for exactly this kind of question,
+            and it only works if you actually know which layer is
+            responsible for what before you start looking.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-13-2026b.html">← Previous: 08-13-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

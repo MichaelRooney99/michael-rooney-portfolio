@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NULL Isn't Nothing — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A database migration adds three new columns to a table that already has real data. Two get left NULL for old rows without any consequence. The third one would have caused a real, silent bug — and the reason why comes down to one word in a WHERE clause."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="NULL Isn't Nothing — Michael Rooney" />
+    <meta property="og:description" content="Three new database columns added to a table with real existing data. Two could safely be left NULL. The third would have caused a silent bug — and the reason comes down to one word in a WHERE clause." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-13-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NULL Isn't Nothing — Michael Rooney" />
+    <meta name="twitter:description" content="Three new database columns, real existing data underneath them — and why one specific column couldn't safely be left empty." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-13-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "NULL Isn't Nothing",
+      "description": "A database migration adds three new columns to a table with real existing data. Two could safely be left NULL. The third would have caused a silent bug, and the reason comes down to one word in a WHERE clause.",
+      "datePublished": "2026-08-13",
+      "url": "https://michaelrooney.dev/journal/08-13-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-13-2026">August 13, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>NULL Isn't Nothing</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A table that's already been running in production for
+            months needs three new columns added, all at once, for a
+            new feature. The straightforward approach: add all three
+            the same way, let old rows come back empty for values that
+            didn't exist yet when they were written. Reasonable
+            instinct. Wrong for exactly one of the three, and the reason
+            why turns out to be worth understanding properly, not just
+            memorizing as a rule.
+          </p>
+
+          <h2>What NULL actually means to a database</h2>
+
+          <p>
+            <code>NULL</code> isn't an empty string, isn't zero, isn't
+            "false" — it represents the complete absence of a value, and
+            it behaves strangely as a direct consequence. Ordinary
+            equality comparisons simply don't apply to it. A row where
+            some column is <code>NULL</code> doesn't equal any specific
+            value in a query filtering on that column — not even
+            another <code>NULL</code>. A condition like
+            <code>WHERE some_column = 'x'</code> silently excludes any
+            row where that column is <code>NULL</code>, without
+            erroring, without warning. It just isn't included in the
+            results, the same as if it failed the comparison outright.
+          </p>
+
+          <h2>Two columns where this genuinely didn't matter</h2>
+
+          <p>
+            Two of the three new columns in this migration were purely
+            descriptive — read and displayed, never used to filter or
+            search for anything. Old rows simply never had a real value
+            for either of them, because the feature that would have
+            populated them didn't exist yet when those rows were
+            written. Leaving them <code>NULL</code> for old data isn't
+            a gap to patch — it's the honest, correct answer for rows
+            where the concept genuinely doesn't apply.
+          </p>
+
+          <h2>One column where it would have been a real, silent bug</h2>
+
+          <p>
+            The third new column was different in exactly one way: real
+            application logic filters on it directly, inside a
+            <code>WHERE</code> clause, to answer a specific operational
+            question — something like "is there already an active
+            record of this particular kind for this specific thing?"
+            before deciding whether to create a new one.
+          </p>
+
+          <p>
+            Picture what happens if that column had been left
+            <code>NULL</code> on every pre-migration row instead of
+            given a real default. Every one of those old records is, in
+            fact, exactly the kind the filter is looking for — they
+            just don't say so explicitly anymore, because the column
+            simply didn't exist when they were written. The query
+            wouldn't error. It wouldn't warn. It would just quietly
+            behave as though those old records didn't exist at all,
+            because <code>NULL</code> can never satisfy an equality
+            check, full stop. Code relying on that filter would treat
+            genuinely already-existing records as though there were
+            nothing there yet — and could easily create a duplicate,
+            with no error anywhere pointing at why.
+          </p>
+
+          <h2>The actual fix, and why it works without extra effort</h2>
+
+          <p>
+            The real solution wasn't some elaborate one-time data-repair
+            script. It was one clause, right in the same statement that
+            added the column: a genuine default value, applied
+            specifically because every row that already existed was, by
+            definition, exactly that value — the feature that could
+            have produced anything different for that column didn't
+            exist until this exact migration ran. The database itself
+            retroactively fills every old row with the correct value the
+            instant the column is added. No separate update step, no
+            follow-up script, no chance to forget a step — because the
+            default value isn't just a fallback for missing input going
+            forward, it's the entire migration for the data that already
+            existed.
+          </p>
+
+          <p>
+            The lesson that actually generalizes past this one table:
+            before deciding a new column is safe to leave empty for old
+            rows, the real question isn't "does this column have a
+            value yet." It's "does anything downstream ever go looking
+            for this value in a way that requires it to actually be
+            there." A column that's only ever displayed can be empty
+            with zero consequence. A column that's ever asked "does this
+            equal something" needs a real, deliberate answer for every
+            row that existed before it did — or it quietly, invisibly,
+            stops being findable at all.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-13-2026.html">← Previous: 08-13-2026 Entry</a>
+          <a href="08-13-2026c.html">Next: 08-13-2026c Entry →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

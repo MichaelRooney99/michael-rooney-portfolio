@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Browser Asks Permission First — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Why a webpage can't just talk to any server it wants, what a preflight request actually is, and a related lesson from the exact same file: why the error a server logs for itself and the error it shows to whoever's asking are often deliberately different things."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Browser Asks Permission First — Michael Rooney" />
+    <meta property="og:description" content="A walkthrough of CORS and preflight requests, plus a related lesson on why a server's own logs and its response to the outside world are often deliberately different things." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-13-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Browser Asks Permission First — Michael Rooney" />
+    <meta name="twitter:description" content="A walkthrough of CORS and preflight requests, plus why a server's internal logs and external responses are often deliberately different." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-13-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Browser Asks Permission First",
+      "description": "Why a webpage can't just talk to any server it wants, what a preflight request actually is, and why a server's internal logs and its external error response are often deliberately different.",
+      "datePublished": "2026-08-13",
+      "url": "https://michaelrooney.dev/journal/08-13-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-13-2026">August 13, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Browser Asks Permission First</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A browser has a rule baked into it that most people never
+            notice until they hit it: a page loaded from one origin
+            can't freely make requests to a server on a different
+            origin, unless that server explicitly says it's allowed to.
+            "Origin" here is specific — protocol, domain, and port all
+            have to match. Same domain over a different port still
+            counts as a different origin. This rule exists purely to
+            protect the person using the browser, not the server — it
+            stops some other website you have open from quietly making
+            authenticated requests to your bank on your behalf, using
+            cookies your browser already has. The server on the other
+            end has to opt in, explicitly, to being talked to from
+            somewhere else.
+          </p>
+
+          <p>
+            That opt-in is CORS — a small set of response headers a
+            server sends back saying which origins it trusts, which
+            HTTP methods it'll accept from them, and which custom
+            headers it'll allow attached to those requests.
+          </p>
+
+          <h2>The request that never shows up in the actual conversation</h2>
+
+          <p>
+            The part that isn't obvious until you actually watch it
+            happen: for anything beyond the simplest kind of request —
+            a plain GET, no unusual headers — the browser doesn't just
+            send the real request and see what comes back. It sends a
+            separate one first, automatically, called a preflight, using
+            the <code>OPTIONS</code> method. The question it's asking,
+            before committing to anything, is essentially "if I actually
+            send this, will you allow it?" Only once the server answers
+            yes does the browser send the real request at all.
+          </p>
+
+          <p>
+            A server that isn't expecting this can end up genuinely
+            confused — a route built to handle <code>POST</code>
+            requests suddenly receiving <code>OPTIONS</code> requests it
+            has no idea what to do with. The fix is a small, separate
+            handler specifically for that case: recognize
+            <code>OPTIONS</code>, respond with an empty
+            <code>204 No Content</code>, and stop right there — never
+            let it fall through to whatever the real route logic would
+            do, because there's no real request to handle yet, just a
+            permission check. It's easy to miss this exists at all if
+            everything you've tested so far only used plain GET
+            requests, since those skip the preflight step entirely.
+          </p>
+
+          <h2>The same file, a different kind of permission question</h2>
+
+          <p>
+            Right next to this CORS handling sat something that turned
+            out to be a related idea, even though it's not about
+            networking at all — a pattern for handling failures inside
+            an actual route, once a request is genuinely being
+            processed. A database write fails, or something else
+            unexpected breaks mid-request. The instinct might be to just
+            hand the real error back to whoever made the request — it's
+            honest, it's informative, it feels helpful. But the actual
+            code deliberately splits this into two separate messages: a
+            full, real error — stack trace and all — written only to
+            the server's own logs, and a flat, generic message sent back
+            to the outside caller instead.
+          </p>
+
+          <p>
+            The reasoning is a genuinely different kind of permission
+            question than CORS asks, but it rhymes: not "can you talk to
+            me," but "how much do you get to know about what just went
+            wrong inside me." A raw error message can leak real internal
+            detail — file paths, database structure, hints about how
+            something's built — to literally anyone who happens to
+            trigger a failure, intentionally or not. None of that detail
+            helps a legitimate caller recover from the error. It's just
+            free information handed to whoever's poking at the system,
+            good intentions or bad. Logging the real thing where only
+            the person running the server can see it, and giving the
+            outside world nothing but "something went wrong," keeps the
+            useful detail where it's actually useful and denies it to
+            everyone else by default.
+          </p>
+
+          <p>
+            Two completely different mechanisms, sitting a few dozen
+            lines apart in the same file — one about which origins get
+            to talk to a server at all, one about how much a request
+            that's already been allowed in gets to learn when something
+            breaks. Different layers, same underlying instinct: default
+            to withholding, and only grant exactly as much access or
+            information as is actually needed.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-12-2026.html">← Previous: 08-12-2026 Entry</a>
+          <a href="08-13-2026b.html">Next: 08-13-2026b Entry →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

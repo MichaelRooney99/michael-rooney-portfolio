@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 33 — Reading My Own Code Like a Reviewer, Not the Author — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A walk through the entire capstone codebase, client and most of the proxy, catching my own misreadings along the way — and coming out the other side with two real, still-open design questions worth scoping properly rather than deciding on the spot."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 33 — Reading My Own Code Like a Reviewer, Not the Author — Michael Rooney" />
+    <meta property="og:description" content="A full walk through the capstone codebase — client and most of the proxy — catching real misreadings along the way and surfacing two genuinely open design questions." />
+    <meta property="og:url" content="https://michaelrooney.dev/capstone/08-13-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 33 — Reading My Own Code Like a Reviewer, Not the Author — Michael Rooney" />
+    <meta name="twitter:description" content="A full walk through the capstone codebase, catching real misreadings along the way and surfacing two genuinely open design questions." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/capstone/08-13-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 33 — Reading My Own Code Like a Reviewer, Not the Author",
+      "description": "A full walk through the capstone codebase, client and most of the proxy, catching real misreadings along the way and surfacing two genuinely open design questions worth scoping properly.",
+      "datePublished": "2026-08-13",
+      "url": "https://michaelrooney.dev/capstone/08-13-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-13-2026">August 13, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 33 — Reading My Own Code Like a Reviewer, Not the Author</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Different kind of session than usual — no new code, no
+            deploys, nothing shipped. Just reading, deliberately, in
+            order: the client's type definitions, the services facade,
+            a few adapters, the hooks, the main orchestrating component,
+            then most of the proxy — routes, the two background loops,
+            the database layer. The goal wasn't to find bugs. It was to
+            actually understand the shape of what's been built well
+            enough to defend it out loud, not just to have written it.
+          </p>
+
+          <h2>Getting things wrong on purpose helped more than getting them right</h2>
+
+          <p>
+            A few real misreadings happened along the way, and catching
+            them turned out to matter more than the parts I understood
+            correctly the first time. Attributing a grouping function to
+            the wrong file. Describing a facade as "importing responses"
+            when it actually imports functions and calls them itself.
+            Skipping straight from a root component to the HTML page
+            without noticing the actual entry point sitting between
+            them. Small errors, every one of them — but each one only
+            got caught by going and checking the real file instead of
+            trusting a confident-sounding mental model. That's a
+            genuinely different skill than writing code in the first
+            place, and it's the one this session was actually for.
+          </p>
+
+          <h2>Patterns that only become visible once you're reading, not writing</h2>
+
+          <p>
+            A few things clicked specifically because reading in order
+            makes repetition visible in a way that writing each piece
+            separately, weeks apart, never does. The same status-
+            derivation logic showing up in three different files, on
+            purpose, with a fixture-based test suite existing
+            specifically to catch the one real risk that duplication
+            creates. A database table that started with six columns and
+            grew to nine, in two separate migrations, each one only
+            firing because a new feature needed data the original
+            design never anticipated — and a default value on exactly
+            one of those new columns doing real, silent work, because
+            that particular column gets used in a <code>WHERE</code>
+            clause and the other two never do. <code>NULL</code> would
+            have been fine for two of the three additions. For the
+            third, it would have been a real, silent correctness bug.
+          </p>
+
+          <p>
+            And a genuinely uncomfortable one, worth sitting with rather
+            than rushing past: what actually happens when a monitoring
+            source itself goes fully unreachable, not just one thing it
+            monitors. A single node going down produces a loud, visible,
+            red signal, reliably, every time. The data source itself
+            disappearing produces almost nothing — no rows get written
+            at all, which means the historical record shows a quiet gap
+            that looks identical to a genuinely uneventful day. The live
+            page has the same blind spot for a different reason — a
+            failed source's promise gets filtered out entirely rather
+            than surfaced, so the services it backs just vanish instead
+            of showing as broken. A status page whose entire purpose is
+            honest visibility having a blind spot about its own
+            visibility is a real gap, not a rough edge, and it's now
+            properly on the list rather than something noticed once and
+            forgotten.
+          </p>
+
+          <h2>Two open questions, deliberately not settled today</h2>
+
+          <p>
+            Two real design decisions surfaced during the walk, and
+            both got a scope doc instead of an on-the-spot answer — the
+            same discipline this project has held to all along, even
+            mid-conversation. Whether <code>incidents.json</code> stays
+            exactly as it is, structurally, while getting integrated
+            differently so editing doesn't require two different
+            workflows depending on an incident's age. And how — or
+            whether — to give the system a real, honest way to say "the
+            monitoring itself failed here," distinct from both "this was
+            actually fine" and "this was actually broken." Both are
+            genuinely open, both deserve a real look at the actual
+            tradeoffs before picking a direction, and neither needed
+            deciding in the middle of a code walk just because they came
+            up during one.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            A second pass through the same code is already planned —
+            this time with real questions asked back, not just
+            explanations offered forward. That's the actual test of
+            whether today's walk stuck: can I answer the kind of
+            question I'd get asked out loud, not just recognize the
+            right answer when it's shown to me.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-13-2026.html">← Session 32</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
