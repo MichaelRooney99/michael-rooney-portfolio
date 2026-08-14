@@ -136,17 +136,18 @@
           <p>
             It's tempting to assume the plain HTML page just loads the
             main application component directly. It doesn't — there's a
-            real, separate file sitting between them, and it's doing
-            more than just bootstrapping. That file is where a shared
-            data-fetching client actually gets created and wrapped
-            around the entire application, once. Every single hook
-            anywhere in the app that relies on that shared client — and
-            most of the interesting ones do — is silently depending on
-            this one small file having wrapped things correctly.
-            Overlooking that link doesn't just mean missing a small
-            technical detail — it means missing the one piece that
-            explains why data-fetching hooks scattered across a dozen
-            different components all get to share caching and
+            real, separate file sitting between them, called
+            <code>main.tsx</code>, and it's doing more than just
+            bootstrapping. That file is where a shared data-fetching
+            client actually gets created and wrapped around the entire
+            application, once, before the root component ever renders a
+            single thing. Every hook anywhere in the app that relies on
+            that shared client — and most of the interesting ones do —
+            is silently depending on this one small file having wrapped
+            things correctly. Overlooking that link doesn't just mean
+            missing a small technical detail — it means missing the one
+            piece that explains why data-fetching hooks scattered across
+            a dozen different components all get to share caching and
             deduplication behavior without ever having to coordinate
             with each other directly. None of them know about each
             other. They're all just quietly plugged into the same thing,
