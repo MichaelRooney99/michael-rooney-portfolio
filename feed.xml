@@ -5,8 +5,36 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 14 Aug 2026 21:21:21 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 15 Aug 2026 22:25:19 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Two Modals, One Real Difference Between Them</title>
+      <link>https://michaelrooney.dev/journal/08-15-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-15-2026c.html</guid>
+      <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Two nearly identical-looking components in the same app land on opposite sides of a real design distinction — and it has nothing to do with what either one looks like.]]></description>
+    </item>
+    <item>
+      <title>The Loop That Doesn't Need to Know How Many</title>
+      <link>https://michaelrooney.dev/journal/08-15-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-15-2026b.html</guid>
+      <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[How a single array method makes an app indifferent to quantity and identity, and why two nearly-identical caching calls sitting side by side protect completely different things.]]></description>
+    </item>
+    <item>
+      <title>Following Data Backward Instead of Forward</title>
+      <link>https://michaelrooney.dev/journal/08-15-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-15-2026.html</guid>
+      <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Starting from something real on screen and tracing backward to its actual source teaches something genuinely different than reading a codebase forward — with its own real vocabulary.]]></description>
+    </item>
+    <item>
+      <title>Session 34 — Starting From a Real Outage and Working Backward</title>
+      <link>https://michaelrooney.dev/capstone/08-15-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-15-2026.html</guid>
+      <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A backward code-review pass, starting from a real live outage and tracing it back through the codebase to a single Zabbix poll — plus a real corrected misconception about how live updates actually reach the detail modal.]]></description>
+    </item>
     <item>
       <title>Reading a Codebase by Its Layers, Not Its Files</title>
       <link>https://michaelrooney.dev/journal/08-13-2026c.html</link>

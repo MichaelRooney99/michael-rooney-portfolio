@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Loop That Doesn't Need to Know How Many — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A single array method quietly makes an application indifferent to how many things it's displaying or what any one of them specifically is. And two nearly-identical caching calls sitting side by side turn out to protect completely different things — one of them doesn't actually save what it looks like it saves."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Loop That Doesn't Need to Know How Many — Michael Rooney" />
+    <meta property="og:description" content="How a single array method makes an app indifferent to quantity and identity, and why two nearly-identical caching calls sitting side by side protect completely different things." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-15-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Loop That Doesn't Need to Know How Many — Michael Rooney" />
+    <meta name="twitter:description" content="How a single array method makes an app indifferent to quantity and identity, and why two nearly-identical caching calls protect completely different things." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-15-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Loop That Doesn't Need to Know How Many",
+      "description": "How a single array method makes an application indifferent to quantity and identity, and why two nearly-identical caching calls sitting side by side protect completely different things.",
+      "datePublished": "2026-08-15",
+      "url": "https://michaelrooney.dev/journal/08-15-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-15-2026">August 15, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Loop That Doesn't Need to Know How Many</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Somewhere in a lot of frontend code, there's a loop that
+            transforms a list of data into a list of visual rows. It's
+            such a common pattern it's easy to stop actually seeing it
+            — until you trace, deliberately, what would have to change
+            if the underlying list grew or shrank. The honest answer,
+            in a well-built version of this pattern, is: nothing at
+            all.
+          </p>
+
+          <h2>What the loop doesn't ask</h2>
+
+          <p>
+            A loop that maps over an array doesn't know, or care, how
+            many items are in it. Feed it one item, it runs once. Feed
+            it a hundred, it runs a hundred times, the exact same code
+            each time. That sounds almost too obvious to be worth
+            saying — until you notice what it implies for a real
+            application: adding a genuinely new thing to display never
+            requires touching the code that displays it, as long as the
+            new thing looks, structurally, like everything else already
+            in the list.
+          </p>
+
+          <p>
+            That "looks like everything else" part is the real
+            precondition, and it's not automatic — it's a discipline.
+            Somewhere upstream, every different kind of thing that ends
+            up in that array had to get reshaped into one consistent,
+            agreed-upon form before it ever reaches the loop. The loop
+            itself doesn't do that reshaping. It just trusts that it
+            already happened, and treats everything handed to it
+            identically. Take that discipline away — let different
+            kinds of items keep their own different shapes — and the
+            loop stops being able to stay ignorant of what it's
+            looping over. It'd need branches, special cases, exactly
+            the kind of code that has to change every time something
+            new gets added.
+          </p>
+
+          <h2>The other side of the same idea: not redoing work</h2>
+
+          <p>
+            A closely related discipline showed up right next to that
+            loop, in a different form — caching the <em>result</em> of
+            a computation so it doesn't get redone unless something it
+            actually depends on has changed. The mechanism deserves a
+            closer look than "it caches things," though, because two
+            nearly identical uses of it, sitting a few lines apart, can
+            behave completely differently depending on exactly what
+            they're told to watch.
+          </p>
+
+          <p>
+            One cached computation watched three inputs that rarely
+            change while a person is actively using a feature. The
+            other watched those same cached results, plus one more
+            thing — live search text, changing on every single
+            keystroke. The first one paid off constantly: real,
+            repeated work skipped, every time something unrelated
+            caused the component to re-render. The second one looked
+            like it should do the same thing, wrapped in the identical
+            mechanism — but because the thing that changes constantly
+            was explicitly one of its own watched inputs, it recomputed
+            on every keystroke anyway, exactly as if the caching wrapper
+            weren't there at all during typing.
+          </p>
+
+          <p>
+            That's not a flaw in the second one. It's protecting
+            something different — a stable result specifically when
+            <em>other</em> things change, like a person navigating a
+            list with arrow keys instead of typing into it. Same
+            mechanism, two completely different real payoffs, and the
+            only way to know which one you're actually getting is to
+            read exactly what each one is told to watch.
+          </p>
+
+          <h2>The pattern underneath both</h2>
+
+          <p>
+            Both of these come down to the same real discipline,
+            described two different ways: don't do more work than the
+            current moment actually requires, and stay ignorant of
+            details that don't matter to the job at hand. A loop that
+            doesn't need to know quantity. A cache that doesn't redo
+            work nothing asked it to redo. Neither is a clever trick on
+            its own — they're both just very literal descriptions of
+            not doing unnecessary work, applied at two different levels
+            of the same small piece of code.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-15-2026.html">← Previous: 08-15-2026 Entry</a>
+          <a href="08-15-2026c.html">Next: 08-15-2026c Entry →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

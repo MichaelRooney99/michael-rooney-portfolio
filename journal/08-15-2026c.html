@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Two Modals, One Real Difference Between Them — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Two components in the same application look almost identical — both full-screen overlays, both managing real internal state. But only one of them actually goes and gets its own data. The real dividing line in component design has nothing to do with what something looks like."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Two Modals, One Real Difference Between Them — Michael Rooney" />
+    <meta property="og:description" content="Two nearly identical-looking components in the same app land on opposite sides of a real design distinction — and it has nothing to do with what either one looks like." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-15-2026c.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Two Modals, One Real Difference Between Them — Michael Rooney" />
+    <meta name="twitter:description" content="Two nearly identical-looking components land on opposite sides of a real design distinction — and it has nothing to do with what either one looks like." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-15-2026c.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Two Modals, One Real Difference Between Them",
+      "description": "Two nearly identical-looking components in the same application land on opposite sides of a real design distinction, and it has nothing to do with what either one looks like.",
+      "datePublished": "2026-08-15",
+      "url": "https://michaelrooney.dev/journal/08-15-2026c.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-15-2026">August 15, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Two Modals, One Real Difference Between Them</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Two components in the same application, both rendered as
+            full-screen overlays on top of everything else, both
+            keeping track of real internal state as a person interacts
+            with them. On the surface, close to the same kind of thing.
+            Look at what each one actually does the moment it appears,
+            though, and they land on opposite sides of a real,
+            meaningful line — one that has nothing to do with being a
+            modal at all.
+          </p>
+
+          <h2>The actual question worth asking</h2>
+
+          <p>
+            The real distinction isn't about layout or visual style.
+            It's whether a component is a window into data its parent
+            already has, or whether it's a self-contained feature that
+            goes and gets its own data the moment it needs it. The
+            first kind — call it presentational — takes what it's
+            handed, displays it, and would render identically given
+            the same input twice. The second kind — a container —
+            actively does something beyond displaying: it reaches out,
+            fetches, manages its own data lifecycle, independent of
+            whatever its parent happens to already have sitting around.
+          </p>
+
+          <h2>A real counter-example worth having, not just a definition</h2>
+
+          <p>
+            One of the two overlays in question fetches its own data
+            the instant it mounts — real network activity, tied to its
+            own lifecycle, not something its parent already had lying
+            around. The other, despite looking structurally almost
+            identical — the same kind of full-screen treatment, the
+            same amount of real internal state to track — receives
+            everything it needs as plain props from its parent. Same
+            visual pattern. Opposite category, for a very concrete
+            reason: one of them needs information its parent doesn't
+            already possess (details specific to one thing someone just
+            clicked), and the other only ever needs information the
+            parent already has sitting in memory for other reasons.
+          </p>
+
+          <h2>Why this needs a real example to actually land</h2>
+
+          <p>
+            It would have been easy to accept a definition like
+            "presentational versus container" as a clean abstract rule
+            and move on. What actually made it stick was finding two
+            components that share almost every surface trait — same UI
+            pattern, same general complexity, built around the same
+            time in the same codebase — and only diverging on the one
+            thing that actually matters. That's usually the difference
+            between memorizing a rule and actually being able to apply
+            it later: not the definition itself, but having a real case
+            where two things looked alike and weren't.
+          </p>
+
+          <h2>Why the split is worth keeping deliberately</h2>
+
+          <p>
+            The practical value isn't philosophical. A component that
+            only ever renders what it's given is trivial to test, easy
+            to reason about, safe to reuse anywhere the right data
+            happens to be available. A component that manages its own
+            data fetching carries real responsibility — loading states,
+            error states, its own lifecycle — and deserves to be
+            treated with more care specifically because of that, not
+            lumped in with the simpler kind just because it happens to
+            share a visual style. Knowing which one you're looking at,
+            on sight, is worth being able to do quickly — and the only
+            reliable way to check is asking exactly one question: does
+            this thing know how to get its own data, or does it only
+            know how to show what it's been handed.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-15-2026b.html">← Previous: 08-15-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

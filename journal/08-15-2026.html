@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Following Data Backward Instead of Forward — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Reading a codebase forward, from its data contracts outward, teaches one thing. Starting from something real on screen and tracing backward to its actual source teaches something genuinely different — and it has its own real vocabulary worth knowing."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Following Data Backward Instead of Forward — Michael Rooney" />
+    <meta property="og:description" content="Starting from something real on screen and tracing backward to its actual source teaches something genuinely different than reading a codebase forward — with its own real vocabulary." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-15-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Following Data Backward Instead of Forward — Michael Rooney" />
+    <meta name="twitter:description" content="Starting from something real on screen and tracing backward to its actual source teaches something genuinely different than reading a codebase forward." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-15-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Following Data Backward Instead of Forward",
+      "description": "Starting from something real on screen and tracing backward to its actual source teaches something genuinely different than reading a codebase forward, with its own real vocabulary.",
+      "datePublished": "2026-08-15",
+      "url": "https://michaelrooney.dev/journal/08-15-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-15-2026">August 15, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Following Data Backward Instead of Forward</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            There's an obvious, natural order to reading an unfamiliar
+            codebase: start at the data, follow it through each layer
+            that transforms it, end at what actually renders on
+            screen. That order teaches you the shape of a system —
+            what depends on what, in what sequence. It's not the same
+            skill as debugging, though, and it took deliberately going
+            the other direction once to notice the gap.
+          </p>
+
+          <h2>Real vocabulary for something obvious once named</h2>
+
+          <p>
+            Tracking where a specific piece of data actually came from,
+            and every transformation it passed through to get to where
+            you're looking at it, has a real name: <strong>data
+            lineage</strong>. The direction matters enough to have its
+            own terms too — starting from something visibly wrong and
+            walking backward to the actual origin is a
+            <strong>backward trace</strong>, sometimes called a
+            <strong>root-cause trace</strong>, since that's usually why
+            someone bothers. The forward direction — start at the
+            source, follow it through to the render — is closer to
+            what people mean by a request's <strong>lifecycle</strong>
+            or its <strong>call chain</strong>.
+          </p>
+
+          <p>
+            Worth knowing one more term even without the tooling behind
+            it: real production systems, with many separate services
+            talking to each other, use <strong>distributed
+            tracing</strong> to do exactly this automatically — every
+            request carries an ID that gets logged at each hop, so
+            nobody has to reconstruct the path by hand afterward. Doing
+            it manually, reading real code and real data one file at a
+            time, is the slow, deliberate version of the same idea —
+            worth doing at least once by hand before ever trusting a
+            tool to do it automatically.
+          </p>
+
+          <h2>Why the direction actually changes what you find</h2>
+
+          <p>
+            Reading forward, you understand a system the way its
+            author built it — assumption by assumption, layer by
+            layer, in the order it was reasoned through originally.
+            Reading backward starts somewhere the author never
+            explicitly pointed you: an actual outcome, and the real
+            question "why did this specific thing happen." That
+            question doesn't respect layer boundaries the way forward
+            reading naturally does. It cuts straight through whatever
+            path actually mattered for this one specific case, skipping
+            everything irrelevant to it.
+          </p>
+
+          <p>
+            That difference showed up directly this time. A live
+            service going down briefly, for real, produced a red mark
+            in its history and correctly no formal incident record —
+            something reasoned through analytically once before, now
+            confirmed by pulling the actual raw data and doing the
+            arithmetic on real timestamps. And backward-tracing that
+            one outage surfaced something a forward read never would
+            have: the exact same physical machine turned out to be
+            tracked twice, through two genuinely separate pipelines,
+            briefly telling two different — both true — stories about
+            itself at once. Forward reading would have walked each
+            pipeline in isolation and never noticed they occasionally
+            describe the same real thing differently, because nothing
+            about reading either one in order would have prompted
+            comparing them against each other at all.
+          </p>
+
+          <h2>The actual value isn't the answer, it's the discipline of getting there</h2>
+
+          <p>
+            Neither direction is more correct than the other — they're
+            genuinely different tools, aimed at genuinely different
+            questions. "How does this system work" wants forward.
+            "Why did this specific thing happen" wants backward. The
+            real skill worth building isn't memorizing which direction
+            to use when — it's noticing, in the moment, which of those
+            two questions is actually being asked, and having both
+            ways of moving through unfamiliar code available rather
+            than only ever reaching for one.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-13-2026c.html">← Previous: 08-13-2026c Entry</a>
+          <a href="08-15-2026b.html">Next: 08-15-2026b Entry →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
