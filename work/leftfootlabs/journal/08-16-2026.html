@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What the First Test Print Actually Taught Me — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A test print of the leftfootLabs rack came back with real problems — a spigot that printed as a separate piece, supports trapped inside a hollow tube. Working through what that meant, what didn't work as a fix, and what did."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="What the First Test Print Actually Taught Me — Michael Rooney" />
+    <meta property="og:description" content="Working through a failed test print of the leftfootLabs rack — bridging, trapped supports, a chamfer that solved one problem and caused another, and what actually fixed it." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/08-16-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="What the First Test Print Actually Taught Me — Michael Rooney" />
+    <meta name="twitter:description" content="Working through a failed test print of the leftfootLabs rack — bridging, trapped supports, a chamfer that solved one problem and caused another, and what actually fixed it." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/08-16-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "What the First Test Print Actually Taught Me",
+      "description": "Working through a failed test print of the leftfootLabs rack — bridging, trapped supports, a chamfer that solved one problem and caused another, and what actually fixed it.",
+      "datePublished": "2026-08-16",
+      "url": "https://michaelrooney.dev/work/leftfootlabs/journal/08-16-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-16-2026">August 16, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>What the First Test Print Actually Taught Me</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            First real print of the rack came back with two honest
+            problems. The post's top spigot printed as basically its own
+            separate piece, barely touching the post underneath it. And
+            the corner and beam joints had generated support material
+            somewhere I couldn't reach it — inside a fully enclosed
+            hollow tube, with no way in after the fact except cutting the
+            part open.
+          </p>
+
+          <p>
+            Both came from the same root cause once I actually understood
+            it: the post was a hollow tube, and the spigot was a solid
+            cap sitting directly on top of that hollow interior. Printing
+            that means bridging solid material across open air — printing
+            a layer with nothing underneath it, relying on the material
+            stiffening fast enough not to sag before the next layer locks
+            it in. PETG doesn't bridge span like that reliably, so the
+            spigot layer partially failed, and the slicer tried to
+            compensate with supports it had no way to place anywhere
+            useful, since the only space available was sealed on every
+            side.
+          </p>
+
+          <h2>The chamfer that solved one thing and broke another</h2>
+
+          <p>
+            First fix attempt was a chamfered "house" profile on the
+            joint sockets and spigots — a peaked cross-section instead of
+            a flat-topped square, so the printer never has to bridge more
+            than a couple millimeters at any layer near the top. That
+            part worked. The bridging problem genuinely went away.
+          </p>
+
+          <p>
+            What I didn't account for: the heat-insert bore for each
+            joint sits at a fixed height, and once the surrounding
+            material stopped being a plain square and started sloping
+            away at 45 degrees, part of that bore's own wall went from
+            solid material to open chamfer. The insert ended up held in
+            by less than half its own circumference. Solved the print
+            problem, broke the actual joint. Reverted the chamfer back to
+            plain squares and I'm handling the bridging the same way I'm
+            handling it on the post now — through slicer settings, not
+            geometry.
+          </p>
+
+          <h2>What actually fixed the post</h2>
+
+          <p>
+            The real fix for the post wasn't a shape change at all — it
+            was making it solid. Turns out the shelf-mount bores had a
+            second, separate problem hiding under the bridging issue: an
+            8.4mm-deep bore drilled into a wall that was only 3mm thick.
+            Every one of those "blind" holes was never actually blind —
+            it was punching straight through into the hollow interior
+            every time. A solid post gives every bore, all the way down
+            the post's length, real material to stop in. Costs more
+            filament and more print time than the hollow version did.
+            That's the trade being made here on purpose, not an oversight.
+          </p>
+
+          <h2>Small things that add up to real assembly</h2>
+
+          <p>
+            A few smaller fixes came out of actually looking at printed
+            geometry from angles I hadn't checked before. The beam's bolt
+            clearance hole was drilled all the way through both walls of
+            the joint, including a thin inner wall right next to the
+            socket that never needed a hole at all — the heat insert
+            lives in the corner piece, not the beam, so the beam only
+            ever needed a clean pass-through on the outside face. And
+            every insert bore that's meant to be accessed during assembly
+            now consistently opens toward the outside of a joint instead
+            of into the tight inside corner — small thing, but it's the
+            difference between reaching a bolt with your fingers and
+            fighting for it.
+          </p>
+
+          <p>
+            Last piece from tonight: the bottom corner's accessory
+            cavity — reserved for a future foot attachment — now has bolt
+            access from the two outer faces that don't already have a
+            beam spigot. Positioned at the same relative depth every
+            other pin in this design uses, so it's a real consistent
+            convention and not a coincidence. Same corner piece also
+            picked up a second insert bore on its post-connecting stub,
+            mirroring the one it already had, so that connection point
+            has two usable directions instead of one — a small bit of
+            headroom for whatever this part ends up doing besides just
+            holding a post upright.
+          </p>
+
+          <p>
+            Test print of this round is running now. Whatever it shows,
+            it'll show something real — that's the only kind of feedback
+            that's mattered so far.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-15-2026.html">← Redesigning the Rack in the Tool I Actually Use</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

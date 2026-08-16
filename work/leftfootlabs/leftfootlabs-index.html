@@ -78,6 +78,55 @@
 
       <div class="divider reveal"></div>
 
+      <section aria-labelledby="overview-heading" class="prose">
+        <span class="section-label">Overview</span>
+        <h2 id="overview-heading" class="reveal">What this is</h2>
+
+        <p>
+          leftfootLabs makes small 3D-printed rack kits for people
+          running a homelab who don't own a printer of their own — a
+          5U, 10-inch open-frame rack, sized for the kind of gear most
+          homelabbers actually have on hand: mini PCs, small switches,
+          patch panels, a compact UPS. The markup is modest by design.
+          This isn't meant to be a business so much as a way to hand
+          off something that already works.
+        </p>
+
+        <p>
+          The design itself has been through real iteration, most of it
+          driven by actual test prints rather than getting everything
+          right on a screen first. Early passes used a cage-nut rail
+          system, borrowed from commercial racks, before switching to
+          fixed M6 heat-set inserts — simpler, fewer loose parts, and a
+          better fit for a kit meant to be assembled by hand. The frame
+          is modular: posts stack in segments to grow from 5U to 8U or
+          10U without a redesign, and corners are split from beams so
+          each piece stays small enough to print reliably and swap out
+          on its own. The base panel carries the actual leftfootLabs
+          mark, rendered as a honeycomb vent — solid everywhere else,
+          open cells cut into the shape of the logo itself.
+        </p>
+
+        <p>
+          None of that came from getting the CAD right on the first try.
+          A handful of early prints came back with real problems — a
+          joint that printed as two separate pieces instead of one,
+          support material trapped somewhere unreachable, a fix that
+          solved one problem and quietly broke another. Working through
+          those is most of what the <a href="#updates-heading">updates</a>
+          below actually document.
+        </p>
+
+        <p>
+          leftfootLabs is also the first real testbed for the Rack
+          Planner, a separate tool — still in scoping, not yet built —
+          for laying out a homelab build and checking that a kit like
+          this actually fits before anyone spends money on one.
+        </p>
+      </section>
+
+      <div class="divider reveal"></div>
+
       <section class="capstone-meta reveal" aria-label="Project details">
         <div class="capstone-meta-grid">
 
@@ -122,7 +171,39 @@
 
         <ol class="entry-list" reversed>
 
-          <li data-tags="homelab projects">
+          <li data-tags="projects">
+            <a href="journal/08-16-2026.html" class="entry" aria-label="Read: What the First Test Print Actually Taught Me — August 16 2026">
+              <time class="entry-date" datetime="08-16-2026">August 16, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">What the First Test Print Actually Taught Me</h2>
+                <p class="entry-excerpt">
+                  A failed test print, a chamfer that fixed bridging but broke a heat insert, and what
+                  actually solved it — going solid instead of hollow.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li data-tags="projects">
+            <a href="journal/08-15-2026.html" class="entry" aria-label="Read: Redesigning the Rack — August 15 2026">
+              <time class="entry-date" datetime="08-15-2026">August 15, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Redesigning the Rack</h2>
+                <p class="entry-excerpt">
+                  Modular posts, corners split from beams, the real logo traced into a honeycomb vent —
+                  and a long night of real bugs that only visual verification actually caught.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li data-tags="projects">
             <a href="journal/08-14-2026.html" class="entry" aria-label="Read: Building the Thing Before the Store — August 14 2026">
               <time class="entry-date" datetime="08-14-2026">August 14, 2026</time>
               <div class="entry-body">
@@ -132,7 +213,6 @@
                   call, and what building it is meant to prove before there's anything to sell.
                 </p>
                 <div class="entry-tags">
-                  <span class="tag tag-homelab">Homelab</span>
                   <span class="tag tag-projects">Projects</span>
                 </div>
               </div>
@@ -140,7 +220,6 @@
           </li>
 
         </ol>
-        <button class="load-more-btn" type="button">Load More</button>
       </section>
 
     </main>

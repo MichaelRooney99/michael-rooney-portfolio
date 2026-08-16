@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redesigning the Rack in the Tool I Actually Use — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Rebuilding the leftfootLabs rack in Blender instead of a tool I've never touched, converting cage-nut rails to heat-set inserts, making posts modular, tracing the real logo into a honeycomb vent panel, and a long night of real bugs caught by actually looking at the output instead of trusting it."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Redesigning the Rack in the Tool I Actually Use — Michael Rooney" />
+    <meta property="og:description" content="A long session rebuilding the leftfootLabs rack in Blender — modular posts, a real logo trace, and a lot of bugs that only visual verification caught." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Redesigning the Rack — Michael Rooney" />
+    <meta name="twitter:description" content="A long session rebuilding the leftfootLabs rack in Blender — modular posts, a real logo trace, and a lot of bugs that only visual verification caught." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Redesigning the Rack",
+      "description": "A long session rebuilding the leftfootLabs rack in Blender — modular posts, a real logo trace, and a lot of bugs that only visual verification caught.",
+      "datePublished": "2026-08-15",
+      "url": "https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-15-2026">August 15, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Redesigning the Rack</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            First thing worth correcting on the record: I've never touched
+            Blender. The rack design work happens in Blender — so im learning from Youtube tutorials and the occasional forum post, and the first pass of the rack was done in a tool I've never used before. That was a mistake. Tonight was a long session rebuilding the rack in Blender itself, and it went much more smoothly.
+          </p>
+
+          <p>
+            With that sorted, tonight was the first real design pass on
+            the rack itself, working from a photo of an off-the-shelf
+            open-frame 4-post rack as a reference. The pictured version
+            uses continuous square-hole rails with cage nuts — universal,
+            but more hardware than this needs. Swapped that for fixed M6
+            heat-set insert bosses at set positions instead: no loose
+            nuts, fewer parts, and it fits the M6 x D8 x L8 inserts and
+            M6x12mm bolts already in use elsewhere.
+          </p>
+
+          <h2>Posts that grow</h2>
+
+          <p>
+            Rather than one fixed-height post, each post is now a
+            stackable segment — a spigot on top, an open socket on the
+            bottom, pinned together with a horizontal insert and bolt.
+            Going from 5U to 8U or 10U means printing more of the same
+            segment, not redesigning anything. The joint hardware needs
+            some clearance from the shelf-mount holes, so there's a small
+            unusable gap right at each joint — tightened that down to
+            the real minimum the hardware needs rather than an arbitrary
+            guess, once it was pointed out that the first pass left more
+            dead space than necessary.
+          </p>
+
+          <h2>The actual logo, not a guess at it</h2>
+
+          <p>
+            The base panel's vented section is meant to be the
+            leftfootLabs mark rendered as a honeycomb — solid panel
+            everywhere else, open cells inside the footprint shape for
+            airflow. First attempt at that shape was built from scratch
+            by eye, and it read as a generic paw print instead of the
+            actual mark. Turned out the fix wasn't to make it more
+            anatomically correct — it was to trace the real logo file
+            directly instead of approximating it. Once the actual SVG
+            was imported and unioned into one shape, the honeycomb cut
+            matched the real mark exactly, four toes and all, intentional
+            asymmetry included.
+          </p>
+
+          <h2>Corners and beams, split apart</h2>
+
+          <p>
+            The frame that holds the posts together started as one
+            continuous ring. Split it into separate corner blocks and
+            beam segments instead, using the same spigot/socket/pin
+            system as the posts — beams are female on both ends, corners
+            carry two male beam connections plus a vertical port for the
+            post above or below. Top and bottom corners are the same
+            design with one necessary difference: the post's own top end
+            is male, so the top corner has to offer a female socket
+            there instead of a spigot. Everything else about the two is
+            identical. Each corner also picked up a female accessory
+            port — facing down on the bottom corners for optional feet,
+            facing up on the top corners for an optional handle — using
+            whatever face the post connection isn't occupying.
+          </p>
+
+          <p>
+            The base panel used to bolt to the frame at four corners.
+            Replaced that with a groove routed along the inside of each
+            beam instead, so the panel slides in like the back of a
+            picture frame — no fasteners for the panel itself, and it
+            comes back out just as easily if it ever needs to.
+          </p>
+
+          <h2>A long night of catching bugs by actually looking</h2>
+
+          <p>
+            Worth documenting honestly: this session had a lot of "the
+            numbers say it worked" moments that turned out to be wrong,
+            caught only by rendering the result and looking at it — or,
+            a few times, by looking hard enough at an ambiguous render to
+            realize it still wasn't proof of anything and going back for
+            a cleaner one. A few of the real ones:
+          </p>
+
+          <p>
+            A basic scaling mistake was quietly cutting every single box
+            in the model to half its intended size — posts, frames,
+            panels, everything — from the very first version. It went
+            unnoticed for a while because the geometry still looked
+            roughly plausible at a glance. A separate, unrelated bug in
+            how solid shapes get thickness meant a vent cut could report
+            success and still not actually go all the way through a
+            panel. Two different objects — an imported logo shape and a
+            procedurally tiled honeycomb grid — each had their own center
+            point sitting somewhere other than where the code assumed,
+            so placing them "at the same coordinate" didn't actually
+            center them on each other until that got fixed on both. And
+            a formula for positioning a hardware bore got copy-pasted
+            from a vertical joint to a horizontal one without adjusting
+            for the different geometry, which quietly hollowed out a set
+            of spigots that looked fine in a plain face-count check and
+            only showed as wrong in a proper close-up render.
+          </p>
+
+          <p>
+            None of these were exotic problems. They were all the same
+            lesson from a few different angles: a number changing in the
+            expected direction isn't the same as confirming the result
+            is actually correct, and the only thing that reliably catches
+            the difference is looking at the real output, closely, at
+            the right angle, more than once if the first look is
+            ambiguous.
+          </p>
+
+          <h2>Where it stands</h2>
+
+          <p>
+            Posts, corners, beams, and both base panel variants exist as
+            real, individually verified parts. The one open item going
+            into next time: the panel groove and the beam's end socket
+            don't yet connect into one continuous open channel, so the
+            panel can't actually slide all the way in as designed yet.
+            Caught that from a render before committing to it further —
+            next session starts there.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <a href="08-16-2026.html">What the First Test Print Actually Taught Me →</a>
+          <a href="08-14-2026.html">← Building the Thing Before the Store</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
