@@ -51,9 +51,10 @@ SKIP_FILENAMES = {
     "capstone-index.html",
     "portfolio-showcase.html",
     "index.html",
+    "leftfootlabs-index.html",
 }
 
-TARGET_DIRS = ["journal", "capstone"]
+TARGET_DIRS = ["journal", "capstone", "work/leftfootlabs/journal"]
 
 # Static/index pages that don't belong in the RSS feed (they're not dated
 # entries) but do belong in the sitemap. Path is relative to repo root;
@@ -63,6 +64,7 @@ STATIC_PAGES = [
     {"path": "journal.html", "priority": "0.8"},
     {"path": "portfolio-showcase.html", "priority": "0.8"},
     {"path": "capstone/capstone-index.html", "priority": "0.8"},
+    {"path": "work/leftfootlabs/leftfootlabs-index.html", "priority": "0.8"},
 ]
 
 OG_TITLE_RE = re.compile(r'<meta property="og:title" content="([^"]*)"')

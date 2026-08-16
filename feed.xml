@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Sun, 16 Aug 2026 18:21:09 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 16 Aug 2026 19:21:02 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>What the First Test Print Actually Taught Me</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-16-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/08-16-2026.html</guid>
+      <pubDate>Sun, 16 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Working through a failed test print of the leftfootLabs rack — bridging, trapped supports, a chamfer that solved one problem and caused another, and what actually fixed it.]]></description>
+    </item>
     <item>
       <title>Two Modals, One Real Difference Between Them</title>
       <link>https://michaelrooney.dev/journal/08-15-2026c.html</link>
@@ -34,6 +41,20 @@
       <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-15-2026.html</guid>
       <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A backward code-review pass, starting from a real live outage and tracing it back through the codebase to a single Zabbix poll — plus a real corrected misconception about how live updates actually reach the detail modal.]]></description>
+    </item>
+    <item>
+      <title>Redesigning the Rack in the Tool I Actually Use</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html</guid>
+      <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A long session rebuilding the leftfootLabs rack in Blender — modular posts, a real logo trace, and a lot of bugs that only visual verification caught.]]></description>
+    </item>
+    <item>
+      <title>Building the Thing Before the Store</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-14-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/08-14-2026.html</guid>
+      <pubDate>Fri, 14 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Why the Rack Planner comes before a leftfootLabs storefront, and what building it is meant to prove before there's anything to sell.]]></description>
     </item>
     <item>
       <title>Reading a Codebase by Its Layers, Not Its Files</title>
