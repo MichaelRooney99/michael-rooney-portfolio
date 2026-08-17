@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Let the Tests Tell You What the Code Promises — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A real technique for getting oriented in unfamiliar code fast: read the test names before the implementation, form a hypothesis, then verify it. Why it works, how to actually do it, and a couple of real self-corrections it caught along the way."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Let the Tests Tell You What the Code Promises — Michael Rooney" />
+    <meta property="og:description" content="A real technique for getting oriented in unfamiliar code fast: read test names before implementation, form a hypothesis, then verify it against real evidence." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-17-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Let the Tests Tell You What the Code Promises — Michael Rooney" />
+    <meta name="twitter:description" content="A real technique for getting oriented in unfamiliar code fast: read test names before implementation, form a hypothesis, then verify it." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-17-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Let the Tests Tell You What the Code Promises",
+      "description": "A real technique for getting oriented in unfamiliar code fast: read test names before implementation, form a hypothesis, then verify it against real evidence.",
+      "datePublished": "2026-08-17",
+      "url": "https://michaelrooney.dev/journal/08-17-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-17-2026">August 17, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Let the Tests Tell You What the Code Promises</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Every unfamiliar codebase has to be read somehow the first
+            time, and the obvious instinct — open the entry point, read
+            top to bottom — turns out to be one of the slower ways to
+            actually get oriented. There's a real, well-established
+            alternative worth knowing, and a real method for doing it
+            properly, not just a vague "read the tests" suggestion.
+          </p>
+
+          <h2>Why tests are worth reading before the code they test</h2>
+
+          <p>
+            A test suite is a form of documentation that can't quietly
+            go stale the way a comment or a README can. If a test
+            claims something about the code's behavior and the code
+            stops living up to that claim, the test fails — there's no
+            silent drift possible the way there is with prose. That
+            alone makes tests a more trustworthy starting point than
+            almost anything else in a codebase.
+          </p>
+
+          <p>
+            <a href="https://www.coreycleary.me/learning-a-codebase-by-reading-tests" class="entry-excerpt" >Corey Cleary's write-up on this exact approach</a>
+            makes a related point worth sitting with: most of what
+            someone actually needs when learning a codebase is a plain
+            answer to "what does this function expect, and what does it
+            return or do" — and that's precisely the question a test
+            already answers, in a form meant to be read by a human, not
+            reverse-engineered from implementation.
+          </p>
+
+          <h2>The actual method</h2>
+
+          <p>
+            Read every test name in a file first, start to finish,
+            without opening a single assertion. Form a one-sentence
+            guess about what the function under test actually does,
+            based on names alone. Only then go back and read the real
+            assertions — starting with whichever names didn't fully
+            make sense, since that's exactly where the guess has a real
+            gap. Pay attention to the setup and fixtures along the way,
+            not just the expectations — that's usually the fastest way
+            to learn the real shape of a system's data. Only after all
+            of that is it worth reading the actual implementation — and
+            reading it with a hypothesis already in hand turns out to
+            be a genuinely faster experience than reading it cold.
+          </p>
+
+          <p>
+            <a href="https://prule.github.io/pauls-blog/page/software/reading-code/" class="entry-excerpt" >A broader piece on reading unfamiliar codebases</a>
+            frames part of why this works: tests reveal which concepts
+            the original developers thought were important enough to
+            protect, and they surface the edge cases someone already
+            anticipated, saving real time compared to discovering those
+            same edge cases the hard way later.
+          </p>
+
+          <h2>A related technique, for code with no tests at all</h2>
+
+          <p>
+            Worth knowing the adjacent case too, even though it wasn't
+            needed this time: what do you do when there's no test suite
+            to read at all? There's a real, named answer to that as
+            well — Michael Feathers, in <em>Working Effectively with
+            Legacy Code</em>, calls it a <strong>characterization
+            test</strong>: rather than writing a test that says what
+            the code <em>should</em> do, you write one that simply
+            records what it <em>actually</em> does right now, correct
+            or not, and use that as a safety net going forward. A good,
+            approachable
+            <a href="https://www.youtube.com/watch?v=mwVRHDD0tEk" class="entry-excerpt" >recent interview with Feathers himself</a>
+            covers this idea directly, including how it holds up even
+            with AI-assisted tooling now in the mix.
+          </p>
+
+          <h2>What actually caught the mistakes</h2>
+
+          <p>
+            The real value of the technique showed up twice, in almost
+            identical fashion, in two completely different files. Both
+            times, a first guess reached for a soft, plausible-sounding
+            verb — "excludes," "averages" — to describe behavior that
+            was actually something sharper and more specific
+            underneath. Both times, one real number from an actual test
+            or fixture disproved the guess cleanly and immediately.
+            That's the part worth remembering past this one project:
+            when an explanation of what code does reaches for a vague,
+            generic verb, that's often exactly the moment worth
+            stopping and checking one real value before trusting the
+            explanation any further.
+          </p>
+
+          <h2>A different technique for a different problem</h2>
+
+          <p>
+            Worth being honest that this isn't the only real approach
+            to getting oriented fast, and it isn't always the right
+            one. <a href="https://mitchellh.com/writing/contributing-to-complex-projects" class="entry-excerpt" >Mitchell Hashimoto's own written process</a>
+            for approaching complex projects leans on something
+            different first — becoming a real user of the system, then
+            tracing one feature end to end before trying to understand
+            anything broadly. His advice not to read the source until
+            you've actually built and run the project is a genuinely
+            different starting point than reading tests first, and a
+            reasonable one for a codebase with no tests to read at all.
+            Different tools for different situations — worth having
+            more than one approach available rather than treating any
+            single technique as the whole answer.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-15-2026c.html">← Previous: 08-15-2026c Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span><svg class="leftfootmark" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="var(--accent)">
+        <path d="M358.408,132.806c-17.392-41.261-80.604-54.014-141.185-28.48c-56.225,23.702-90.418,72.044-81.14,111.865
+          c0.415,2.929,1.377,5.954,2.944,9.087c0.804,1.91,1.708,3.761,2.706,5.55c18.241,37.827,26.862,69.947,32.894,99.554
+          c11.091,54.453,12.077,82.24,11.983,104.85c-0.002,0.693,0.018,1.338,0.051,1.952c1.037,41.49,34.976,74.816,76.717,74.816
+          c42.404,0,76.771-34.374,76.771-76.768c0-22.996-10.826-41.587-26.136-57.683c-1.367-1.735-3.305-4.073-3.67-4.61
+          c-6.611-9.774-10.118-14.601-14.568-29.136c-11.501-37.568,5.945-85.597,33.548-119.235c0.696-0.844,0.566-0.675,0.199-0.217
+          C359.27,192.207,369.123,158.224,358.408,132.806z"/>
+        <path d="M368.14,1.151c-25.09,0-45.432,20.338-45.432,45.432c0,25.088,20.342,45.426,45.432,45.426
+          c25.088,0,45.432-20.338,45.432-45.426C413.572,21.489,393.228,1.151,368.14,1.151z"/>
+        <path d="M268.367,68.434c18.892,0,34.214-15.318,34.214-34.217C302.581,15.325,287.259,0,268.367,0
+          c-18.898,0-34.22,15.325-34.22,34.217C234.148,53.115,249.469,68.434,268.367,68.434z"/>
+        <path d="M189.291,85.687c17.786,0,32.204-14.421,32.204-32.204c0-17.789-14.418-32.204-32.204-32.204
+          c-17.786,0-32.207,14.415-32.207,32.204C157.084,71.266,171.505,85.687,189.291,85.687z"/>
+        <path d="M155.936,102.362c0-15.88-12.875-28.751-28.754-28.751c-15.88,0-28.754,12.872-28.754,28.751
+          c0,15.885,12.875,28.757,28.754,28.757C143.061,131.118,155.936,118.246,155.936,102.362z"/>
+      </svg></span>
+      <span>Front-End Developer</span>
+    </footer>
+    
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

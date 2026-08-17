@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 35 — Reading the Tests First — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A third code-review pass, using a genuinely different technique this time — reading test names before implementation, forming a hypothesis, then checking it against real code. Two real self-corrections along the way, both caught by going back to actual fixture data rather than trusting a first read."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 35 — Reading the Tests First — Michael Rooney" />
+    <meta property="og:description" content="A third code-review pass using the test-files-first technique — reading test names before implementation, forming a hypothesis, then checking it against real code and real fixture data." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-17-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 35 — Reading the Tests First — Michael Rooney" />
+    <meta name="twitter:description" content="A third code-review pass using the test-files-first technique — reading test names before implementation, then checking a hypothesis against real fixture data." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-17-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 35 — Reading the Tests First",
+      "description": "A third code-review pass through the capstone codebase using the test-files-first technique, with two real self-corrections caught by checking actual fixture data rather than trusting a first read.",
+      "datePublished": "2026-08-17",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-17-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-17-2026">August 17, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 35 — Reading the Tests First</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Two full code-review passes already done — forward from the
+            data contracts, backward from something real on screen. A
+            third technique this time, picked up from outside reading
+            rather than continuing to invent variations on the same
+            idea: read the tests before the implementation. The
+            reasoning behind it is worth stating plainly, since it's
+            what makes the whole exercise more than a gimmick — a test
+            suite already describes, in plain language, every behavior
+            a piece of code has promised to guarantee. That's real
+            documentation, and unlike a comment or a README, it can't
+            silently drift out of sync with what the code actually
+            does — if the promise and the code ever disagree, the test
+            fails. What makes this
+            <a href="https://michaelrooney.dev/journal/08-07-2026.html">a promise you can check automatically</a>
+            in the first place is the same idea underneath why it's
+            worth reading first, not just running.
+          </p>
+
+          <h2>The actual method, not just the idea</h2>
+
+          <p>
+            Read every test name in a file, top to bottom, before
+            reading a single assertion. Form a one-sentence guess about
+            what the thing being tested actually does. Only then go
+            back and read the bodies — starting with whichever names
+            didn't fully make sense on the first pass, since those mark
+            exactly where the guess has a real gap. The payoff comes
+            last: reading the actual implementation with a hypothesis
+            already in hand turns out to be a genuinely faster, more
+            confident way to read unfamiliar code than starting cold.
+          </p>
+
+          <h2>A prediction that was wrong in one precise, useful way</h2>
+
+          <p>
+            The first real test, walking through an uptime-percentage
+            calculation's test names, produced a guess that sounded
+            complete: operational days count, and days without any real
+            status get excluded. Close, but a specific word — "excludes"
+            — was doing too much work, covering two behaviors that
+            aren't actually the same. A single real number from an
+            actual test disproved it cleanly: one operational day
+            alongside one degraded day comes out to fifty percent, not a
+            hundred. If a degraded day were genuinely excluded the same
+            way a no-data day is, only the operational day would be left
+            to count, and the answer would have to be a hundred. It
+            wasn't. The real distinction, worth holding onto: a day with
+            no data means genuinely unknown, and gets removed from the
+            question entirely — a degraded or outage day means known,
+            and bad, and stays right there in the denominator, dragging
+            the score down on purpose.
+          </p>
+
+          <h2>The same mistake shape, a second time, in a different file</h2>
+
+          <p>
+            Reading a fixture-driven test file for the overall
+            system-status logic — a function already read once, back
+            during the very first forward pass — produced a second
+            guess this time, describing it as some kind of averaging
+            across every individual service's status. Same category of
+            error as before: a plausible-sounding word standing in for
+            something that isn't actually there. One fixture row killed
+            it immediately — one operational service and one degraded
+            service together come out as degraded outright, not some
+            blended middle value. No averaging happens anywhere in this
+            function at all. It's the exact same worst-status-wins
+            ranking already read once before, just being met again from
+            a different angle, and mislabeled a second time before the
+            real evidence corrected it.
+          </p>
+
+          <p>
+            Two other real edge cases in that same fixture file were
+            worth sitting with past the main correction. An empty list
+            of services resolves to a genuine "unknown," a real
+            decision about what a page with nothing to report should
+            honestly say. And one specific case — one healthy service
+            alongside one whose status genuinely couldn't be determined
+            — resolves to "unknown" overall, not "operational," even
+            though on the surface the good news might seem like it
+            should win. It shouldn't. An unknown status isn't quiet good
+            news being outvoted; it's a real gap in what the page
+            actually knows, and burying that gap under a confident
+            "operational" would be a genuinely dishonest thing for a
+            status page to do.
+          </p>
+
+          <h2>Why the same mistake happening twice is the useful part</h2>
+
+          <p>
+            Getting the exact same *kind* of thing wrong in two
+            different files, on two different sessions of the same
+            underlying skill, is worth more than getting either one
+            right the first time would have been. Both times, a
+            plausible, almost-correct word — "excludes," "averages" —
+            got used to describe behavior that was actually a sharper,
+            more specific rule underneath. That's a real pattern worth
+            watching for going forward, not just in this codebase: when
+            an explanation reaches for a soft, generic verb to describe
+            what a function does, that's often exactly the moment worth
+            slowing down and checking a real number before trusting it.
+          </p>
+
+          <h2>A short, real detour</h2>
+
+          <p>
+            A live, real bug came up mid-session and got fixed
+            entirely outside the code-review technique itself — a
+            mobile rendering issue on the portfolio's own hours table,
+            unrelated to anything in the test walkthrough. Worth noting
+            it happened and got resolved, even briefly, since real
+            production issues don't wait for a convenient stopping
+            point in whatever else is being worked on.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            Three test files fully walked through this session, a
+            fourth — the proxy's real, non-mocked database tests —
+            started but not finished. A natural place to pick back up.
+            Two real scope decisions are still waiting from a few
+            sessions back, and the plan remains to finish this pass
+            before returning to them — by the time that happens, this
+            understanding should be solid enough to make those calls
+            with real confidence, not just informed guessing.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-15-2026.html">← Session 34</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span><svg class="leftfootmark" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="var(--accent)">
+        <path d="M358.408,132.806c-17.392-41.261-80.604-54.014-141.185-28.48c-56.225,23.702-90.418,72.044-81.14,111.865
+          c0.415,2.929,1.377,5.954,2.944,9.087c0.804,1.91,1.708,3.761,2.706,5.55c18.241,37.827,26.862,69.947,32.894,99.554
+          c11.091,54.453,12.077,82.24,11.983,104.85c-0.002,0.693,0.018,1.338,0.051,1.952c1.037,41.49,34.976,74.816,76.717,74.816
+          c42.404,0,76.771-34.374,76.771-76.768c0-22.996-10.826-41.587-26.136-57.683c-1.367-1.735-3.305-4.073-3.67-4.61
+          c-6.611-9.774-10.118-14.601-14.568-29.136c-11.501-37.568,5.945-85.597,33.548-119.235c0.696-0.844,0.566-0.675,0.199-0.217
+          C359.27,192.207,369.123,158.224,358.408,132.806z"/>
+        <path d="M368.14,1.151c-25.09,0-45.432,20.338-45.432,45.432c0,25.088,20.342,45.426,45.432,45.426
+          c25.088,0,45.432-20.338,45.432-45.426C413.572,21.489,393.228,1.151,368.14,1.151z"/>
+        <path d="M268.367,68.434c18.892,0,34.214-15.318,34.214-34.217C302.581,15.325,287.259,0,268.367,0
+          c-18.898,0-34.22,15.325-34.22,34.217C234.148,53.115,249.469,68.434,268.367,68.434z"/>
+        <path d="M189.291,85.687c17.786,0,32.204-14.421,32.204-32.204c0-17.789-14.418-32.204-32.204-32.204
+          c-17.786,0-32.207,14.415-32.207,32.204C157.084,71.266,171.505,85.687,189.291,85.687z"/>
+        <path d="M155.936,102.362c0-15.88-12.875-28.751-28.754-28.751c-15.88,0-28.754,12.872-28.754,28.751
+          c0,15.885,12.875,28.757,28.754,28.757C143.061,131.118,155.936,118.246,155.936,102.362z"/>
+      </svg></span>
+      <span>Front-End Developer</span>
+    </footer>
+    
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
