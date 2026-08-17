@@ -5,7 +5,7 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 17 Aug 2026 16:59:54 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 17 Aug 2026 18:23:03 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Fixing It Myself, Then Measuring Against a Real Part</title>
@@ -44,8 +44,8 @@
     </item>
     <item>
       <title>Session 34 — Starting From a Real Outage and Working Backward</title>
-      <link>https://michaelrooney.dev/capstone/08-15-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-15-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-15-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-15-2026.html</guid>
       <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A backward code-review pass, starting from a real live outage and tracing it back through the codebase to a single Zabbix poll — plus a real corrected misconception about how live updates actually reach the detail modal.]]></description>
     </item>
@@ -79,8 +79,8 @@
     </item>
     <item>
       <title>Session 33 — Reading My Own Code Like a Reviewer, Not the Author</title>
-      <link>https://michaelrooney.dev/capstone/08-13-2026b.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-13-2026b.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-13-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-13-2026b.html</guid>
       <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A full walk through the capstone codebase — client and most of the proxy — catching real misreadings along the way and surfacing two genuinely open design questions.]]></description>
     </item>
@@ -93,15 +93,15 @@
     </item>
     <item>
       <title>Session 32 — One Push, Three Networks, Zero Commands</title>
-      <link>https://michaelrooney.dev/capstone/08-13-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-13-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-13-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-13-2026.html</guid>
       <pubDate>Thu, 13 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Finishing the CD pipeline's Cloudflare Access setup and watching a real push turn into a fully automatic deploy — with a full walkthrough of the three separate network legs it actually crosses.]]></description>
     </item>
     <item>
       <title>Session 31 — A Deploy Broke Itself on Purpose, and Fixed Itself Too</title>
-      <link>https://michaelrooney.dev/capstone/08-12-2026b.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-12-2026b.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-12-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-12-2026b.html</guid>
       <pubDate>Wed, 12 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[The CD webhook and automated rollback pair, built and proven in both directions against real infrastructure — including a deliberately broken deploy that rolled itself back live.]]></description>
     </item>
@@ -114,8 +114,8 @@
     </item>
     <item>
       <title>Session 30 — Three Kinds of Testing, and What Broke Along the Way</title>
-      <link>https://michaelrooney.dev/capstone/08-12-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-12-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-12-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-12-2026.html</guid>
       <pubDate>Wed, 12 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Three different testing techniques, deliberately chosen for breadth over padding — hook testing, real user-interaction simulation, and mocked async data — plus two real bugs the tests themselves had.]]></description>
     </item>
@@ -128,8 +128,8 @@
     </item>
     <item>
       <title>Session 29 — The Comment Describing a Route That Was Never Built</title>
-      <link>https://michaelrooney.dev/capstone/08-11-2026b.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-11-2026b.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-11-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-11-2026b.html</guid>
       <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A comment describing how a live-update route should behave turned out to be the only place that behavior existed — the route itself was never actually wired up. Found, confirmed, and fixed against real production.]]></description>
     </item>
@@ -142,22 +142,22 @@
     </item>
     <item>
       <title>Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See</title>
-      <link>https://michaelrooney.dev/capstone/08-11-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-11-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-11-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-11-2026.html</guid>
       <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Gating the capstone deploy on its own tests — a Docker build-stage decision, a watch-mode gotcha, a fixture file unreachable across a build boundary, and both directions confirmed for real.]]></description>
     </item>
     <item>
       <title>Session 27 — Proving the Smoke Test Actually Smokes</title>
-      <link>https://michaelrooney.dev/capstone/08-10-2026c.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-10-2026c.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-10-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-10-2026c.html</guid>
       <pubDate>Mon, 10 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A post-deploy smoke test confirmed both directions against real infrastructure — a real passing deploy, and a real killed proxy proving it genuinely fails loudly, not just looks correct.]]></description>
     </item>
     <item>
       <title>Session 26 — Three Bugs, a Disk, and an Idempotency Check That Actually Worked</title>
-      <link>https://michaelrooney.dev/capstone/08-10-2026b.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-10-2026b.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-10-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-10-2026b.html</guid>
       <pubDate>Mon, 10 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Idempotency verification built and run for real against all three flagged playbooks — surfacing a corrupted fstab UUID that had quietly filled a root filesystem to 100%, among three other real bugs.]]></description>
     </item>
@@ -170,22 +170,22 @@
     </item>
     <item>
       <title>Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable</title>
-      <link>https://michaelrooney.dev/capstone/08-10-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-10-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-10-2026.html</guid>
       <pubDate>Mon, 10 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Phase 2 of automated test coverage closed for real — db.ts tested against a real in-memory database, and two pure decision functions extracted specifically to make untestable logic testable.]]></description>
     </item>
     <item>
       <title>Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time</title>
-      <link>https://michaelrooney.dev/capstone/08-09-2026d.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026d.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-09-2026d.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-09-2026d.html</guid>
       <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Incident history moved into its own column, separate from category status — and a real breakpoint mistake caught by actually looking at the result, not just the code.]]></description>
     </item>
     <item>
       <title>Session 23 — The Badge, the Fixture, and the Gap We Finally Closed</title>
-      <link>https://michaelrooney.dev/capstone/08-09-2026c.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026c.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-09-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-09-2026c.html</guid>
       <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[The embeddable status badge, built and confirmed live — then a real fixture-based parity test closing a gap flagged since 18- was first scoped, confirmed green in CI.]]></description>
     </item>
@@ -198,8 +198,8 @@
     </item>
     <item>
       <title>Session 22 — GitHub Actions, and a Folder That Never Existed</title>
-      <link>https://michaelrooney.dev/capstone/08-09-2026b.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026b.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-09-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-09-2026b.html</guid>
       <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Building real CI for both repos surfaced a structural mismatch every scope doc had wrong, a deliberate vault-secret tradeoff, and a permanently-failing check fixed properly.]]></description>
     </item>
@@ -212,8 +212,8 @@
     </item>
     <item>
       <title>Session 21 — Security Hardening, and the Proxy That Trusted Everyone</title>
-      <link>https://michaelrooney.dev/capstone/08-09-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-09-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-09-2026.html</guid>
       <pubDate>Sun, 09 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A secrets audit that found something bigger than a leaked credential — three unrestricted authenticated proxies — fixed with real allowlists, confirmed live.]]></description>
     </item>
@@ -233,8 +233,8 @@
     </item>
     <item>
       <title>Session 20 — Manual Incident Authoring, and Two Routing Bugs Nginx Was Hiding</title>
-      <link>https://michaelrooney.dev/capstone/08-08-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-08-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-08-2026.html</guid>
       <pubDate>Sat, 08 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[The last big workflow gap, closed — with a real dedup bug caught before shipping, Cloudflare Access with zero application code, and two genuine nginx routing bugs found in production.]]></description>
     </item>
@@ -254,8 +254,8 @@
     </item>
     <item>
       <title>Session 19 — The First Real Tests, and a Folder Nobody Planned For</title>
-      <link>https://michaelrooney.dev/capstone/08-07-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-07-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-07-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-07-2026.html</guid>
       <pubDate>Fri, 07 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[23 tests targeting real documented bug history, a react-refresh lint catch, a new lib/ directory, and a scope doc for testing the deployment playbooks next.]]></description>
     </item>
@@ -268,15 +268,15 @@
     </item>
     <item>
       <title>Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate</title>
-      <link>https://michaelrooney.dev/capstone/08-06-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-06-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-06-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-06-2026.html</guid>
       <pubDate>Thu, 06 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[The hybrid SSE nudge channel, a real Cloudflare idle-timeout bug found in testing, and both directions confirmed live against production.]]></description>
     </item>
     <item>
       <title>Session 17 — Auto-Drafted Incidents, and the Build Assumption That Wasted Twenty Minutes</title>
-      <link>https://michaelrooney.dev/capstone/08-05-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-05-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-05-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-05-2026.html</guid>
       <pubDate>Wed, 05 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A new drafted-incidents table, threshold detection re-derived from real data, a live production test end to end, and a stale build assumption that cost real time.]]></description>
     </item>
@@ -289,8 +289,8 @@
     </item>
     <item>
       <title>Session 16 — A Full Restyle, and the One Color That Didn't Pass</title>
-      <link>https://michaelrooney.dev/capstone/08-04-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-04-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-04-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-04-2026.html</guid>
       <pubDate>Tue, 04 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A component-by-component token replacement, real portfolio typography, and a WCAG contrast failure caught in the accent color and fixed at the source.]]></description>
     </item>
@@ -303,15 +303,15 @@
     </item>
     <item>
       <title>Session 15 — A Command Palette, and the Same Bug Caught Twice</title>
-      <link>https://michaelrooney.dev/capstone/08-02-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/08-02-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-02-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-02-2026.html</guid>
       <pubDate>Sun, 02 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A hand-rolled Cmd+K command palette, reusing the existing detail view and adding a new category filter — plus a lint rule that caught the same state-sync mistake in two different components.]]></description>
     </item>
     <item>
       <title>Session 14 — Click Into a Node, See What It's Actually Doing</title>
-      <link>https://michaelrooney.dev/capstone/07-31-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-31-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-31-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-31-2026.html</guid>
       <pubDate>Fri, 31 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Response-time tracking and a per-service detail view, built together — a hand-rolled line chart, a real Prometheus job-name bug, and confirming both data paths independently.]]></description>
     </item>
@@ -324,15 +324,15 @@
     </item>
     <item>
       <title>Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch</title>
-      <link>https://michaelrooney.dev/capstone/07-30-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-30-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-30-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-30-2026.html</guid>
       <pubDate>Thu, 30 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Building the color-token system and light/dark toggle — Tailwind v4's @theme directive, an anti-flash script, and real contrast bugs a manual test caught.]]></description>
     </item>
     <item>
       <title>Session 12 — Four Small Things, One Real Lint Chain</title>
-      <link>https://michaelrooney.dev/capstone/07-29-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-29-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-29-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-29-2026.html</guid>
       <pubDate>Wed, 29 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[A dynamic tab title and favicon, skeleton loading states, a days-since-last-incident counter, documented public API routes, and a genuine three-layer ESLint purity chase.]]></description>
     </item>
@@ -352,8 +352,8 @@
     </item>
     <item>
       <title>Session 11 — Giving Every Category Real History</title>
-      <link>https://michaelrooney.dev/capstone/07-25-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-25-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-25-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-25-2026.html</guid>
       <pubDate>Sat, 25 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Scoping and building full-category uptime history for Proxmox API and Zabbix — a proxy-side snapshot poller, a dead-code bug found along the way, and a checklist applied before deploying instead of after.]]></description>
     </item>
@@ -366,8 +366,8 @@
     </item>
     <item>
       <title>Session 10 — Incident History, and Five Bugs on the Way There</title>
-      <link>https://michaelrooney.dev/capstone/07-24-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-24-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-24-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-24-2026.html</guid>
       <pubDate>Fri, 24 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Building incident history end to end, and the trail of real bugs it took to get there — tooling, timezones, filenames, and a missing nginx route.]]></description>
     </item>
@@ -387,22 +387,22 @@
     </item>
     <item>
       <title>Session 9 — Real History, and Two Loose Ends Tied Off</title>
-      <link>https://michaelrooney.dev/capstone/07-18-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-18-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-18-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-18-2026.html</guid>
       <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Wiring the 90-day uptime bars to real Prometheus data, fixing a cloudflared idempotency gap, rewriting the Ansible reference doc, and tracing a fleet-wide monitoring gap to a physical rack rebuild.]]></description>
     </item>
     <item>
       <title>Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away</title>
-      <link>https://michaelrooney.dev/capstone/07-16-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-16-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/07-16-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/07-16-2026.html</guid>
       <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Taking the capstone status page live — the missing Dockerfiles, a single-origin nginx reverse proxy, a crash-looping proxy container, a leaked password, and a silently missing Prometheus category caught only after going public.]]></description>
     </item>
     <item>
       <title>Session 7 — A VM, a VLAN, and a Backwards Firewall Rule</title>
-      <link>https://michaelrooney.dev/capstone/07-12-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/07-12-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal07-12-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal07-12-2026.html</guid>
       <pubDate>Sun, 12 Jul 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug that broke Layer 2 entirely, three cloudflared token mistakes, and an OPNsense firewall rule that had source and destination reversed.]]></description>
     </item>
@@ -443,8 +443,8 @@
     </item>
     <item>
       <title>Session 6 — Zabbix Adapter and Four Live Data Sources</title>
-      <link>https://michaelrooney.dev/capstone/06-27-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-27-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/06-27-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/06-27-2026.html</guid>
       <pubDate>Sat, 27 Jun 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Building the Zabbix client adapter, debugging a Zabbix 7.x API change that moved agent availability into the interfaces object, and wiring the fourth data source into a fully operational status page.]]></description>
     </item>
@@ -457,36 +457,36 @@
     </item>
     <item>
       <title>Session 5 — Zabbix, Debugging, and a Deliberate Deferral</title>
-      <link>https://michaelrooney.dev/capstone/06-17-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-17-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/06-17-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/06-17-2026.html</guid>
       <pubDate>Wed, 17 Jun 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Wiring up the Zabbix proxy route, debugging a wrong IP, fixing TypeScript strict mode errors, and making a deliberate decision to defer Zabbix configuration in favor of deployment momentum.]]></description>
     </item>
     <item>
       <title>Session 4 — Proxmox Adapter and Debugging</title>
-      <link>https://michaelrooney.dev/capstone/06-11-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-11-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/06-11-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/06-11-2026.html</guid>
       <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Wiring up the Proxmox adapter, debugging NaN metrics, a missing Sys.Audit permission, and learning that the /nodes endpoint doesn't return what you think it does.]]></description>
     </item>
     <item>
       <title>Session 3 — The Proxy Layer</title>
-      <link>https://michaelrooney.dev/capstone/06-10-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-10-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/06-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/06-10-2026.html</guid>
       <pubDate>Wed, 10 Jun 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Building an Express proxy to keep Proxmox API credentials off the browser — what a backend-for-frontend is, why CORS exists, and how dotenv keeps secrets out of source code.]]></description>
     </item>
     <item>
       <title>Session 2 — Hook, Components, and First Live Render</title>
-      <link>https://michaelrooney.dev/capstone/06-09-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-09-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/jounral/06-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/jounral/06-09-2026.html</guid>
       <pubDate>Tue, 09 Jun 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[TanStack Query hook, four UI components, and the first live render — six services pulling real data from Prometheus and NUT, plus debugging a label key mismatch in the UPS adapter.]]></description>
     </item>
     <item>
       <title>Session 1 — Scaffold, Dependencies, and Data Layer</title>
-      <link>https://michaelrooney.dev/capstone/06-08-2026.html</link>
-      <guid isPermaLink="true">https://michaelrooney.dev/capstone/06-08-2026.html</guid>
+      <link>https://michaelrooney.dev/work/capstone/journal/06-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/06-08-2026.html</guid>
       <pubDate>Mon, 08 Jun 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4, TanStack Query provider, and the complete typed data layer talking to Prometheus and NUT before any UI exists.]]></description>
     </item>

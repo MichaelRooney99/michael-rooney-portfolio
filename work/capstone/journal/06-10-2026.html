@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 3 — The Proxy Layer — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building an Express proxy to keep Proxmox API credentials off the browser — what a backend-for-frontend is, why CORS exists, and how dotenv keeps secrets out of source code."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 3 — The Proxy Layer — Michael Rooney" />
+    <meta property="og:description" content="Building an Express proxy to keep Proxmox API credentials off the browser — what a backend-for-frontend is, why CORS exists, and how dotenv keeps secrets out of source code." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/06-10-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 3 — The Proxy Layer — Michael Rooney" />
+    <meta name="twitter:description" content="Building an Express proxy to keep Proxmox API credentials off the browser — what a backend-for-frontend is, why CORS exists, and how dotenv keeps secrets out of source code." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/06-10-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 3 — The Proxy Layer",
+      "description": "Building an Express proxy to keep Proxmox API credentials off the browser — what a backend-for-frontend is, why CORS exists, and how dotenv keeps secrets out of source code.",
+      "datePublished": "2026-06-10",
+      "url": "https://michaelrooney.dev/work/capstone/journal/06-10-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-10-2026">June 10, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 3 — The Proxy Layer</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Every piece of this project up to this point has run entirely 
+            in the browser. React, TanStack Query, the Prometheus fetch 
+            calls — all of it is JavaScript the browser downloads and 
+            executes. That works for Prometheus because Prometheus has no 
+            secrets. This session introduced the first piece of the project 
+            that can't live in the browser: a small Express server whose 
+            only job is to hold a credential the browser should never see.
+          </p>
+
+          <h2>Why the browser can't hold credentials</h2>
+          <p class="callout">
+            The browser is a public environment. Any code or data that lives in the browser is accessible to anyone who visits the page.
+            I had no idea how to build a proxy server before this session. I had never used Express, never heard of CORS,
+             and didn't know how environment variables work in Node. But I did know that the Proxmox API token was a secret 
+             that couldn't go in the browser, so I knew I needed some kind of server layer to keep it safe.
+             The rest was just research and experimentation until it worked.
+          </p>
+          <p>
+            The Proxmox API requires an API token to authorize requests. 
+            The token is a long credential string — something like 
+            <code>prometheus@pve!monitor=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>. 
+            If that token lives in the React app, it lives in the browser. 
+            And anything in the browser is public. Anyone who visits the 
+            status page, opens DevTools, and watches the Network tab will 
+            see that token in plain text in the request headers. With it 
+            they could query the Proxmox API directly.
+          </p>
+
+          <p>
+            The solution is a server that sits between the browser and 
+            Proxmox. The browser never talks to Proxmox directly — it 
+            talks to the proxy. The proxy holds the token in an environment 
+            variable on the server, attaches it to every request it 
+            forwards to Proxmox, and sends the response back to the 
+            browser. The token never travels to the browser at all.
+          </p>
+
+          <p>
+            This pattern has a name: Backend for Frontend, or BFF. A thin 
+            server layer purpose-built to serve one specific frontend, 
+            handling credential management and API translation on its 
+            behalf. It's a well-documented architecture pattern worth 
+            searching for if you want to read further.
+          </p>
+
+          <h2>What Express is</h2>
+
+          <p>
+            Express is a minimal web framework for Node.js — the most 
+            widely used one. Node.js is JavaScript that runs on a server 
+            instead of in a browser. Express makes it straightforward to 
+            define routes and middleware in a small amount of code.
+          </p>
+
+          <p>
+            The proxy lives in a <code>proxy/</code> folder at the 
+            monorepo root — a completely separate Node.js project from 
+            the React app. Its own <code>package.json</code>, its own 
+            dependencies, its own TypeScript config. It's a small 
+            independent server that happens to live in the same repository.
+          </p>
+
+          <h2>How the forwarding works</h2>
+
+          <p>
+            Rather than writing the forwarding logic manually, the proxy 
+            uses <code>http-proxy-middleware</code> — a library built 
+            specifically for this pattern. Every request to 
+            <code>/proxmox/*</code> gets forwarded to the Proxmox host 
+            with two modifications: the path gets rewritten, and the 
+            authorization header gets attached.
+          </p>
+
+          <p>
+            Path rewriting: when the browser asks for 
+            <code>/proxmox/nodes</code>, the proxy rewrites that to 
+            <code>/api2/json/nodes</code> before forwarding it to 
+            Proxmox. The browser doesn't need to know the internal 
+            Proxmox API path structure.
+          </p>
+
+          <p>
+            Header injection: the <code>proxyReq</code> handler runs 
+            on every forwarded request before it leaves the proxy. The 
+            browser sent a request with no credentials. The proxy adds 
+            the <code>Authorization</code> header with the token before 
+            Proxmox ever sees the request.
+          </p>
+
+          <p>
+            One Proxmox-specific detail: Proxmox uses a self-signed SSL 
+            certificate by default. The proxy sets <code>secure: false</code> 
+            to tell the forwarding library not to reject the connection 
+            over the unverified cert. Without this, every forwarded 
+            request would fail at the TLS handshake.
+          </p>
+
+          <h2>What CORS is and why it matters</h2>
+
+          <p>
+            CORS stands for Cross-Origin Resource Sharing. Browsers 
+            enforce a security rule: JavaScript on one origin — say 
+            <code>localhost:5173</code>, the Vite dev server — cannot 
+            make requests to a different origin — say 
+            <code>localhost:3001</code>, the proxy — unless the server 
+            at that second origin explicitly permits it.
+          </p>
+
+          <p>
+            Without CORS headers the browser would block every request 
+            from the React app to the proxy before it even left the 
+            browser. The middleware in the proxy sets two headers on 
+            every response: which origin is allowed, and which methods 
+            are permitted. The allowed origin is read from an environment 
+            variable so it can differ between development and production.
+          </p>
+
+          <p>
+            There's also an OPTIONS preflight check. Before making a 
+            cross-origin request, the browser sends an OPTIONS request 
+            first to ask whether the real request is permitted. The proxy 
+            responds with 204 (no content) and the browser proceeds. This 
+            happens automatically and invisibly — it only becomes visible 
+            if the CORS config is wrong and the preflight gets rejected.
+          </p>
+
+          <h2>How dotenv keeps secrets out of source code</h2>
+
+          <p>
+            <code>dotenv</code> reads a <code>.env</code> file from disk 
+            and loads its contents into <code>process.env</code> — Node's 
+            environment variable object. The proxy reads 
+            <code>PROXMOX_HOST</code> and <code>PROXMOX_TOKEN</code> 
+            from there at runtime.
+          </p>
+
+          <p>
+            The <code>.env</code> file is in <code>.gitignore</code>. It 
+            exists on the development machine and on whatever server the 
+            proxy runs on, but it is never committed to GitHub. The source 
+            code can be completely public — the credentials stay private 
+            because they only ever exist in the environment, not in the 
+            code.
+          </p>
+
+          <p class="callout">
+            The pattern is: code is public, configuration is private. 
+            Source code describes what the program does. Environment 
+            variables describe where it runs and what credentials it uses. 
+            Keeping those two things separate means the same code can 
+            run in development, staging, and production with different 
+            credentials and different targets — none of which appear 
+            anywhere in the repository.
+          </p>
+
+          <h2>The startup guard and health check</h2>
+
+          <p>
+            The proxy checks for required environment variables 
+            immediately on startup. If either <code>PROXMOX_HOST</code> 
+            or <code>PROXMOX_TOKEN</code> is missing it logs an error 
+            and exits rather than running in a broken state that might 
+            fail silently later. This is a fail-fast pattern — surface 
+            the problem immediately and loudly rather than letting it 
+            manifest as a confusing error elsewhere.
+          </p>
+
+          <p>
+            There's also a <code>/health</code> endpoint that returns 
+            <code>{"status":"ok"}</code>. This exists so the React app, 
+            Docker, and monitoring tools can verify the proxy is reachable 
+            before trying to use it. A health check is standard practice 
+            for any networked service — it's the first thing you hit when 
+            something seems wrong.
+          </p>
+
+          <h2>How the whole flow looks</h2>
+
+          <p>
+            The request path from browser to Proxmox and back:
+          </p>
+
+          <ul>
+            <li>Browser sends <code>GET /proxmox/nodes</code> to the proxy — no credentials attached</li>
+            <li>Proxy rewrites the path to <code>/api2/json/nodes</code></li>
+            <li>Proxy attaches <code>Authorization: PVEAPIToken=...</code> to the request</li>
+            <li>Proxy forwards the request to Proxmox</li>
+            <li>Proxmox returns node data to the proxy</li>
+            <li>Proxy forwards the response to the browser</li>
+            <li>Browser receives node data — the token never appeared in any response</li>
+          </ul>
+
+          <h2>Resources</h2>
+
+          <ul>
+            <li>
+              Express getting started — 
+              <code>expressjs.com/en/starter/hello-world.html</code>
+            </li>
+            <li>
+              http-proxy-middleware documentation — 
+              <code>github.com/chimurai/http-proxy-middleware</code>
+            </li>
+            <li>
+              CORS explained — 
+              <code>developer.mozilla.org/en-US/docs/Web/HTTP/CORS</code>
+            </li>
+            <li>
+              dotenv — 
+              <code>github.com/motdotla/dotenv</code>
+            </li>
+            <li>
+              Backend for Frontend pattern — search 
+              <code>"BFF pattern backend for frontend"</code>
+            </li>
+          </ul>
+
+          <h2>What's next</h2>
+
+          <p>
+            The proxy is running and confirmed reachable. Next session 
+            wires up the Proxmox adapter in the client — a new 
+            <code>fetchProxmoxStatus</code> function that calls the 
+            proxy instead of Prometheus directly, parses node uptime 
+            and VM/LXC counts, and outputs <code>ServiceStatus</code> 
+            objects in the same normalized shape everything else already 
+            uses.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-09-2026.html">← Session 2</a>
+          <a href="06-11-2026.html">Session 4 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

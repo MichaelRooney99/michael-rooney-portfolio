@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 29 — The Comment Describing a Route That Was Never Built — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A routine pass through this project's source comments — replacing references to private planning notes with self-contained explanations — surfaced something bigger: a live-update route that had never actually worked since it shipped. Confirmed broken with a direct curl against production, fixed, and confirmed working the same way."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 29 — The Comment Describing a Route That Was Never Built — Michael Rooney" />
+    <meta property="og:description" content="A comment describing how a live-update route should behave turned out to be the only place that behavior existed — the route itself was never actually wired up. Found, confirmed, and fixed against real production." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-11-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 29 — The Comment Describing a Route That Was Never Built — Michael Rooney" />
+    <meta name="twitter:description" content="A comment describing how a live-update route should behave turned out to be the only place that behavior existed. Found, confirmed, and fixed against real production." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-11-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 29 — The Comment Describing a Route That Was Never Built",
+      "description": "A routine comment cleanup surfaced a live-update route that had never actually worked since it shipped — confirmed broken against real production, fixed, and confirmed working the same way.",
+      "datePublished": "2026-08-11",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-11-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="../../work/capstone/capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../work/capstone/capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-11-2026">August 11, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 29 — The Comment Describing a Route That Was Never Built</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A follow-on to earlier today, and not one that was planned.
+            The task was a full pass through this project's source
+            comments — replacing references to private planning notes
+            with explanations that stand on their own, no outside
+            context required. Mechanical work, in theory. Reading every
+            comment in every file to do it properly is what actually
+            surfaced something real.
+          </p>
+
+          <h2>A comment describing behavior that didn't exist</h2>
+
+          <p>
+            The nginx config for the live-update channel had a detailed
+            comment explaining exactly what that route needed — response
+            buffering off, a long read timeout, the works. What it
+            didn't have was the route itself. No <code>location</code>
+            block for it anywhere in the file. The comment described the
+            fix; the fix was never actually applied.
+          </p>
+
+          <p>
+            Confirmed it directly rather than trusting the read — a
+            plain <code>curl</code> against the live production URL for
+            that route came back <code>200</code>, <code>text/html</code>,
+            with a <code>last-modified</code> header attached. That's not
+            what a live server-sent-events connection looks like — that's
+            nginx quietly serving the app's own static homepage instead,
+            the same fallback it uses for any URL it doesn't otherwise
+            recognize.
+          </p>
+
+          <h2>Why nobody noticed</h2>
+
+          <p>
+            This is the part worth sitting with. The feature this route
+            powers was built specifically to degrade gracefully — if the
+            live-update connection never establishes, the page just falls
+            back to checking for updates every 60 seconds instead of
+            near-instantly, and the client-side error handling for a
+            failed connection is deliberately silent, since a dropped
+            connection reconnecting on its own is completely normal and
+            shouldn't clutter a console with noise. Both of those were
+            good decisions on their own. Together, they meant a
+            completely dead feature looked, from the outside, exactly
+            like a healthy one running on its slower fallback path. It
+            had been that way since the day it shipped.
+          </p>
+
+          <h2>The fix, and proving it twice</h2>
+
+          <p>
+            Added the missing route with the directives the orphaned
+            comment had already correctly described — buffering off,
+            the connection header cleared so the upstream connection
+            doesn't get torn down after the first byte, a read timeout
+            long enough for a connection meant to stay open indefinitely.
+            Deployed for real, then ran the exact same <code>curl</code>
+            command from before against production again. This time:
+            <code>text/event-stream</code>, an open connection instead of
+            an immediate response, and the server's own keep-alive
+            signal arriving right on schedule — proof the fix reached
+            all the way through, not just that the config file looked
+            different.
+          </p>
+
+          <p>
+            A comment can describe the right behavior in perfect detail
+            and still not be the behavior. The only way to know which
+            one you actually have is to go check.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-11-2026.html">← Session 28</a>
+          <a href="08-12-2026.html">Session 30 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

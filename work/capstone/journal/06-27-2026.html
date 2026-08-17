@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 6 — Zabbix Adapter and Four Live Data Sources — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building the Zabbix client adapter, debugging a Zabbix 7.x API change that moved agent availability into the interfaces object, and wiring the fourth data source into a fully operational status page."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 6 — Zabbix Adapter and Four Live Data Sources — Michael Rooney" />
+    <meta property="og:description" content="Building the Zabbix client adapter, debugging a Zabbix 7.x API change that moved agent availability into the interfaces object, and wiring the fourth data source into a fully operational status page." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/06-27-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 6 — Zabbix Adapter and Four Live Data Sources — Michael Rooney" />
+    <meta name="twitter:description" content="Building the Zabbix client adapter, debugging a Zabbix 7.x API change that moved agent availability into the interfaces object, and wiring the fourth data source into a fully operational status page." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/06-27-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 6 — Zabbix Adapter and Four Live Data Sources",
+      "description": "Building the Zabbix client adapter, debugging a Zabbix 7.x API change that moved agent availability into the interfaces object, and wiring the fourth data source into a fully operational status page.",
+      "datePublished": "2026-06-27",
+      "url": "https://michaelrooney.dev/work/capstone/journal/06-27-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-27-2026">June 27, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 6 — Zabbix Adapter and Four Live Data Sources</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Session 5 ended with a deliberate deferral: the Zabbix proxy
+            route was built and authenticating, but Zabbix itself had no
+            hosts configured beyond the Zabbix server, so building a client
+            adapter against empty data wasn't worth doing yet. That gap
+            closed in separate homelab sessions — Zabbix Agent 2 deployed
+            across all five Proxmox nodes, host objects and templates
+            created in the frontend, 606 items collecting. Today's session
+            picked up where Session 5 left off: build the adapter, wire
+            it in, confirm it renders.
+          </p>
+
+          <h2>What Zabbix uniquely provides</h2>
+
+          <p>
+            The status page already shows CPU and memory from Prometheus,
+            and CPU, memory, and uptime from the Proxmox API directly.
+            Adding a third source of the same metrics would just add noise.
+            The question was what Zabbix provides that the other two don't.
+          </p>
+
+          <p>
+            The answer is agent availability state — a discrete signal,
+            not a time-series metric. Prometheus knows that a node's CPU
+            was at 2.3% five minutes ago. Zabbix knows whether it can
+            reach the node's agent right now, and whether it's been
+            reachable consistently. Those are different things. The adapter
+            is scoped to exactly that: one service per node, status
+            derived from Zabbix agent availability, category
+            <code>Zabbix</code> so it renders as a distinct section.
+          </p>
+
+          <h2>A permissions gap first</h2>
+
+          <p>
+            Before writing any adapter code, the proxy sanity check
+            confirmed whether <code>host.get</code> actually returned
+            the five Proxmox nodes:
+          </p>
+
+          <pre><code>{"jsonrpc":"2.0","result":[{"hostid":"10084","name":"Zabbix server","status":"0"}],"id":1}</code></pre>
+
+          <p>
+            Only the Zabbix server. The <code>api-readonly</code> user
+            was in the API Read Group but that group didn't have read
+            permission on the "Proxmox Nodes" host group. Added Read
+            permission in Administration → User groups → API Read Group
+            → Permissions, re-ran the check, and all six hosts appeared.
+            Worth checking permissions before writing code that will
+            silently return empty data if they're wrong.
+          </p>
+
+          <h2>The adapter</h2>
+
+          <p>
+            <code>src/services/zabbix.ts</code> follows the same pattern
+            as the other adapters — one exported function, one internal
+            helper, interfaces for the API response shapes. The
+            <code>queryZabbix</code> helper POSTs to <code>/zabbix</code>
+            on the proxy and handles error checking. The exported
+            <code>fetchZabbixStatus</code> calls <code>host.get</code>,
+            filters out the Zabbix server entry, and maps each host to a
+            <code>ServiceStatus</code> object.
+          </p>
+
+          <p>
+            The Zabbix server itself — hostid 10084, name "Zabbix server"
+            — appears in every <code>host.get</code> response because
+            it's a monitored host in its own right. It's not a Proxmox
+            node and doesn't belong on the status page. A simple
+            <code>.filter(host => host.name !== 'Zabbix server')</code>
+            before the map handles it cleanly.
+          </p>
+
+          <h2>The availability field that wasn't there</h2>
+
+          <p>
+            First render showed all five Zabbix nodes appearing — but
+            every one showing Unknown rather than Operational. The adapter
+            was reading <code>host.available</code> to determine status,
+            but the API response didn't include that field at all despite
+            it being in the <code>output</code> array.
+          </p>
+
+          <p>
+            Running the raw <code>host.get</code> query confirmed it:
+            <code>available</code> simply wasn't coming back on the host
+            object. In Zabbix 7.x, agent availability moved out of the
+            host-level <code>available</code> field and into the
+            interfaces object. The old field is deprecated. The correct
+            approach is to add <code>selectInterfaces: ['type', 'available']</code>
+            to the query params, then find the agent interface
+            (<code>type === '1'</code>) and read its <code>available</code>
+            value.
+          </p>
+
+          <p class="callout">
+            Running the raw API query directly is always faster than
+            reading source code. The response either contains the field
+            or it doesn't. In this case it didn't, which pointed
+            immediately at a version difference in how the API works
+            rather than a bug in the adapter code.
+          </p>
+
+          <p>
+            After switching to <code>selectInterfaces</code>, the
+            sanity check returned:
+          </p>
+
+          <pre><code>{"hostid":"10780","name":"network","status":"0","interfaces":[{"type":"1","available":"1"}]}</code></pre>
+
+          <p>
+            All five nodes returning <code>"available": "1"</code>.
+            Updated the adapter, reloaded, all five showing Operational.
+          </p>
+
+          <h2>Wiring into the facade and UI</h2>
+
+          <p>
+            The facade change is two lines — one import and one entry
+            in the <code>Promise.allSettled</code> array. Nothing else
+            in the data layer needed to change. That's the facade pattern
+            working as intended: adding a new data source means touching
+            exactly one file outside the adapter itself.
+          </p>
+
+          <p>
+            The UI needed one additional change. <code>App.tsx</code>
+            uses a fixed <code>CATEGORY_ORDER</code> array to group and
+            sequence services, with anything not in the list falling into
+            "Other." <code>'Zabbix'</code> wasn't in that list, so the
+            five nodes were landing in Other rather than their own section.
+            Adding it to the end of the array put them in the right place.
+          </p>
+
+          <h2>What the page shows now</h2>
+
+          <p>
+            Fourteen services across four data sources, all operational.
+            Five Proxmox nodes from Prometheus with live CPU and memory.
+            Three nodes from the Proxmox API with CPU, memory, and uptime.
+            CyberPower UPS from NUT with flags, runtime, and load. Five
+            nodes from Zabbix showing agent availability state. Overall
+            banner green.
+          </p>
+
+          <p>
+            The four data sources are meaningfully distinct. Prometheus
+            tracks what happened over time. The Proxmox API shows
+            hypervisor-level state. NUT monitors power. Zabbix confirms
+            agent reachability. Each one is answering a different question
+            about the same infrastructure.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            The data layer is complete. Every planned source is wired in
+            and rendering live data. Next session moves to deployment:
+            Docker Compose to bundle the React client build and the
+            Express proxy into a single deployable unit, and the
+            Cloudflare Zero Trust tunnel to make the status page publicly
+            accessible at status.michaelrooney.dev without opening any
+            inbound ports.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-17-2026.html">← Session 5</a>
+          <a href="07-12-2026.html">Session 7 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

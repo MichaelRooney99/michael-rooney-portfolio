@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 27 — Proving the Smoke Test Actually Smokes — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Verifying Layer 3's post-deploy smoke test against real infrastructure, both directions — a real passing deploy, and a real killed proxy container proving the test genuinely fails loudly instead of just looking correct. A first real use of Ansible's --start-at-task, and why a test that's only ever been seen passing isn't actually proven."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 27 — Proving the Smoke Test Actually Smokes — Michael Rooney" />
+    <meta property="og:description" content="A post-deploy smoke test confirmed both directions against real infrastructure — a real passing deploy, and a real killed proxy proving it genuinely fails loudly, not just looks correct." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-10-2026c.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 27 — Proving the Smoke Test Actually Smokes — Michael Rooney" />
+    <meta name="twitter:description" content="A post-deploy smoke test confirmed both directions against real infrastructure — a real pass, and a real fail, proving it genuinely works rather than just looking correct." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-10-2026c.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 27 — Proving the Smoke Test Actually Smokes",
+      "description": "Verifying Layer 3's post-deploy smoke test against real infrastructure, both directions — a real passing deploy, and a real killed proxy container proving the test genuinely fails loudly.",
+      "datePublished": "2026-08-10",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-10-2026c.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="../../work/capstone/capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../work/capstone/capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-10-2026">August 10, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 27 — Proving the Smoke Test Actually Smokes</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The post-deploy smoke test built earlier today had one real
+            gap left before it counted as actually done: it had only
+            ever been seen passing. A test that's only ever passed
+            hasn't been proven — it might be correctly checking the
+            right thing, or it might be silently broken in a way that
+            happens to still say <code>200</code>. This session's whole
+            job was closing that gap, deliberately, against real
+            infrastructure.
+          </p>
+
+          <h2>The pass, confirmed for real</h2>
+
+          <p>
+            First, a genuine end-to-end deploy — <code>git pull</code>,
+            rebuild, restart, both checks in sequence. Health check
+            <code>200</code>, smoke test <code>200</code>, tunnel active.
+            Clean. That's the easy half, and also the less interesting
+            one — a test passing tells you almost nothing on its own.
+          </p>
+
+          <h2>The fail, which took more setup than expected</h2>
+
+          <p>
+            Proving the failure path meant genuinely breaking the
+            deployed site on purpose, which turned out to need a few
+            real steps most of them worth noting. First real snag —
+            <code>docker compose stop proxy</code> over a plain SSH
+            session failed with a permissions error; the
+            <code>ansible</code> user isn't in the host's
+            <code>docker</code> group. Ansible's own privilege
+            escalation handled it cleanly instead —
+            <code>ansible capstone -m command ... --become</code>, the
+            same path every playbook in this project already uses,
+            rather than reaching for raw <code>sudo</code> on an
+            interactive session.
+          </p>
+
+          <p>
+            With the proxy actually stopped, <code>curl</code> against
+            the real public domain came back exactly as it should — a
+            genuine <code>502</code>, nginx correctly reporting it has
+            nothing to forward to. Confirmed the break was real before
+            testing whether anything would catch it.
+          </p>
+
+          <p class="callout">
+            Running the full playbook at this point would have been
+            self-defeating — <code>capstone_deploy.yml</code>'s
+            "Bring up the Docker Compose stack" task runs before the
+            smoke test, and <code>docker compose up -d --build</code>
+            would have silently restarted the stopped proxy as a normal
+            side effect, fixing the outage before the smoke test ever
+            got a chance to see it broken. First real use of
+            <code>--start-at-task</code> — skip straight to the smoke
+            test by name, touch nothing before it. Exactly the tool for
+            this specific problem: testing one task in isolation without
+            editing the file just to comment out the steps around it.
+          </p>
+
+          <h2>What actually failing looked like</h2>
+
+          <p>
+            Three real retries, five seconds apart, each one hitting the
+            genuine <code>502</code> — then a hard stop. <code>msg:
+            'Status code was 502 and not [200]: HTTP Error 502: Bad
+            Gateway'</code>, <code>failed=1</code> in the recap, nothing
+            after it ran. No <code>ignore_errors</code> anywhere in the
+            task, so the play halted exactly where it should have. That's
+            the actual proof — not "the code looks like it would fail
+            correctly," a real recorded failure against a real broken
+            deployment.
+          </p>
+
+          <p>
+            Restarted the proxy, confirmed the site healthy again — a
+            real <code>200</code>, matching content-length to what it
+            showed before any of this started. Fully recovered, nothing
+            left in a broken state.
+          </p>
+
+          <h2>Why this was worth the extra session</h2>
+
+          <p>
+            The idempotency script earlier today did the exact thing
+            this session was trying to rule out for the smoke test — it
+            reported <code>PASS</code> once for the wrong reason, because
+            forced color codes had silently broken its own parsing logic
+            and it found nothing to flag as a failure. Correct that
+            particular run, but not because it had actually verified
+            anything. A test that's only ever been observed passing
+            carries exactly that risk, invisibly. Confirming both
+            directions — a real pass and a real, deliberately-triggered
+            fail — is the only way to actually rule it out, and it's the
+            same standard this whole project has run on since the first
+            production incident: prove it against the real thing, not
+            against what the code looks like it should do.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-10-2026b.html">← Session 26</a>
+          <a href="08-11-2026.html">Session 28 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

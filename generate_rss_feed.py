@@ -3,7 +3,7 @@
 generate_rss_feed.py
 
 Builds a single RSS 2.0 feed (feed.xml) AND sitemap.xml from every
-journal/ and capstone/ entry, by reading the same og:title /
+journal/, capstone/ /leftfootlabs entry, by reading the same og:title /
 og:description / og:url / <time datetime> values already sitting in
 each file's <head> — no new content to write, just repackaging what's
 already there. One collection pass, two outputs, so "what pages exist"
@@ -54,7 +54,7 @@ SKIP_FILENAMES = {
     "leftfootlabs-index.html",
 }
 
-TARGET_DIRS = ["journal", "capstone", "work/leftfootlabs/journal"]
+TARGET_DIRS = ["journal", "work/capstone/journal", "work/leftfootlabs/journal"]
 
 # Static/index pages that don't belong in the RSS feed (they're not dated
 # entries) but do belong in the sitemap. Path is relative to repo root;
@@ -63,7 +63,7 @@ STATIC_PAGES = [
     {"path": "index.html", "priority": "1.0"},
     {"path": "journal.html", "priority": "0.8"},
     {"path": "portfolio-showcase.html", "priority": "0.8"},
-    {"path": "capstone/capstone-index.html", "priority": "0.8"},
+    {"path": "work/capstone/capstone-index.html", "priority": "0.8"},
     {"path": "work/leftfootlabs/leftfootlabs-index.html", "priority": "0.8"},
 ]
 
@@ -248,7 +248,7 @@ def build_sitemap(entries) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate feed.xml and sitemap.xml from journal/capstone entries.")
+    parser = argparse.ArgumentParser(description="Generate feed.xml and sitemap.xml from journal/capstone/leftfootLabs entries.")
     parser.add_argument("--dry-run", action="store_true", help="Print output without writing any files.")
     parser.add_argument("--feed-only", action="store_true", help="Only generate feed.xml.")
     parser.add_argument("--sitemap-only", action="store_true", help="Only generate sitemap.xml.")

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 4 — Proxmox Adapter and Debugging — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Wiring up the Proxmox adapter, debugging NaN metrics, a missing Sys.Audit permission, and learning that the /nodes endpoint doesn't return what you think it does."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 4 — Proxmox Adapter and Debugging — Michael Rooney" />
+    <meta property="og:description" content="Wiring up the Proxmox adapter, debugging NaN metrics, a missing Sys.Audit permission, and learning that the /nodes endpoint doesn't return what you think it does." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/06-11-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 4 — Proxmox Adapter and Debugging — Michael Rooney" />
+    <meta name="twitter:description" content="Wiring up the Proxmox adapter, debugging NaN metrics, a missing Sys.Audit permission, and learning that the /nodes endpoint doesn't return what you think it does." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/06-11-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 4 — Proxmox Adapter and Debugging",
+      "description": "Wiring up the Proxmox adapter, debugging NaN metrics, a missing Sys.Audit permission, and learning that the /nodes endpoint doesn't return what you think it does.",
+      "datePublished": "2026-06-11",
+      "url": "https://michaelrooney.dev/work/capstone/journal/06-11-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-11-2026">June 11, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 4 — Proxmox Adapter and Debugging</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Last session ended with the Express proxy confirmed working and 
+            the Proxmox adapter written but not yet wired in. This session 
+            was supposed to be straightforward — connect the adapter, see 
+            the data, move on. It wasn't. Three separate issues surfaced 
+            before the Proxmox API category rendered with real numbers, and 
+            each one taught something worth writing down.
+          </p>
+
+          <h2>Issue 1 — NaN metrics</h2>
+
+          <p>
+            First render showed the Proxmox API category appearing under 
+            Other with three nodes listed — but every metric showing 
+            <code>NaN%</code>. The nodes were connecting and returning 
+            as operational, but the CPU, memory, and uptime values were 
+            all not-a-number.
+          </p>
+
+          <p>
+            The cause: any math operation on <code>undefined</code> 
+            produces <code>NaN</code> in JavaScript. The adapter was 
+            assuming fields like <code>node.cpu</code> and 
+            <code>node.maxmem</code> would always be present, but the 
+            <code>/nodes</code> endpoint was returning them as 
+            <code>undefined</code>. Adding nullish coalescing fallbacks 
+            — <code>node.cpu ?? 0</code> — stopped the NaN, but 
+            everything showed as <code>0.0%</code> instead. Better, 
+            but still wrong.
+          </p>
+
+          <h2>Issue 2 — the /nodes endpoint doesn't return metrics</h2>
+
+          <p>
+            Querying the proxy directly revealed the real problem. The 
+            Proxmox <code>/nodes</code> endpoint in a clustered setup 
+            returns only a summary list — node name, online status, and 
+            SSL fingerprint. No CPU, no memory, no uptime. Those fields 
+            simply aren't in the response. The initial adapter design 
+            assumed flat metrics on the node list, which was wrong.
+          </p>
+
+          <p>
+            The fix was a two-stage fetch. First call <code>/nodes</code> 
+            to get the list of online nodes. Then call 
+            <code>/nodes/{nodename}/status</code> for each one 
+            concurrently using <code>Promise.allSettled</code>. The 
+            per-node status endpoint returns the full picture — CPU, 
+            nested memory object, uptime in seconds. Two calls instead 
+            of one, but the data is actually there this time.
+          </p>
+
+          <p>
+            One shape difference worth noting: the memory object in the 
+            per-node response is nested — <code>{ used, total, free, 
+            available }</code> — rather than the flat 
+            <code>mem</code>/<code>maxmem</code> fields the summary 
+            endpoint implies. The interface had to be updated to match.
+          </p>
+
+          <h2>Issue 3 — Sys.Audit permission</h2>
+
+          <p>
+            After switching to per-node calls the category disappeared 
+            entirely. No error in the UI — just six services instead 
+            of nine, no Proxmox API section at all. This is 
+            <code>Promise.allSettled</code> doing exactly what it's 
+            designed to do: catching all three rejections silently 
+            and returning an empty array. The silence that makes the 
+            app resilient also makes this class of failure invisible.
+          </p>
+
+          <p>
+            Querying the per-node endpoint directly from PowerShell 
+            showed the cause immediately:
+          </p>
+
+          <pre><code>{"message":"Permission check failed (/nodes/ankhh, Sys.Audit)\n","data":null}</code></pre>
+
+          <p>
+            The <code>prometheus@pve!monitor</code> token's custom 
+            role didn't include <code>Sys.Audit</code>. The 
+            <code>/nodes</code> summary endpoint doesn't need it. 
+            The <code>/nodes/{name}/status</code> endpoint does. 
+            Adding <code>Sys.Audit</code> to the role in Proxmox 
+            resolved it immediately.
+          </p>
+
+          <p class="callout">
+            When a category disappears from the status page with no 
+            error shown, the first debugging step is to query the 
+            relevant proxy endpoint directly. The UI swallows errors 
+            by design — the raw response tells the truth. In this 
+            case a 403 with a specific permission name pointed 
+            directly at the fix.
+          </p>
+
+          <h2>What the page shows now</h2>
+
+          <p>
+            Nine services, all operational. Five Proxmox nodes from 
+            Prometheus. Three nodes from the Proxmox API directly — 
+            Murloc, Ankhh, and Shasta — each showing CPU percentage, 
+            memory percentage, and uptime. Ankhh and Shasta showing 
+            42 days 16 hours of uptime confirms the data is real. 
+            UPS operational, 48 minutes runtime, 14% load. Overall 
+            banner green.
+          </p>
+
+          <h2>A note on silent failure</h2>
+
+          <p>
+            The <code>Promise.allSettled</code> pattern in the services 
+            facade was a deliberate design choice — partial visibility 
+            over blank pages. This session showed both sides of that 
+            tradeoff clearly. When the proxy was down or permissions 
+            were wrong, the page kept rendering the data it could get. 
+            But the failure was invisible without going looking for it. 
+            That's the right behavior for a status page facing users — 
+            less so for a developer trying to debug why a category 
+            isn't showing up. The debugging move is always to test 
+            the endpoint directly rather than reading the UI.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            The three primary data sources are all working. Next 
+            session moves to the Zabbix adapter — JSON-RPC over HTTP, 
+            a different protocol from everything else so far — and 
+            then the Cloudflare tunnel for public deployment. After 
+            that, incident history and a polish pass before Perry 
+            reviews the finished site.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-10-2026.html">← Session 3</a>          
+          <a href="06-17-2026.html">Session 5 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

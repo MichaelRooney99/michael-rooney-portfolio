@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 32 — One Push, Three Networks, Zero Commands — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Finishing the Cloudflare Access setup and watching a real push to main turn into a fully automatic deploy for the first time — a real DNS negative-cache bug, a misconfigured Access policy caught by its own warning, a missed save found by testing instead of assuming, and a full walkthrough of the three genuinely separate network legs a single deploy actually crosses."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 32 — One Push, Three Networks, Zero Commands — Michael Rooney" />
+    <meta property="og:description" content="Finishing the CD pipeline's Cloudflare Access setup and watching a real push turn into a fully automatic deploy — with a full walkthrough of the three separate network legs it actually crosses." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-13-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 32 — One Push, Three Networks, Zero Commands — Michael Rooney" />
+    <meta name="twitter:description" content="A full walkthrough of the three separate network legs a single automatic deploy actually crosses, from git push to a Discord notification." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-13-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 32 — One Push, Three Networks, Zero Commands",
+      "description": "Finishing the CD pipeline's Cloudflare Access setup and watching a real push to main turn into a fully automatic deploy for the first time, with a full walkthrough of the three separate network legs it actually crosses.",
+      "datePublished": "2026-08-13",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-13-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="../../work/capstone/capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../work/capstone/capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-13-2026">August 13, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 32 — One Push, Three Networks, Zero Commands</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The webhook and rollback logic were both already proven
+            working a session ago — but only by bypassing Cloudflare
+            entirely, triggering the receiver and the playbook directly.
+            What was still missing was the actual front door: the part
+            that lets a real GitHub Actions job, sitting on infrastructure
+            with no path into this network at all, reach in and trigger
+            any of it. That's what this session closed.
+          </p>
+
+          <p>
+            The individual pieces — a Cloudflare tunnel, a service
+            token, an Access policy — each made sense on their own.
+            What didn't click until sitting down and tracing it start to
+            finish is that a single deploy actually crosses three
+            completely separate networks, each with its own
+            authentication, each unaware the other two exist. That
+            separation is the actual reason this took real, careful work
+            to wire up — and it's also the thing that makes the whole
+            system trustworthy once it's done. Worth walking through
+            properly, in order, rather than just listing what got built.
+          </p>
+
+          <h2>Leg one: the public internet, gated by Cloudflare Access</h2>
+
+          <p>
+            This leg starts the instant <code>git push</code> finishes
+            and ends the moment a request either gets rejected or
+            reaches this homelab's front door. Nothing in it happens on
+            this network — it's GitHub's servers and Cloudflare's edge
+            talking to each other, entirely outside anything this
+            project controls directly.
+          </p>
+
+          <p>
+            A push to <code>main</code> fires the two existing CI jobs
+            first — client and proxy, unchanged from before. Only once
+            both genuinely pass does a third job wake up:
+            <code>trigger-deploy</code>. Its entire job is one HTTP
+            request — a <code>POST</code> to a URL
+            (<code>deploy.michaelrooney.dev/deploy</code>) that
+            resolves, via DNS, to two Cloudflare IP addresses, not
+            anything on this network. Attached to that request are two
+            headers carrying a service token — not a password typed by
+            a human, a credential meant specifically for one machine to
+            hand another.
+          </p>
+
+          <p>
+            That request never gets anywhere near this homelab yet.
+            Cloudflare's edge intercepts it first, checks the token
+            against the Access policy configured for that exact
+            hostname, and makes a binary decision right there. Sent
+            with no token at all, the real response was a clean
+            <code>403</code>, an actual Cloudflare-branded error page,
+            proof the policy is genuinely enforcing something rather
+            than just existing unused. Sent with the real token, the
+            request is allowed through — and Cloudflare attaches a
+            second credential of its own, a signed JWT, as proof to
+            whatever's on the other end that this specific request
+            already passed a real check.
+          </p>
+
+          <p>
+            Only past that gate does the request enter the second leg
+            at all — through a tunnel connection that the receiving
+            side <em>already opened outward</em>, before any of this
+            ever happened, and keeps open continuously. No port was
+            ever opened inward on this network for any of this to work.
+            The direction of connection never reverses.
+          </p>
+
+          <h2>Leg two: the private LAN, no Cloudflare involved at all</h2>
+
+          <p>
+            Past the tunnel, everything is different. There's no more
+            Access policy, no more public internet, no more Cloudflare
+            in the loop at all — just a small Flask process listening
+            on a single internal port, and everything from here happens
+            entirely inside this network's own boundaries.
+          </p>
+
+          <p>
+            That process does almost nothing on purpose. It doesn't
+            re-check the token — Cloudflare already did, and checking
+            twice would just be duplicating a decision that's already
+            been made correctly. It writes a lock file so a second
+            near-simultaneous trigger gets rejected instead of starting
+            a competing deploy, hands the real work to a background
+            thread, and responds immediately. That immediate response
+            is the entire reason the GitHub Actions job finishes in
+            about two seconds even though the actual deploy takes far
+            longer — the job only ever waited to hear "started," never
+            "finished."
+          </p>
+
+          <p>
+            What happens in that background thread has nothing to do
+            with Cloudflare, tunnels, or tokens at all — it's the exact
+            same <code>ansible-playbook</code> command that's been run
+            by hand dozens of times this project, connecting over plain
+            SSH, on the internal LAN, to the actual capstone host. Every
+            layer already built and proven — the test gate, the health
+            check, the smoke test, the rollback — runs here, completely
+            unaware that anything upstream involved Cloudflare at all.
+            From this playbook's own point of view, a webhook trigger
+            and a person typing the command by hand are indistinguishable.
+          </p>
+
+          <h2>Leg three: reporting out, a second and entirely separate trip to the internet</h2>
+
+          <p>
+            The last leg starts only once the deploy itself either
+            succeeds or fails, and it goes back out to the internet a
+            second time — but through a completely different door than
+            the first leg used. The Ansible play, running on internal
+            infrastructure, sends a plain internal request to an
+            existing alert relay already sitting on this network — no
+            tunnel, no Access policy, nothing shared with leg one at
+            all. That relay is the one that actually reaches out to
+            Discord, using its own separate webhook, entirely unrelated
+            to anything Cloudflare was involved in.
+          </p>
+
+          <p>
+            That's genuinely why the message can show up in Discord a
+            little while after the GitHub Actions job itself already
+            shows green — they're not the same event. The job succeeding
+            only ever meant "the trigger was accepted." The Discord
+            message means the actual deploy, minutes later, finished —
+            and it's reporting through a path that never touched
+            Cloudflare, GitHub, or the tunnel at any point.
+          </p>
+
+          <h2>What actually went wrong along the way, and why each was worth catching slowly</h2>
+
+          <p>
+            None of this worked on the first attempt, and every failure
+            pointed at a real, specific boundary between these three
+            legs.
+          </p>
+
+          <p>
+            The service type on the tunnel's public hostname route got
+            set to HTTPS by default — but the receiver only speaks
+            plain HTTP internally. Cloudflare terminates real TLS at
+            its own edge regardless; asking it to also speak TLS to an
+            origin that never offered any just breaks leg two before it
+            starts. A quick fix once spotted, but a real reminder that
+            "public HTTPS" and "internal HTTP" are two independent
+            choices, not one setting.
+          </p>
+
+          <p>
+            After the route was fixed, the exact same request that had
+            just failed to resolve at all started resolving to a real
+            answer within Cloudflare's own DNS, but kept failing to
+            resolve through the internal resolver specifically — a
+            genuine negative-cache issue, the internal DNS server having
+            asked once, correctly gotten "doesn't exist yet" at that
+            exact moment, and cached that answer. Confirmed by comparing
+            the exact same query against Cloudflare's own resolver
+            directly rather than guessing — one worked, one didn't, and
+            that difference was the actual diagnosis.
+          </p>
+
+          <p>
+            The Access policy itself came with its own built-in warning,
+            caught before it ever got saved wrong: an <code>Allow</code>
+            action paired with only a service-token selector is a real,
+            common misconfiguration, since <code>Allow</code> assumes a
+            human logging in through an identity provider — exactly what
+            a machine credential can't do. The fix was switching to
+            <code>Service Auth</code> specifically, a genuinely different
+            policy type built for exactly this case, not just a stricter
+            version of the same one.
+          </p>
+
+          <p>
+            And the very last gap, the one that actually could have
+            shipped silently wrong: the Access Application itself never
+            got its own final save, buried a step behind the policy
+            editor that was being worked in. Found the only real way
+            it could be — testing the unauthenticated request and
+            getting a clean <code>200</code> back instead of the
+            expected rejection, immediately proving something was
+            configured but not yet enforcing anything.
+          </p>
+
+          <h2>What actually proved it, at the end</h2>
+
+          <p>
+            Not the Actions job turning green — that only confirms leg
+            one. The actual proof needed three separate pieces of
+            evidence, one from each leg: the GitHub Actions run itself
+            showing a real <code>202</code> instead of an instant
+            failure, the receiver's own log file on the internal network
+            showing a real trigger and a real success tied to the exact
+            commit SHA that was pushed, and a genuine message landing in
+            Discord through the completely separate reporting leg,
+            timestamped a little after the Actions job finished, exactly
+            as the mechanism predicts.
+          </p>
+
+          <p>
+            All three lined up. A commit landed on <code>main</code>
+            and, entirely on its own, ended up live — no command
+            typed anywhere in the loop, three independent networks each
+            doing their own small piece, none of them aware the others
+            existed.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-12-2026b.html">← Session 31</a>
+          <a href="08-13-2026b.html">Session 33 →</a>
+        </nav>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

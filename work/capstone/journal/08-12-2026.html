@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 30 — Three Kinds of Testing, and What Broke Along the Way — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Closing out component and integration testing with three deliberately different techniques — testing a hook in isolation, simulating real user interaction, and mocking an async data boundary — plus two real bugs the tests themselves had, caught by actually running them rather than trusting how they read."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 30 — Three Kinds of Testing, and What Broke Along the Way — Michael Rooney" />
+    <meta property="og:description" content="Three different testing techniques, deliberately chosen for breadth over padding — hook testing, real user-interaction simulation, and mocked async data — plus two real bugs the tests themselves had." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-12-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 30 — Three Kinds of Testing, and What Broke Along the Way — Michael Rooney" />
+    <meta name="twitter:description" content="Three different testing techniques, deliberately chosen for breadth over padding, plus two real bugs the tests themselves had." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-12-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 30 — Three Kinds of Testing, and What Broke Along the Way",
+      "description": "Closing out component and integration testing with three deliberately different techniques, plus two real bugs the tests themselves had, caught by actually running them rather than trusting how they read.",
+      "datePublished": "2026-08-12",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-12-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html">Journal</a></li>
+          <li><a href="../../work/capstone/capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../work/capstone/capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-12-2026">August 12, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 30 — Three Kinds of Testing, and What Broke Along the Way</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Everything tested up to this point has been a pure function
+            — feed it an input, check the output, no rendering involved.
+            That's the easiest kind of test to write and the least like
+            what actually breaks in a real UI. This session closed out
+            the last piece of automated coverage with three genuinely
+            different testing problems instead of just more of the same
+            kind, on the theory that three techniques done properly
+            teach more than ten shallow tests of trivial components
+            ever would.
+          </p>
+
+          <h2>Testing a hook with nothing attached to it</h2>
+
+          <p>
+            The keyboard-shortcut logic behind the command palette — 
+            Cmd/Ctrl+K or a bare "/" opens it, unless whatever's
+            currently focused is a text field — lives in its own hook,
+            completely separate from any component that renders
+            anything. Testing it meant learning <code>renderHook</code>,
+            which mounts a hook inside a real, disposable component
+            behind the scenes so it can be exercised in isolation,
+            without needing to build and render an actual UI just to
+            reach the logic inside it.
+          </p>
+
+          <p>
+            The genuinely interesting part was proving the
+            typing-target guard actually works — not just calling a
+            function and checking a return value, but creating a real
+            <code>&lt;input&gt;</code> element, dispatching a real
+            keyboard event <em>at</em> that element, and letting it
+            bubble up to the document-level listener the same way an
+            actual keystroke would. That's the difference between
+            testing what a piece of code is supposed to do and testing
+            what it actually does when a real event reaches it.
+          </p>
+
+          <h2>Simulating an actual person, not just calling functions</h2>
+
+          <p>
+            The command palette itself — the searchable list, arrow-key
+            navigation, Enter to select — needed a different kind of
+            test entirely: not "does this function return the right
+            value," but "if someone types into this box and presses
+            Enter, does the right thing actually happen." That's
+            <code>user-event</code>'s job, and it's a genuinely
+            different mental model — instead of calling
+            <code>onSelectService(service)</code> directly to check it
+            works, the test clicks and types and presses keys the same
+            way a real visitor would, and only then checks whether the
+            right handler got called.
+          </p>
+
+          <h2>Mocking the boundary, not the network</h2>
+
+          <p>
+            The per-service detail modal fetches real data the moment it
+            opens, which meant learning how to test something
+            asynchronous without actually hitting a network. The
+            decision worth explaining: mock the app's own data-fetching
+            function directly, not the browser's <code>fetch</code>
+            underneath it. This app is already built around small
+            adapter modules as the seam between "real data" and
+            "everything else" — mocking at that same seam means this
+            test stays accurate even if the underlying API call it
+            wraps changes shape entirely, since only that adapter's own
+            test would need to know about that.
+          </p>
+
+          <h2>Two real bugs, both in the tests themselves</h2>
+
+          <p>
+            Neither of these was a bug in the actual app — both were in
+            code written this same session, caught only by actually
+            running it rather than trusting that it read correctly.
+          </p>
+
+          <p>
+            The first: a query meant to find one specific row on screen
+            accidentally matched three, because two unrelated rows
+            happened to share a word with the one row's name. The fix
+            wasn't cleverness, just narrowing the search to something
+            provably unique. The second, more interesting one: clicking
+            on a list item didn't trigger its button's click handler,
+            because the button was a separate element nested inside the
+            item, and a real click event only travels <em>up</em> from
+            wherever it actually lands, never back down into children
+            that weren't the real target. Visually, clicking anywhere on
+            that row looks like it should work — the button fills the
+            whole row. Structurally, the test needed to click the actual
+            button, not the row that merely contains it.
+          </p>
+
+          <p>
+            Both were fixed the same way as everything else this
+            project has caught along the way — not by reasoning about
+            what should be true, but by running it, watching it fail,
+            and finding out why.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            67 tests on the client side now, 34 on the proxy — 101
+            total, every one of them run for real, not just written and
+            assumed correct. This closes out the last open piece of
+            automated test coverage for this project. What's left on the
+            roadmap now is genuinely different in kind — not more
+            testing, but the deployment pipeline's own next step.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-11-2026b.html">← Session 29</a>
+          <a href="08-12-2026b.html">Session 31 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Taking the capstone status page live — writing the Dockerfiles that never existed, a single-origin nginx reverse proxy to work around the tunnel's single-port limit, a crash-looping proxy container from a missing env var, a leaked password, and a silently missing Prometheus category caught only after going public."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away — Michael Rooney" />
+    <meta property="og:description" content="Taking the capstone status page live — the missing Dockerfiles, a single-origin nginx reverse proxy, a crash-looping proxy container, a leaked password, and a silently missing Prometheus category caught only after going public." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/07-16-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away — Michael Rooney" />
+    <meta name="twitter:description" content="Taking the capstone status page live — missing Dockerfiles, a single-origin nginx reverse proxy, a crash-looping proxy container, a leaked password, and a missing Prometheus category caught only after going public." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/07-16-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away",
+      "description": "Taking the capstone status page live — the missing Dockerfiles, a single-origin nginx reverse proxy, a crash-looping proxy container, a leaked password, and a silently missing Prometheus category caught only after going public.",
+      "datePublished": "2026-07-16",
+      "url": "https://michaelrooney.dev/work/capstone/journal/07-16-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-16-2026">July 16, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Session 7 ended with provisioning confirmed clean — Docker and
+            cloudflared running on the VM, all three firewall pinholes
+            reachable — and one command left: <code>capstone_deploy.yml</code>.
+            It felt like the last step. It was actually four separate
+            problems wearing a trenchcoat.
+          </p>
+
+          <h2>The Dockerfiles that were never written</h2>
+
+          <p>
+            First run failed immediately: <code>no configuration file
+            provided: not found</code>. The clone succeeded, the
+            <code>.env</code> write succeeded, and then <code>docker
+            compose up</code> had nothing to build from. Checking the
+            actual repo confirmed it — <code>docker-compose.yml</code>
+            referenced a root <code>Dockerfile</code> and a
+            <code>proxy/Dockerfile</code>, and neither one existed. The
+            compose file had been written ahead of the containers it was
+            supposed to build, and the gap never got closed on the way
+            to VM provisioning and firewall work.
+          </p>
+
+          <p>
+            Wrote both as two-stage builds — a Node stage to install and
+            build, then a slim final stage. For the client, that's
+            <code>nginx:alpine</code> serving the Vite output. For the
+            proxy, it stays Node in both stages, but the run stage
+            reinstalls with <code>--omit=dev</code> so <code>ts-node</code>
+            and the TypeScript toolchain don't ship in the final image —
+            just the compiled <code>dist/index.js</code>.
+          </p>
+
+          <h2>Two containers, one public port</h2>
+
+          <p>
+            First real deploy attempt built cleanly but exposed a design
+            gap that had been sitting unaddressed since the tunnel route
+            was first discussed: the client and proxy were built as two
+            independent containers on two separate ports, but the
+            Cloudflare tunnel only routes one public hostname to one
+            origin. A browser hitting <code>localhost:3001</code> from
+            outside the LAN resolves to the visitor's own machine, not
+            Dega — that request was never going to work no matter how
+            correctly everything else was configured.
+          </p>
+
+          <p class="callout">
+            The fix wasn't more infrastructure, it was less exposure: nginx
+            serves the static build <em>and</em> reverse-proxies
+            <code>/proxmox</code>, <code>/zabbix</code>, and (later)
+            <code>/prometheus</code> internally to the proxy container over
+            the Compose network. The browser only ever talks to one origin.
+            The proxy stops being something the public needs to know exists
+            at all.
+          </p>
+
+          <p>
+            The other half of that fix lives in the client build itself.
+            Vite bakes <code>VITE_PROXY_URL</code> into the compiled JS at
+            build time, not runtime — the adapters' dev-mode fallback of
+            <code>http://localhost:3001</code> would have shipped straight
+            into production otherwise. Writing an empty value into
+            <code>.env.production</code> before <code>npm run build</code>
+            makes the nullish-coalescing fallback in the adapter code treat
+            it as "set, just empty" rather than "unset" — so the fetch
+            calls become same-origin relative paths instead of pointing at
+            a port that doesn't exist for anyone outside this laptop.
+          </p>
+
+          <h2>The proxy that wouldn't start</h2>
+
+          <p>
+            With the compose file and nginx config both fixed, the stack
+            built and nginx came up — but every proxied path returned a
+            clean <code>502 Bad Gateway</code>. Nothing was listening on
+            3001 at all.
+          </p>
+
+          <p>
+            The cause was sitting in the proxy's own startup guard:
+            <code>process.exit(1)</code> if <code>ZABBIX_HOST</code>,
+            <code>ZABBIX_USER</code>, or <code>ZABBIX_PASSWORD</code> are
+            missing. <code>capstone_deploy.yml</code>'s <code>.env</code>
+            write task had never been updated to include them — it only
+            ever wrote the Proxmox variables from when the Zabbix adapter
+            didn't exist yet. The container started, hit that guard
+            immediately, and exited. nginx's 502 was accurate: there
+            genuinely was nothing behind it.
+          </p>
+
+          <p>
+            Added the three missing variables, plus new Vault entries
+            pulling the existing <code>api-readonly</code> Zabbix
+            credentials that were already documented from the adapter work
+            back in Session 5 and 6. Caught one more small thing in the
+            same pass — the task wrote <code>CORS_ORIGIN</code>, but the
+            proxy code actually reads <code>CLIENT_ORIGIN</code>. Wrong
+            variable name, silently falling back to a dev default. Harmless
+            now that everything's same-origin through nginx, but worth
+            fixing for accuracy regardless.
+          </p>
+
+          <h2>The password that got away</h2>
+
+          <p>
+            Re-running with <code>--check --diff</code> to preview the env
+            file change before applying it for real — standard practice
+            all session — printed the new Zabbix password in plaintext to
+            the terminal. Vault encrypts the file at rest, but
+            <code>--diff</code> shows the decrypted content being written,
+            and that content ended up in a shared, logged session.
+          </p>
+
+          <p class="callout">
+            Vault protects a file on disk. It does nothing to protect
+            output printed to a terminal that's being watched, copied, or
+            logged elsewhere. <code>--check --diff</code> is genuinely
+            useful for previewing config changes, but any task that writes
+            a secret needs <code>no_log: true</code> regardless of whether
+            you're using diff mode that particular run — the moment
+            secrets show up in playbook output is the moment they stop
+            being secret, and that moment doesn't announce itself in
+            advance.
+          </p>
+
+          <p>
+            Rotated the credential and added <code>no_log: true</code> to
+            the task before moving on — flagged explicitly as open until
+            both were actually confirmed done, rather than assumed fixed
+            just because they'd been discussed. That distinction matters:
+            a conversation about a fix isn't the fix.
+          </p>
+
+          <h2>Live, but quietly incomplete</h2>
+
+          <p>
+            With the env fix in place, deployment finally succeeded clean —
+            health check 200, real Proxmox node data flowing through the
+            proxy. Configured the Cloudflare Zero Trust public hostname
+            route (one small snag: the Service URL field needs an explicit
+            <code>http://</code> scheme, a bare <code>host:port</code>
+            wasn't enough), and <code>curl -I
+            https://status.michaelrooney.dev</code> came back
+            <code>HTTP/2 200</code>.
+          </p>
+
+          <p>
+            Looked done. Wasn't. Opening the actual site showed 9 services
+            instead of 14 — every Proxmox API and Zabbix entry present,
+            but all 5 Proxmox Nodes and the UPS entirely missing, with no
+            error anywhere on the page.
+          </p>
+
+          <p class="callout">
+            Third time this exact failure shape has shown up across the
+            project — Session 4's missing <code>Sys.Audit</code>
+            permission, Session 6's Zabbix availability field move, and now
+            this. <code>Promise.allSettled</code> is doing exactly what
+            it's designed to do: a failed adapter disappears cleanly rather
+            than breaking the page. That's the right behavior for a visitor.
+            It also means a real bug and "working as intended" look
+            identical from the outside, every time, and the only way to
+            tell them apart is to go check the adapter directly rather than
+            trust that a rendered page means a working page.
+          </p>
+
+          <p>
+            The cause: <code>prometheus.ts</code> was the one adapter that
+            never got moved behind the proxy. It fetches
+            <code>10.10.10.105:9090</code> directly — fine on the LAN
+            during development, unreachable from anywhere on the public
+            internet, tunnel or not, since the tunnel only exposes what
+            nginx serves. Every public page load, both Prometheus-backed
+            categories failed instantly and silently. This is the first
+            time the site was ever actually tested from outside the LAN,
+            so it's also the first time this could have been caught.
+          </p>
+
+          <p>
+            Added a <code>/prometheus</code> route to the proxy — same
+            shape as the existing <code>/proxmox</code> forward, no auth
+            needed since this is purely a reachability problem, not a
+            credentials one. One more nginx location block, one more
+            baked-in build-time env var, redeploy. All 14 services showed
+            up on the next load.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            <code>status.michaelrooney.dev</code> is live, publicly
+            reachable, serving real data from all four sources — Prometheus,
+            the Proxmox API, Zabbix, and NUT. Single-origin architecture
+            throughout: the browser only ever talks to nginx, which is the
+            only thing the tunnel exposes and the only thing that needs to
+            be trusted from outside.
+          </p>
+
+          <p>
+            Both loose ends from the credential leak are closed now too —
+            the Zabbix password rotated, <code>no_log: true</code> confirmed
+            in the playbook. Deployment day is actually done, not just
+            looking done.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-12-2026.html">← Session 7</a>
+          <a href="07-18-2026.html">Session 9 →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

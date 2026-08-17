@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building the color-token system and light/dark toggle for the status page — Tailwind v4's CSS-native @theme directive, an anti-flash inline script, and two real contrast bugs a manual test caught that automated tooling never would have."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch — Michael Rooney" />
+    <meta property="og:description" content="Building the color-token system and light/dark toggle — Tailwind v4's @theme directive, an anti-flash script, and real contrast bugs a manual test caught." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/07-30-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch — Michael Rooney" />
+    <meta name="twitter:description" content="Building the color-token system and light/dark toggle — Tailwind v4's @theme directive, an anti-flash script, and real contrast bugs a manual test caught." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/07-30-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch",
+      "description": "Building the color-token system and light/dark toggle — Tailwind v4's @theme directive, an anti-flash script, and real contrast bugs a manual test caught.",
+      "datePublished": "2026-07-30",
+      "url": "https://michaelrooney.dev/work/capstone/journal/07-30-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-30-2026">July 30, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Second session of the front-end polish plan, and the one
+            deliberately pulled forward from its own suggested order —
+            the theme toggle needed the same token system the later full
+            visual restyle needs, so building both in one pass meant the
+            actual theming mechanism only gets built once instead of
+            twice.
+          </p>
+
+          <h2>The token system</h2>
+
+          <p>
+            This project runs Tailwind v4, which replaced the old
+            <code>tailwind.config.js</code> with a CSS-native
+            <code>@theme</code> directive — and critically, values inside
+            <code>@theme</code> can be <code>var()</code> references
+            pointing at other CSS custom properties, not just static
+            colors. That's the whole mechanism: define
+            <code>--color-capstone-bg: var(--theme-bg)</code>, then let
+            two separate selector blocks — <code>:root</code> for dark,
+            <code>[data-theme="light"]</code> for light — decide what
+            <code>--theme-bg</code> actually equals. Flip one HTML
+            attribute, every utility class built on that token updates
+            everywhere, no component-by-component rewrite required for
+            the mechanism itself to work.
+          </p>
+
+          <p>
+            The light palette needed deriving from scratch — the
+            portfolio site this is meant to eventually match doesn't have
+            a light mode to copy from. Went with a warm-toned derivation
+            rather than a generic inversion: cream background instead of
+            stark white, warm charcoal text instead of pure black, the
+            same orange accent kept identical across both themes on
+            purpose rather than picked twice.
+          </p>
+
+          <h2>Proving it without doing Session 5's job early</h2>
+
+          <p>
+            The plan draws a real line: this session builds the
+            mechanism, Session 5 does the actual component-by-component
+            replacement of every <code>zinc-*</code> class in the
+            codebase. Applied the new tokens to the outer app wrapper and
+            header only — enough to prove the whole thing genuinely
+            works end to end, without quietly doing the full restyle
+            early just because it was tempting to keep going.
+          </p>
+
+          <h2>Two bugs a real test caught, that nothing automated would have</h2>
+
+          <p>
+            Toggled to light mode to check the work, and the page title
+            went nearly invisible — <code>text-zinc-100</code>, a
+            near-white color that was never meant to respond to theme at
+            all, sitting on the new cream background it had no way of
+            knowing existed. My first instinct fix used a static mid-gray
+            instead, which technically improved light mode's contrast
+            while quietly making dark mode's worse — a compromise that's
+            mediocre in both places rather than good in either. The
+            actual fix was using the token system for exactly what it's
+            for: <code>text-capstone-text</code> resolves to the right
+            high-contrast color in whichever mode is active, automatically,
+            without picking a middle ground.
+          </p>
+
+          <p class="callout">
+            Same root bug turned up a second time in the loading skeleton
+            — reload the page with light theme active, and the
+            placeholder blocks would have flashed as dark gray on a cream
+            background before real content ever arrived. Nothing wrong
+            with the skeleton's shape, just the same static-color mistake
+            in a different component. Fixed by converting both skeleton
+            components and the loading wrapper to the same
+            <code>capstone-*</code> tokens — the kind of thing that's
+            easy to miss because a broken loading state only shows up for
+            a second, and only in the one theme mode you weren't looking
+            at when you built it.
+          </p>
+
+          <h2>Avoiding a flash of the wrong theme entirely</h2>
+
+          <p>
+            A theme decided in a React <code>useEffect</code> paints too
+            late — the browser renders once with whatever the default CSS
+            says, then visibly snaps to the real answer once JavaScript
+            catches up. Fixed with a plain, blocking
+            <code>&lt;script&gt;</code> in <code>&lt;head&gt;</code>,
+            ahead of any stylesheet, that reads the same
+            stored-choice-then-OS-preference logic synchronously before
+            the browser paints a single frame. No flash, because there's
+            never a wrong frame rendered to begin with — wrote up the
+            full mechanics of this separately, since it turned out to be
+            genuinely interesting on its own.
+          </p>
+
+          <h2>Testing it properly, not just looking at it</h2>
+
+          <p>
+            Four real checks, not just "does it look right": basic
+            toggle behavior, confirming <code>&lt;html data-theme="light"&gt;</code>
+            is already present in the raw page source on a hard reload
+            (more reliable than trying to catch a few frames of flash by
+            eye), persistence surviving an actual tab close and reopen —
+            checked directly in DevTools' Application panel, not assumed
+            — and the OS-preference fallback verified through Chrome's
+            built-in <code>prefers-color-scheme</code> emulator rather
+            than touching real system settings. All four passed clean.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            Token system and toggle both genuinely working, confirmed
+            through direct testing rather than eyeballing. Two real
+            contrast bugs found and fixed properly instead of patched
+            around. Session 3 is next — response-time tracking and the
+            per-service detail view, built together since one is the
+            natural thing the other displays.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-29-2026.html">← Session 12</a>
+          <a href="07-31-2026.html">Session 14 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

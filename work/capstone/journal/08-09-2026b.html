@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 22 — GitHub Actions, and a Folder That Never Existed — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building CI for both repos — client/proxy tests on homelab-status, ansible-lint on homelab-ansible — surfaced a real structural mismatch that had been silently wrong in every scope doc all session long, a deliberate call to keep the vault password out of CI, and a permanently-failing check fixed properly instead of left red forever."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 22 — GitHub Actions, and a Folder That Never Existed — Michael Rooney" />
+    <meta property="og:description" content="Building real CI for both repos surfaced a structural mismatch every scope doc had wrong, a deliberate vault-secret tradeoff, and a permanently-failing check fixed properly." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-09-2026b.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 22 — GitHub Actions, and a Folder That Never Existed — Michael Rooney" />
+    <meta name="twitter:description" content="Real CI for both repos surfaced a structural mismatch every scope doc had wrong, plus a deliberate vault-secret tradeoff." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-09-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 22 — GitHub Actions, and a Folder That Never Existed",
+      "description": "Building real CI for both repos surfaced a structural mismatch every scope doc had wrong, a deliberate vault-secret tradeoff, and a permanently-failing check fixed properly.",
+      "datePublished": "2026-08-09",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-09-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-09-2026">August 9, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 22 — GitHub Actions, and a Folder That Never Existed</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Second session of the day, picking up right where the
+            first one left off — <code>23-GitHub Actions CI/CD</code>,
+            the item that had been the most exciting one on the list
+            since it was first scoped. Building it turned out to
+            surface something none of the excitement was about.
+          </p>
+
+          <h2>The client folder that was never real</h2>
+
+          <p class="callout">
+            Every scope doc written this entire session — every
+            "Monorepo structure" diagram, without exception — described
+            <code>client/</code> and <code>proxy/</code> as sibling
+            folders. The actual repo doesn't match. <code>proxy/</code>
+            genuinely is nested; the client app lives directly at the
+            repo root and always has. Nothing had ever broken because
+            of this, since nothing before this session had actually
+            executed against those paths — a CI workflow was the first
+            thing to try, and it failed with a plain "No such file or
+            directory" the instant it tried to <code>cd</code> into a
+            folder that isn't there.
+          </p>
+
+          <p>
+            Fixed in the workflow itself by dropping the assumption —
+            but the more interesting question was which direction to
+            fix the <em>real</em> mismatch in: correct every doc to
+            describe the flatter actual layout, or move the real files
+            to match documentation that had been describing the
+            cleaner shape all along. Chose the second, scoped
+            separately as <code>26-Client Folder Restructure</code>
+            rather than rushed into the same session — this touches
+            the live deploy pipeline directly
+            (<code>docker-compose.yml</code>'s build context, at
+            minimum), and that's exactly the kind of change this
+            project has always tested carefully before trusting, not
+            something to squeeze in as an afterthought.
+          </p>
+
+          <h2>A deliberate line held on secrets</h2>
+
+          <p>
+            Ten playbooks need the Ansible vault password to fully
+            resolve during <code>ansible-lint</code>'s syntax-check —
+            without it, all ten fail every single run. Adding the
+            vault password to GitHub Actions would fix that, and would
+            also be the first exception to something this project has
+            held consistently since <code>22-</code>: CI stays
+            genuinely secret-free everywhere. The actual coverage lost
+            by not adding it is narrow — deep variable-resolution
+            checking specifically for vault-dependent values, not the
+            bulk of what <code>ansible-lint</code> actually checks.
+            Kept secret-free.
+          </p>
+
+          <h2>A permanently red check is worse than none</h2>
+
+          <p>
+            Left at default severity, those same ten vault-related
+            findings would fail the build forever — a check that's
+            always red teaches you to stop looking at it, which
+            defeats the entire reason to have one. Fixed with a real
+            <code>.ansible-lint</code> config moving them to
+            <code>warn_list</code>: still visible in every run's
+            output, correctly no longer blocking. The 30 real style
+            findings underneath them — inconsistent colon spacing,
+            missing trailing newlines across six inventory files — got
+            fixed for real, and one deliberately didn't get the
+            "obvious" fix: a long secret token over the line-length
+            limit got an explicit <code>noqa</code> rather than YAML
+            folding syntax, since folding rejoins line breaks as
+            spaces — correct for wrapped prose, and something that
+            would have silently corrupted the actual token value if
+            applied to an opaque credential string instead.
+          </p>
+
+          <h2>Confirmed the way this project confirms things</h2>
+
+          <p>
+            Both workflows ended the session genuinely green — not
+            red-with-an-accepted-asterisk, actual passing checks for
+            real reasons. Real debugging along the way too: a caching
+            step that failed for one reason (a path assumption) that
+            turned out to be hiding a bigger one (the folder that
+            never existed), traced properly instead of patched around.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            <code>23-</code>'s CI half is done; CD stays deliberately
+            unbuilt, per the doc's own reasoning about what GitHub's
+            hosted runners can and can't reach. A real side effect
+            worth naming: the same <code>ansible-lint</code> workflow
+            satisfies <code>19-</code>'s Layer 1 too — static linting,
+            now live, not a separate task waiting for its own session.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-09-2026.html">← Session 21</a>
+          <a href="08-09-2026c.html">Session 23 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

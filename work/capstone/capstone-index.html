@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Capstone — Homelab Status Page — Michael Rooney</title>
+    <meta name="description" content="Build journal for a public-facing homelab infrastructure status page — Madison College internship capstone project." />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Capstone — Homelab Status Page — Michael Rooney" />
+    <meta property="og:description" content="Build journal for a public-facing homelab infrastructure status page — Madison College internship capstone project." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Capstone — Homelab Status Page — Michael Rooney" />
+    <meta name="twitter:description" content="Build journal for a public-facing homelab infrastructure status page — Madison College internship capstone project." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../index.html#about">About</a></li>
+          <li><a href="../../journal.html">Journal</a></li>
+          <li><a href="../../work/capstone/capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+
+      <section class="hero journal-hero hero-load" aria-labelledby="capstone-heading">
+  <span class="hero-eyebrow">Madison College — Internship Capstone</span>
+  <h1 id="capstone-heading">Homelab Status Page</h1>
+  <p>
+    A session-by-session build journal for a public-facing infrastructure 
+    status page — built with Vite, React, TypeScript, and TanStack Query, 
+    deployed at status.michaelrooney.dev via Cloudflare Zero Trust tunnel.
+  </p>
+  <div class="hero-buttons">
+  <a 
+    href="https://status.michaelrooney.dev"
+    class="project-link magnetic"
+    target="_blank"
+    rel="noopener noreferrer"
+  >View Live Site ↗</a>
+  
+    <a href="https://status.michaelrooney.dev"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="View live status — opens the status page"
+  >
+    <img
+      src="https://status.michaelrooney.dev/badge.svg"
+      alt="Homelab Status"
+    />
+  </a>
+</div>
+</section>
+
+
+      <div class="divider reveal"></div>
+
+      <section class="capstone-meta reveal" aria-label="Project details">
+        <div class="capstone-meta-grid">
+
+          <div class="capstone-meta-block">
+            <span class="section-label">Stack</span>
+            <ul class="capstone-stack-list">
+              <li>Vite + React + TypeScript</li>
+              <li>TanStack Query</li>
+              <li>Tailwind CSS v4</li>
+              <li>Cloudflare Zero Trust</li>
+            </ul>
+          </div>
+
+          <div class="capstone-meta-block">
+            <span class="section-label">Data Sources</span>
+            <ul class="capstone-stack-list">
+              <li>Prometheus + node_exporter</li>
+              <li>NUT via nut_exporter</li>
+              <li>Proxmox API</li>
+              <li>Zabbix JSON-RPC</li>
+            </ul>
+          </div>
+
+          <div class="capstone-meta-block">
+            <span class="section-label">Deliverables</span>
+            <ul class="capstone-stack-list">
+              <li>Live site at status.michaelrooney.dev — deployed 07-16-2026</li>
+              <li>GitHub repo shared with instructor</li>
+              <li>This build journal</li>
+              <li>216+ logged hours</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="hours-heading">
+        <span class="section-label">Progress</span>
+        <h2 id="hours-heading" class="reveal">Hours Log</h2>
+
+        <div class="table-responsive">
+          <table class="skills-table capstone-hours-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Session</th>
+                <th>Hours</th>
+                <th>Running Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Jun 8, 2026</td>
+                <td><a href="journal/06-08-2026.html">Session 1 — Scaffold, dependencies, and data layer</a></td>
+                <td>4.5</td>
+                <td>4.5</td>
+              </tr>
+              <tr>
+                <td>Jun 9, 2026</td>
+                <td><a href="journal/06-09-2026.html">Session 2 — Hook, components, and first live render</a></td>
+                <td>3.5</td>
+                <td>8.0</td>
+              </tr>
+              <tr>
+                <td>Jun 10, 2026</td>
+                <td><a href="journal/06-10-2026.html">Session 3 — The proxy layer</a></td>
+                <td>6</td>
+                <td>14</td>
+              </tr>
+              <tr>
+                <td>Jun 11, 2026</td>
+                <td><a href="journal/06-11-2026.html">Session 4 — Proxmox adapter and debugging</a></td>
+                <td>3.0</td>
+                <td>17</td>
+              </tr>
+              <tr>
+                <td>Jun 17, 2026</td>
+                <td><a href="journal/06-17-2026.html">Session 5 — Zabbix, debugging, and a deliberate deferral</a></td>
+                <td>3.5</td>
+                <td>20.5</td>
+              </tr>
+              <tr>
+                <td>Jun 27, 2026</td>
+                <td><a href="journal/06-27-2026.html">Session 6 — Zabbix adapter and four live data sources</a></td>
+                <td>3.0</td>
+                <td>23.5</td>
+              </tr>
+              <tr>
+                <td>Jul 12, 2026</td>
+                <td><a href="journal/07-12-2026.html">Session 7 — Deployment and Cloudflare Zero Trust</a></td>
+                <td>6.0</td>
+                <td>29.5</td>
+              </tr>
+              <tr>
+                <td>Jul 16, 2026</td>
+                <td><a href="journal/07-16-2026.html">Session 8 — Deployment day: Dockerfiles, a single origin, and a password that got away</a></td>
+                <td>3.5</td>
+                <td>33.0</td>
+              </tr>
+              <tr>
+                <td>Jul 18, 2026</td>
+                <td><a href="journal/07-18-2026.html">Session 9 — Real History, and Two Loose Ends Tied Off</a></td>
+                <td>5.5</td>
+                <td>38.5</td>
+              </tr>
+              <tr>
+                <td>Jul 24, 2026</td>
+                <td><a href="journal/07-24-2026.html">Session 10 — Incident History, and Five Bugs on the Way There</a></td>
+                <td>8.0</td>
+                <td>46.5</td>
+              </tr>
+              <tr>
+                <td>Jul 25, 2026</td>
+                <td><a href="journal/07-25-2026.html">Session 11 — Giving Every Category Real History</a></td>
+                <td>6.0</td>
+                <td>52.5</td>
+              </tr>
+              <tr>
+                <td>Jul 29, 2026</td>
+                <td><a href="journal/07-29-2026.html">Session 12 — Four Small Things, One Real Lint Chain</a></td>
+                <td>4.5</td>
+                <td>57.0</td>
+              </tr>
+              <tr>
+                <td>Jul 30, 2026</td>
+                <td><a href="journal/07-30-2026.html">Dega disk exhaustion incident + full documentation audit</a></td>
+                <td>1.0</td>
+                <td>58.0</td>
+              </tr>
+              <tr>
+                <td>Jul 30, 2026</td>
+                <td><a href="journal/07-30-2026.html">Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch</a></td>
+                <td>5.5</td>
+                <td>63.5</td>
+              </tr>
+              <tr>
+                <td>Jul 31, 2026</td>
+                <td><a href="journal/07-31-2026.html">Session 14 — Click Into a Node, See What It's Actually Doing</a></td>
+                <td>7.0</td>
+                <td>70.5</td>
+              </tr>
+              <tr>
+                <td>Aug 2, 2026</td>
+                <td><a href="journal/08-02-2026.html">Session 15 — A Command Palette, and the Same Bug Caught Twice</a></td>
+                <td>5.0</td>
+                <td>75.5</td>
+              </tr>
+              <tr>
+                <td>Aug 4, 2026</td>
+                <td><a href="journal/08-04-2026.html">Session 16 — A Full Restyle, and the One Color That Didn't Pass</a></td>
+                <td>6.5</td>
+                <td>82.0</td>
+              </tr>
+              <tr>
+                <td>Aug 5, 2026</td>
+                <td><a href="journal/08-05-2026.html">Session 17 — Auto-Drafted Incidents, and the Build Assumption That Wasted Twenty Minutes</a></td>
+                <td>7.5</td>
+                <td>89.5</td>
+              </tr>
+              <tr>
+                <td>Aug 6, 2026</td>
+                <td><a href="journal/08-06-2026.html">Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate</a></td>
+                <td>7.0</td>
+                <td>96.5</td>
+              </tr>
+              <tr>
+                <td>Aug 7, 2026</td>
+                <td><a href="journal/08-07-2026.html">Session 19 — The First Real Tests, and a Folder Nobody Planned For</a></td>
+                <td>6.0</td>
+                <td>102.5</td>
+              </tr>
+              <tr>
+                <td>Aug 7, 2026</td>
+                <td>Follow-up scoping — duplication-threshold decision, 20- through 24-</td>
+                <td>1.0</td>
+                <td>103.5</td>
+              </tr>
+              <tr>
+                <td>Aug 8, 2026</td>
+                <td><a href="journal/08-08-2026.html">Session 20 — Manual Incident Authoring, and Two Routing Bugs Nginx Was Hiding</a></td>
+                <td>9.0</td>
+                <td>112.5</td>
+              </tr>
+              <tr>
+                <td>Aug 9, 2026</td>
+                <td><a href="journal/08-09-2026.html">Session 21 — Security Hardening, and the Proxy That Trusted Everyone</a></td>
+                <td>2.5</td>
+                <td>115.0</td>
+              </tr>
+              <tr>
+                <td>Aug 9, 2026</td>
+                <td><a href="journal/08-09-2026b.html">Session 22 — GitHub Actions, and a Folder That Never Existed</a></td>
+                <td>2.5</td>
+                <td>117.5</td>
+              </tr>
+              <tr>
+                <td>Aug 9, 2026</td>
+                <td>Client folder restructure (26-) — moved to match every scope doc's structure</td>
+                <td>0.5</td>
+                <td>118.0</td>
+              </tr>
+              <tr>
+                <td>Aug 9, 2026</td>
+                <td><a href="journal/08-09-2026c.html">Session 23 — The Badge, the Fixture, and the Gap We Finally Closed</a></td>
+                <td>3.0</td>
+                <td>121.0</td>
+              </tr>
+              <tr>
+                <td>Aug 9, 2026</td>
+                <td><a href="journal/08-09-2026d.html">Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time</a></td>
+                <td>1.5</td>
+                <td>122.5</td>
+              </tr>
+              <tr>
+                <td>Aug 10, 2026</td>
+                <td><a href="journal/08-10-2026.html">Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable</a></td>
+                <td>2.5</td>
+                <td>125.0</td>
+              </tr>
+              <tr>
+                <td>Aug 10, 2026</td>
+                <td><a href="journal/08-10-2026b.html">Session 26 — Three Bugs, a Disk, and an Idempotency Check That Actually Worked</a></td>
+                <td>5.0</td>
+                <td>130.0</td>
+              </tr>
+              <tr>
+                <td>Aug 10, 2026</td>
+                <td><a href="journal/08-10-2026c.html">Session 27 — Proving the Smoke Test Actually Smokes</a></td>
+                <td>2.5</td>
+                <td>132.5</td>
+              </tr>
+              <tr>
+                <td>Aug 11, 2026</td>
+                <td><a href="journal/08-11-2026.html">Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See</a></td>
+                <td>1.5</td>
+                <td>134.0</td>
+              </tr>
+              <tr>
+                <td>Aug 11, 2026</td>
+                <td><a href="journal/08-11-2026b.html">Session 29 — The Comment Describing a Route That Was Never Built</a></td>
+                <td>1.5</td>
+                <td>135.5</td>
+              </tr>
+              <tr>
+                <td>Aug 12, 2026</td>
+                <td><a href="journal/08-12-2026.html">Session 30 — Three Kinds of Testing, and What Broke Along the Way</a></td>
+                <td>6.5</td>
+                <td>140.5</td>
+              </tr>
+              <tr>
+                <td>Aug 12, 2026</td>
+                <td><a href="journal/08-12-2026b.html">Session 31 — A Deploy Broke Itself on Purpose, and Fixed Itself Too</a></td>
+                <td>6.0</td>
+                <td>146.5</td>
+              </tr>
+              <tr>
+                <td>Aug 13, 2026</td>
+                <td><a href="journal/08-13-2026.html">Session 32 — One Push, Three Networks, Zero Commands</a></td>
+                <td>5.5</td>
+                <td>152.0</td>
+              </tr>
+              <tr>
+                <td>Aug 13, 2026</td>
+                <td><a href="journal/08-13-2026b.html">Session 33 — Reading My Own Code Like a Reviewer, Not the Author</a></td>
+                <td>6.0</td>
+                <td>158.0</td>
+              </tr>
+              <tr>
+                <td>Aug 15, 2026</td>
+                <td><a href="journal/08-15-2026.html">Session 34 — Starting From a Real Outage and Working Backward</a></td>
+                <td>7.5</td>
+                <td>165.5</td>
+              </tr>
+            
+
+            </tbody>
+            <tfoot>
+              <tr class="capstone-hours-total">
+                <td colspan="2">Total</td>
+                <td>165.5</td>
+                <td>165.5 / 216</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="sessions-heading">
+        <span class="section-label">Journal</span>
+        <h2 id="sessions-heading" class="reveal">Sessions</h2>
+
+        <ol class="entry-list" reversed>
+
+          <li>
+            <a href="journal/08-15-2026.html" class="entry" aria-label="Read: Starting From a Real Outage and Working Backward — August 15 2026">
+              <time class="entry-date" datetime="08-15-2026">Aug 15, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 34 — Starting From a Real Outage and Working Backward</h2>
+                <p class="entry-excerpt">
+                  A backward code-review pass, starting from a real live outage and tracing it back through the codebase to a single Zabbix poll — plus a corrected misconception about live updates.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-13-2026b.html" class="entry" aria-label="Read: Reading My Own Code Like a Reviewer, Not the Author — August 13 2026">
+              <time class="entry-date" datetime="08-13-2026">Aug 13, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 33 — Reading My Own Code Like a Reviewer, Not the Author</h2>
+                <p class="entry-excerpt">
+                  A full walk through the capstone codebase, client and most of the proxy, catching real misreadings along the way and surfacing two genuinely open design questions.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-13-2026.html" class="entry" aria-label="Read: One Push, Three Networks, Zero Commands — August 13 2026">
+              <time class="entry-date" datetime="08-13-2026">Aug 13, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 32 — One Push, Three Networks, Zero Commands</h2>
+                <p class="entry-excerpt">
+                  Finishing the CD pipeline's Cloudflare Access setup and watching a real push turn into a fully automatic deploy — with a full walkthrough of the three separate network legs it actually crosses.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-12-2026b.html" class="entry" aria-label="Read: A Deploy Broke Itself on Purpose, and Fixed Itself Too — August 12 2026">
+              <time class="entry-date" datetime="08-12-2026">Aug 12, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 31 — A Deploy Broke Itself on Purpose, and Fixed Itself Too</h2>
+                <p class="entry-excerpt">
+                  The CD webhook and automated rollback pair, built and proven in both directions against real infrastructure — including a deliberately broken deploy that rolled itself back live.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-12-2026.html" class="entry" aria-label="Read: Three Kinds of Testing, and What Broke Along the Way — August 12 2026">
+              <time class="entry-date" datetime="08-12-2026">Aug 12, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 30 — Three Kinds of Testing, and What Broke Along the Way</h2>
+                <p class="entry-excerpt">
+                  Closing out component and integration testing with three deliberately different techniques, plus two real bugs the tests themselves had, caught by actually running them.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          
+          <li>
+            <a href="journal/08-11-2026b.html" class="entry" aria-label="Read: The Comment Describing a Route That Was Never Built — August 11 2026">
+              <time class="entry-date" datetime="08-11-2026">Aug 11, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 29 — The Comment Describing a Route That Was Never Built</h2>
+                <p class="entry-excerpt">
+                  A routine comment cleanup surfaced a live-update route that had never actually worked since it shipped — confirmed broken against real production, fixed, and confirmed working the same way.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-11-2026.html" class="entry" aria-label="Read: Gating Deploys on Tests, and a Fixture File Docker Couldn't See — August 11 2026">
+              <time class="entry-date" datetime="08-11-2026">Aug 11, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 28 — Gating Deploys on Tests, and a Fixture File Docker Couldn't See</h2>
+                <p class="entry-excerpt">
+                  Gating the capstone deploy on its own tests — a Docker build-stage decision, a fixture file unreachable across a build boundary, and both the pass and fail paths confirmed against real infrastructure.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-10-2026c.html" class="entry" aria-label="Read: Proving the Smoke Test Actually Smokes — August 10 2026">
+              <time class="entry-date" datetime="08-10-2026">Aug 10, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 27 — Proving the Smoke Test Actually Smokes</h2>
+                <p class="entry-excerpt">
+                  Verifying the post-deploy smoke test against real infrastructure, both directions — a real passing deploy, and a real killed proxy container proving it genuinely fails loudly rather than just looking correct.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-10-2026b.html" class="entry" aria-label="Read: Three Bugs, a Disk, and an Idempotency Check That Actually Worked — August 10 2026">
+              <time class="entry-date" datetime="08-10-2026">Aug 10, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 26 — Three Bugs, a Disk, and an Idempotency Check That Actually Worked</h2>
+                <p class="entry-excerpt">
+                  Idempotency verification for all three flagged playbooks, surfacing four real bugs — a stream mismatch, a missing safety check, a paste that silently didn't take, and a corrupted fstab UUID that had quietly filled a root filesystem to 100%.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-10-2026.html" class="entry" aria-label="Read: Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable — August 10 2026">
+              <time class="entry-date" datetime="08-10-2026">Aug 10, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 25 — Closing Phase 2: A Database, a Decision, and a Comparison, All Made Testable</h2>
+                <p class="entry-excerpt">
+                  Real tests against an in-memory SQLite database, and two pure decision functions extracted specifically to make previously untestable logic testable — 18-'s Phase 2 fully closed, 66 tests total across both packages.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-09-2026d.html" class="entry" aria-label="Read: Two Columns, and the Breakpoint That Was Wrong the First Time — August 9 2026">
+              <time class="entry-date" datetime="08-09-2026">Aug 9, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 24 — Two Columns, and the Breakpoint That Was Wrong the First Time</h2>
+                <p class="entry-excerpt">
+                  Incident history moved into its own column, separate from category status. The first breakpoint choice looked right in one screenshot and wrong in the next — fixed with a tapering aside width and a wider container, confirmed at three real viewport tiers plus a command palette retest.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-09-2026c.html" class="entry" aria-label="Read: The Badge, the Fixture, and the Gap We Finally Closed — August 9 2026">
+              <time class="entry-date" datetime="08-09-2026">Aug 9, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 23 — The Badge, the Fixture, and the Gap We Finally Closed</h2>
+                <p class="entry-excerpt">
+                  The embeddable status badge, built and confirmed live against the public domain — then a real fixture-based parity test closing a gap that had sat open since 18- was first scoped, confirmed green locally and in CI.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-09-2026b.html" class="entry" aria-label="Read: GitHub Actions, and a Folder That Never Existed — August 9 2026">
+              <time class="entry-date" datetime="08-09-2026">Aug 9, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 22 — GitHub Actions, and a Folder That Never Existed</h2>
+                <p class="entry-excerpt">
+                  Real CI for both repos surfaced a structural mismatch every scope doc had wrong all session long, a deliberate call to keep the vault password out of CI, and a permanently-failing check fixed properly instead of left red forever.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-09-2026.html" class="entry" aria-label="Read: Security Hardening, and the Proxy That Trusted Everyone — August 9 2026">
+              <time class="entry-date" datetime="08-09-2026">Aug 9, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 21 — Security Hardening, and the Proxy That Trusted Everyone</h2>
+                <p class="entry-excerpt">
+                  A routine secrets audit found something bigger than a leaked credential — three unrestricted, fully-authenticated passthrough proxies. Fixed with real allowlists, nginx-level security headers, and rate limiting, all confirmed live against production.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-08-2026.html" class="entry" aria-label="Read: Manual Incident Authoring, and Two Routing Bugs Nginx Was Hiding — August 8 2026">
+              <time class="entry-date" datetime="08-08-2026">Aug 8, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 20 — Manual Incident Authoring, and Two Routing Bugs Nginx Was Hiding</h2>
+                <p class="entry-excerpt">
+                  The biggest remaining workflow gap, closed — Cloudflare Access for auth with zero application code, a real dedup bug caught before shipping, and two genuine nginx routing bugs found live in production.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-07-2026.html" class="entry" aria-label="Read: The First Real Tests, and a Folder Nobody Planned For — August 7 2026">
+              <time class="entry-date" datetime="08-07-2026">Aug 7, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 19 — The First Real Tests, and a Folder Nobody Planned For</h2>
+                <p class="entry-excerpt">
+                  23 tests targeting the three functions with real documented bug history, a react-refresh lint catch that led to a new lib/ directory, and a scope doc for testing the deployment playbooks next.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-06-2026.html" class="entry" aria-label="Read: A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate — August 6 2026">
+              <time class="entry-date" datetime="08-06-2026">Aug 6, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 18 — A Nudge Channel, and the Silence Cloudflare Wouldn't Tolerate</h2>
+                <p class="entry-excerpt">
+                  The hybrid SSE nudge channel closes out all three planned scope docs. A real Cloudflare idle-connection bug found in testing — fixed with a periodic keep-alive — confirmed live in both directions against Murloc's node_exporter.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          
+          <li>
+            <a href="journal/08-05-2026.html" class="entry" aria-label="Read: Auto-Drafted Incidents, and the Build Assumption That Wasted Twenty Minutes — August 5 2026">
+              <time class="entry-date" datetime="08-05-2026">Aug 5, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 17 — Auto-Drafted Incidents, and the Build Assumption That Wasted Twenty Minutes</h2>
+                <p class="entry-excerpt">
+                  A new drafted_incidents table reusing the already-writable snapshots.db, threshold detection re-derived from real data instead of a volatile counter, and a real end-to-end test against production. A stale doc assumption about the proxy's runtime cost real debugging time along the way.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-04-2026.html" class="entry" aria-label="Read: A Full Restyle, and the One Color That Didn't Pass — August 4 2026">
+              <time class="entry-date" datetime="08-04-2026">Aug 4, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 16 — A Full Restyle, and the One Color That Didn't Pass</h2>
+                <p class="entry-excerpt">
+                  Retheming every component to the portfolio's real palette and typography, and a real WCAG AA contrast failure caught in the accent color's light-mode value — fixed once at the token source instead of patched three separate places.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/08-02-2026.html" class="entry" aria-label="Read: A Command Palette, and the Same Bug Caught Twice — August 2 2026">
+              <time class="entry-date" datetime="08-02-2026">Aug 2, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 15 — A Command Palette, and the Same Bug Caught Twice</h2>
+                <p class="entry-excerpt">
+                  A hand-rolled Cmd+K command palette — reusing the existing detail view, a new category filter, and lifting IncidentList's local collapse state so it could be controlled from outside. Two real react-hooks/set-state-in-effect lint hits along the way, both the same mistake in two different components.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-31-2026.html" class="entry" aria-label="Read: Click Into a Node, See What It's Actually Doing — July 31 2026">
+              <time class="entry-date" datetime="07-31-2026">Jul 31, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 14 — Click Into a Node, See What It's Actually Doing</h2>
+                <p class="entry-excerpt">
+                  Response-time tracking and a per-service detail view, built together — a hand-rolled SVG line chart, a real Prometheus job-name bug caught by querying the source directly, and both data paths confirmed independently.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-30-2026.html" class="entry" aria-label="Read: A Toggle, and Three Contrast Bugs It Was Right to Catch — July 30 2026">
+              <time class="entry-date" datetime="07-30-2026">Jul 30, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 13 — A Toggle, and Three Contrast Bugs It Was Right to Catch</h2>
+                <p class="entry-excerpt">
+                  Building the color-token system and light/dark toggle — Tailwind v4's @theme directive, an anti-flash inline script, and two real contrast bugs a manual test caught that automated tooling never would have.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-29-2026.html" class="entry" aria-label="Read: Four Small Things, One Real Lint Chain — July 29 2026">
+              <time class="entry-date" datetime="07-29-2026">Jul 29, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 12 — Four Small Things, One Real Lint Chain</h2>
+                <p class="entry-excerpt">
+                  A dynamic tab title and favicon, skeleton loading states, a days-since-last-incident counter, documented public API routes, and a genuine three-layer ESLint purity chase.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-25-2026.html" class="entry" aria-label="Read: Giving Every Category Real History — July 25 2026">
+              <time class="entry-date" datetime="07-25-2026">Jul 25, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 11 — Giving Every Category Real History</h2>
+                <p class="entry-excerpt">
+                  Scoping and building full-category uptime history for Proxmox API and Zabbix — a proxy-side snapshot poller, a dead-code bug found along the way, and a checklist applied before deploying instead of after.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-24-2026.html" class="entry" aria-label="Read: Incident History, and Five Bugs on the Way There — July 24 2026">
+              <time class="entry-date" datetime="07-24-2026">Jul 24, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 10 — Incident History, and Five Bugs on the Way There</h2>
+                <p class="entry-excerpt">
+                  Building incident history end to end, and the trail of real bugs it took to get there — tooling, timezones, filenames, and a missing nginx route.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-18-2026.html" class="entry" aria-label="Read: Real History, and Two Loose Ends Tied Off — July 18 2026">
+              <time class="entry-date" datetime="07-18-2026">Jul 18, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 9 — Real History, and Two Loose Ends Tied Off</h2>
+                <p class="entry-excerpt">
+                  Wiring the 90-day uptime bars to real Prometheus data, fixing a cloudflared idempotency gap, rewriting the Ansible reference doc, and tracing a fleet-wide monitoring gap to a physical rack rebuild.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+
+          <li>
+            <a href="journal/07-16-2026.html" class="entry" aria-label="Read: Deployment day, Dockerfiles, a single origin, and a password that got away — July 16 2026">
+              <time class="entry-date" datetime="07-16-2026">Jul 16, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 8 — Deployment Day: Dockerfiles, a Single Origin, and a Password That Got Away</h2>
+                <p class="entry-excerpt">
+                  Missing Dockerfiles, a single-origin nginx reverse proxy
+                  to work around the tunnel's one-port limit, a
+                  crash-looping proxy container from a missing env var, a
+                  briefly-leaked password, and a silently missing
+                  Prometheus category caught only after going public.
+                  status.michaelrooney.dev is live.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/07-12-2026.html" class="entry" aria-label="Read: Deployment and Cloudflare Zero Trust — July 12 2026">
+              <time class="entry-date" datetime="07-12-2026">Jul 12, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 7 — Deployment and Cloudflare Zero Trust</h2>
+                <p class="entry-excerpt">
+                  Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug that broke Layer 2 entirely, three cloudflared token mistakes, and an OPNsense firewall rule that had source and destination reversed.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/06-27-2026.html" class="entry" aria-label="Read: Zabbix adapter and four live data sources — June 27 2026">
+              <time class="entry-date" datetime="06-27-2026">Jun 27, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 6 — Zabbix Adapter and Four Live Data Sources</h2>
+                <p class="entry-excerpt">
+                  Building the Zabbix client adapter, fixing a Zabbix 7.x API change
+                  that moved agent availability into the interfaces object, and wiring
+                  the fourth data source into the status page — 14 services, all
+                  operational.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="journal/06-17-2026.html" class="entry" aria-label="Read: Zabbix, debugging, and a deliberate deferral — June 17 2026">
+              <time class="entry-date" datetime="06-17-2026">Jun 17, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 5 — Zabbix, Debugging, and a Deliberate Deferral</h2>
+                <p class="entry-excerpt">
+                  Wiring up the Zabbix proxy route, fixing TypeScript strict mode 
+                  errors, finding the right LXC IP, and making a deliberate decision 
+                  to defer Zabbix host configuration in favor of deployment momentum.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="journal/06-11-2026.html" class="entry" aria-label="Read: Proxmox adapter and debugging — June 11 2026">
+              <time class="entry-date" datetime="06-11-2026">Jun 11, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 4 — Proxmox Adapter and Debugging</h2>
+                <p class="entry-excerpt">
+                  NaN metrics, a /nodes endpoint that doesn't return what you expect, 
+                  a missing Sys.Audit permission causing silent failure, and what the 
+                  right debugging move looks like when Promise.allSettled swallows errors.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/06-10-2026.html" class="entry" aria-label="Read: The proxy layer — June 10 2026">
+              <time class="entry-date" datetime="06-10-2026">Jun 10, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 3 — The Proxy Layer</h2>
+                <p class="entry-excerpt">
+                  Building an Express proxy to keep Proxmox API credentials off 
+                  the browser — what a backend-for-frontend is, why CORS exists, 
+                  how dotenv keeps secrets out of source code, and how 
+                  http-proxy-middleware handles the forwarding.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          
+          <li>
+            <a href="journal/06-09-2026.html" class="entry" aria-label="Read: Hook, components, and first live render — June 9 2026">
+              <time class="entry-date" datetime="06-09-2026">Jun 9, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 2 — Hook, Components, and First Live Render</h2>
+                <p class="entry-excerpt">
+                  TanStack Query hook wired up, all four UI components built, 
+                  and the first live render — six services pulling real data 
+                  from Prometheus and NUT. Debugging a label key mismatch in 
+                  the UPS adapter that was causing the overall status to read Unknown.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+
+          <li>
+            <a href="journal/06-08-2026.html" class="entry" aria-label="Read: Scaffold, dependencies, and data layer — June 8 2026">
+              <time class="entry-date" datetime="06-08-2026">Jun 8, 2026</time>
+              <div class="entry-body">
+                <h2 class="entry-title">Session 1 — Scaffold, Dependencies, and Data Layer</h2>
+                <p class="entry-excerpt">
+                  Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4 config, 
+                  TanStack Query provider, and all three services files — types, 
+                  Prometheus adapter, and the index facade. Data layer complete, 
+                  nothing in the browser yet.
+                </p>
+                <div class="entry-tags">
+                  <span class="tag tag-projects">Projects</span>
+                  <span class="tag tag-learning">Learning</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ol>
+        <button class="load-more-btn" type="button">Load More</button>
+      </section>
+
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../js/main.js" defer></script>
+  </body>
+</html>

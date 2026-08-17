@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 10 — Incident History, and Five Bugs on the Way There — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building the incident history feature end to end, and the trail of real bugs it took to get there — a Node 24 tooling incompatibility, a timezone bug in the uptime history, a wrong filename that broke both dev and prod, a case-duplicate file, and a missing nginx route that made the whole feature silently invisible in production."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 10 — Incident History, and Five Bugs on the Way There — Michael Rooney" />
+    <meta property="og:description" content="Building incident history end to end, and the trail of real bugs it took to get there — tooling, timezones, filenames, and a missing nginx route." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/07-24-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 10 — Incident History, and Five Bugs on the Way There — Michael Rooney" />
+    <meta name="twitter:description" content="Building incident history end to end, and the trail of real bugs it took to get there — tooling, timezones, filenames, and a missing nginx route." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/07-24-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 10 — Incident History, and Five Bugs on the Way There",
+      "description": "Building incident history end to end, and the trail of real bugs it took to get there — tooling, timezones, filenames, and a missing nginx route.",
+      "datePublished": "2026-07-24",
+      "url": "https://michaelrooney.dev/work/capstone/journal/07-24-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <ul>
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-24-2026">July 24, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 10 — Incident History, and Five Bugs on the Way There</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Session 9 scoped incident history and deliberately stopped
+            short of building it, on the theory that build time should go
+            to building rather than re-deciding the shape of it mid-session.
+            That paid off — the scope doc from last time turned into a
+            straight build this time, minus one genuine improvement over
+            the original plan and five real bugs along the way, several
+            of which had nothing to do with incidents at all.
+          </p>
+
+          <h2>What actually got built</h2>
+
+          <p>
+            Incident history landed roughly as scoped: a hand-edited
+            <code>incidents.json</code>, a new proxy route, a client
+            adapter, and two components. The one deliberate change from
+            the original plan — bind-mounting <code>incidents.json</code>
+            into the proxy container instead of baking it into the image.
+            Docker Compose doesn't need a restart to see a changed
+            bind-mounted file, and the proxy already reads the file fresh
+            on every request rather than caching it, so an edit takes
+            effect on the very next request — whether that edit happened
+            through a direct SSH edit on Dega or through the normal
+            git-pull-then-redeploy path. Nice property to get for free
+            from a decision made mostly for a different reason.
+          </p>
+
+          <h2>The tooling bug that had nothing to do with incidents</h2>
+
+          <p>
+            First real snag wasn't in the new code at all —
+            <code>npm run dev</code> in the proxy started crashing with an
+            error pointing at an internal <code>ts-node</code> placeholder
+            path, the kind of thing that looks like a mystery until you've
+            seen the pattern before: <code>ts-node</code> patches Node's
+            internal module resolution directly, and breaks every time
+            Node's internals shift under it. Running Node 24 with
+            TypeScript 6 and a `ts-node` version that predates both was
+            exactly the setup where that was going to happen. Swapped it
+            for <code>tsx</code> — same job, doesn't touch Node internals,
+            and picked up file-watching as a bonus that plain
+            <code>ts-node</code> never had.
+          </p>
+
+          <h2>A timezone bug hiding in a tooltip</h2>
+
+          <p>
+            The 90-day history code from Session 9 computed its Prometheus
+            query window as "90 days back from right now" — which sounds
+            fine until you notice that "right now" moves. The specific
+            instant Prometheus samples for "the bucket labeled July 16th"
+            drifted depending on what time of day the page happened to
+            load, so the same nominal day could genuinely show a different
+            status on different visits. Caught it because a tooltip read
+            <code>Jul 16 — Operational</code> for a day the entire fleet
+            was physically powered off for a rack rebuild. Fix was
+            anchoring both the query window and the day labels to real
+            UTC midnight instead of a moving "now" — stable regardless of
+            load time. Worth being honest about the remaining limit, not
+            hidden by the fix: Prometheus still only takes one sample a
+            day, so a partial-day outage can still land on an "up" moment
+            if that's what the midnight sample happens to catch.
+          </p>
+
+          <h2>A filename, twice</h2>
+
+          <p>
+            The updated proxy server code got saved as
+            <code>proxy-index.ts</code> instead of replacing
+            <code>index.ts</code> — an artifact of dodging a filename
+            collision on my end that turned into a real bug on the other
+            end. Locally, <code>tsx</code> couldn't find its entry file.
+            On Dega, <code>tsc</code> had nothing new to compile, the
+            proxy container failed to start, and the deploy playbook's
+            health check failed with a clean connection refused. Same
+            root cause, two different-looking symptoms in two different
+            environments — the kind of thing that's obvious once you
+            check the actual file on disk and easy to chase in circles
+            before that.
+          </p>
+
+          <p class="callout">
+            Somewhere in the same stretch, a second file —
+            <code>incidentbadge.tsx</code> — turned up sitting right next
+            to the correctly-cased <code>IncidentBadge.tsx</code>. Classic
+            Windows/git trap: NTFS doesn't care about case, git does, so
+            it's possible to end up with two tracked paths that look
+            identical in Explorer. TypeScript's strict casing check caught
+            it as a real error rather than silently picking one. Confirmed
+            it never made it into the actual pushed repo — worth deleting
+            locally regardless, since it kept confusing the language
+            server every time it reopened.
+          </p>
+
+          <h2>The one that actually mattered</h2>
+
+          <p>
+            Everything above got fixed, redeployed, and confirmed working
+            — and the incident section still didn't show up on the live
+            site. Worked perfectly in <code>npm run dev</code> the entire
+            time, which was the tell in hindsight: dev mode talks straight
+            to the proxy, production talks through nginx on the same
+            origin. Every other API route — Proxmox, Zabbix, Prometheus,
+            health — had an explicit nginx forward rule. <code>/incidents</code>
+            never got one, because I built the proxy route and the client
+            fetch without touching nginx at all. The request fell through
+            to nginx's SPA fallback, got HTML back instead of JSON, failed
+            to parse, and got silently swallowed by the same
+            <code>Promise.allSettled</code>-style failure isolation that's
+            protected this app from cascading failures three times before
+            — this time hiding my own bug instead of catching someone
+            else's.
+          </p>
+
+          <p>
+            One missing <code>location</code> block, styled to match the
+            existing ones, and a client rebuild later — confirmed through
+            the actual public domain this time, not the direct proxy port,
+            since that had been working the whole time and never proved
+            anything about whether the public path was wired up.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            Incident history is live — two real incidents on the page
+            right now, one of them a warts-and-all writeup of the
+            timezone bug this exact session found and fixed. Five bugs
+            deep to get here, none of them in the feature's own logic —
+            a dev tool aging out from under a new Node version, a math
+            mistake in day-boundary handling, a misnamed file, a
+            filesystem quirk, and a missing routing rule. Noted for later,
+            not built tonight: making the incident section collapsible
+            once there's enough history in it to be worth collapsing.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="07-18-2026.html">← Session 9</a>
+          <a href="07-25-2026.html">Session 11 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

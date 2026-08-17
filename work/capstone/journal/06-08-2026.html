@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 1 — Scaffold, Dependencies, and Data Layer — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4, TanStack Query provider, and the complete typed data layer talking to Prometheus and NUT before any UI exists."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 1 — Scaffold, Dependencies, and Data Layer — Michael Rooney" />
+    <meta property="og:description" content="Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4, TanStack Query provider, and the complete typed data layer talking to Prometheus and NUT before any UI exists." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/06-08-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 1 — Scaffold, Dependencies, and Data Layer — Michael Rooney" />
+    <meta name="twitter:description" content="Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4, TanStack Query provider, and the complete typed data layer talking to Prometheus and NUT before any UI exists." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/06-08-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 1 — Scaffold, Dependencies, and Data Layer",
+      "description": "Fresh repo, Vite + React + TypeScript scaffold, Tailwind v4, TanStack Query provider, and the complete typed data layer talking to Prometheus and NUT before any UI exists.",
+      "datePublished": "2026-06-08",
+      "url": "https://michaelrooney.dev/work/capstone/journal/06-08-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="06-08-2026">June 8, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 1 — Scaffold, Dependencies, and Data Layer</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The internship capstone project is a public-facing infrastructure 
+            status page — something like Atlassian Statuspage but built from 
+            scratch and self-hosted. The goal is a React SPA that polls live 
+            data from Prometheus and the homelab infrastructure, shows the 
+            current health of every node and service, and deploys publicly at 
+            status.michaelrooney.dev via Cloudflare Zero Trust tunnel. Today 
+            was session one: scaffold, dependencies, data layer, and nothing 
+            in the browser worth looking at yet.
+          </p>
+
+
+          <h2>Starting from scratch</h2>
+
+          <p>
+            I had a working version of this project from a previous session 
+            but made a deliberate choice to rebuild it from the beginning 
+            rather than pick up from existing files. The reasoning was 
+            straightforward — hand-keying the code produces a better journal, 
+            a more accurate hour log, and a project I can speak to completely 
+            in a conversation with my instructor or anyone else who asks about it.
+          </p>
+
+          <p>
+            The scaffold is Vite with React and TypeScript. 
+          </p>
+
+          <h2>The dependency choices</h2>
+
+          <p>
+            Three production dependencies beyond React itself: TanStack Query, 
+            Recharts, and Tailwind CSS.
+          </p>
+
+          <p>
+            TanStack Query deserves the most explanation because it replaces 
+            something you'd normally reach for instinctively. The standard 
+            React pattern for fetching data is a <code>useEffect</code> with 
+            a <code>fetch</code> call inside it, combined with 
+            <code>useState</code> for loading and error states. That works 
+            but it has real gaps — no automatic retries, no background 
+            refetching, no caching, and every component that needs data has 
+            to wire all of it up independently. For a status page that needs 
+            to poll Prometheus every 60 seconds and update automatically, 
+            building that reliably with <code>useEffect</code> and 
+            <code>setInterval</code> is genuinely fiddly. TanStack Query 
+            handles all of it in a single hook call with a 
+            <code>refetchInterval</code> option. Notably, TanStack Query 
+            is not part of the official React documentation — it lives at 
+            tanstack.com/query as a third-party library.
+          </p>
+
+          <p class="callout">TanStack Query is new to me. I need to spend some time understanding how it works and how it can help simplify the data fetching logic.
+            The main benefits I'm looking for are automatic retries, background refetching, caching, and simplified polling. I'll need to read the documentation and experiment with it to see how it fits into my project.
+            The README.md in this projects repo has a section on TanStack Query with some notes and resources for learning it.</p>
+          </p>
+
+          <p>
+            Tailwind v4 uses a Vite plugin instead of a config file. The 
+            entire CSS setup is one import line in <code>index.css</code>. 
+            That's a meaningful simplification over v3.
+          </p>
+
+          <h2>Wiring up TanStack Query</h2>
+
+          <p>
+            Before writing any fetching code, TanStack Query needs to be 
+            wired into the app at the top level. This means creating a 
+            <code>QueryClient</code> — a single object that holds the cache, 
+            configuration, and state of every query in the app — and wrapping 
+            the entire component tree in a <code>QueryClientProvider</code> 
+            that makes it available everywhere. This goes in 
+            <code>main.tsx</code>, one level above <code>App</code>. Any 
+            component below it can then use the <code>useQuery</code> hook 
+            without passing anything down through props.
+          </p>
+
+          <h2>Types before code</h2>
+
+          <p>
+            The first real file written was <code>src/services/types.ts</code> — 
+            the data contract for the entire project. Before any fetching 
+            logic exists, the shape of the data is defined. The key pieces:
+          </p>
+
+          <ul>
+            <li>
+              <code>Status</code> — a union type: 
+              <code>'operational' | 'degraded' | 'outage' | 'unknown'</code>. 
+              A union type restricts a value to one of a specific set of 
+              strings. Assigning anything else causes a TypeScript error at 
+              compile time.
+            </li>
+            <li>
+              <code>ServiceStatus</code> — the normalized shape every adapter 
+              must output. Every data source — Prometheus, NUT, Proxmox, 
+              Zabbix — speaks a different protocol and returns different 
+              structures. The adapter for each is responsible for translating 
+              its raw response into this single agreed shape. The UI only 
+              ever works with <code>ServiceStatus</code> objects.
+            </li>
+            <li>
+              <code>StatusPage</code> — the top-level shape: overall status, 
+              array of services, array of incidents, and a timestamp.
+            </li>
+          </ul>
+
+          <p>
+            Writing types first forces decisions about the data model before 
+            you're in the middle of writing logic. Once <code>ServiceStatus</code> 
+            is defined, every adapter knows exactly what it needs to produce. 
+            TypeScript will flag anything that doesn't match.
+          </p>
+
+          <h2>The Prometheus adapter</h2>
+
+          <p>
+            <code>src/services/prometheus.ts</code> contains two exported 
+            functions and one internal helper. The helper — 
+            <code>queryPrometheus</code> — centralizes the fetch, error 
+            handling, and JSON parsing so neither adapter has to repeat it. 
+            It is not exported because nothing outside this file needs it 
+            directly.
+          </p>
+
+          <p>
+            Both adapters fire multiple Prometheus queries concurrently using 
+            <code>Promise.all</code> rather than awaiting them sequentially. 
+            Three queries running simultaneously instead of one at a time — 
+            a meaningful difference on a polling interval.
+          </p>
+
+          <p>
+            The NUT adapter required understanding something non-obvious about 
+            how the nut_exporter formats UPS status. Rather than a single 
+            numeric value, it emits one row per possible flag — 
+            <code>OL</code>, <code>OB</code>, <code>LB</code>, and others — 
+            with a value of <code>1</code> if that flag is currently active. 
+            Reading the UPS status means collecting all active flags and 
+            deriving state from their combination. Two other quirks worth 
+            noting: <code>nut_battery_charge</code> returns a boolean in this 
+            exporter version, not a percentage — use the warning and low flags 
+            instead. And <code>nut_load</code> returns a ratio between 0 and 1, 
+            not a percentage — <code>0.15</code> means 15% load, multiply 
+            by 100 for display.
+          </p>
+
+          <h2>The services facade</h2>
+
+          <p>
+            <code>src/services/index.ts</code> ties the adapters together. 
+            Its main function — <code>fetchAllServices</code> — calls every 
+            adapter concurrently using <code>Promise.allSettled</code> rather 
+            than <code>Promise.all</code>. The distinction matters: 
+            <code>Promise.all</code> fails fast — one failing adapter takes 
+            down everything. <code>Promise.allSettled</code> waits for every 
+            promise regardless of outcome, then processes only the ones that 
+            succeeded. If the Proxmox adapter is down, the page still renders 
+            Prometheus and NUT data. Partial visibility is better than a 
+            blank page.
+          </p>
+
+          <p>
+            Overall status uses worst-status-wins logic — outage beats 
+            degraded beats operational. One node down means the overall 
+            banner shows outage even if everything else is healthy.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            The data layer is complete for the two working sources. Session 2 
+            picks up with <code>src/hooks/useServiceStatus.ts</code> — the 
+            TanStack Query hook that wraps <code>fetchAllServices</code> and 
+            handles polling, caching, and error states — then moves into the 
+            UI components. Nothing renders yet. That changes next session.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="index.html">← Back to Capstone Journal</a>
+          <a href="06-09-2026.html">Session 2 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

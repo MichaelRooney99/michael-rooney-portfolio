@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 23 — The Badge, the Fixture, and the Gap We Finally Closed — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building the embeddable status badge — extending the nudge loop to cache an overall status, a hand-rolled SVG route, the nginx forward rule — then closing a gap that had been sitting open since 18-Automated Test Coverage was first scoped: a real fixture-based parity test between the client's and proxy's duplicated status logic, confirmed green in CI. Finished with the badge embedded live on the portfolio site."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 23 — The Badge, the Fixture, and the Gap We Finally Closed — Michael Rooney" />
+    <meta property="og:description" content="The embeddable status badge, built and confirmed live — then a real fixture-based parity test closing a gap flagged since 18- was first scoped, confirmed green in CI." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-09-2026c.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 23 — The Badge, the Fixture, and the Gap We Finally Closed — Michael Rooney" />
+    <meta name="twitter:description" content="The embeddable status badge, built and confirmed live — then a real fixture-based parity test closing a real gap, confirmed green in CI." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-09-2026c.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 23 — The Badge, the Fixture, and the Gap We Finally Closed",
+      "description": "The embeddable status badge, built and confirmed live — then a real fixture-based parity test closing a gap flagged since 18- was first scoped, confirmed green in CI.",
+      "datePublished": "2026-08-09",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-09-2026c.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-09-2026">August 9, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 23 — The Badge, the Fixture, and the Gap We Finally Closed</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <code>20-Embeddable Status Badge</code>'s design had been
+            fully settled since 08-07 — extend <code>nudge.ts</code>'s
+            existing 20-second loop to also cache an overall status,
+            add a route that reads that cache, add the nginx forward
+            rule. Small enough to be one session, per the doc's own
+            recommendation, and it stayed that size — no surprises,
+            for once.
+          </p>
+
+          <h2>A cache, not a query</h2>
+
+          <p>
+            The whole point of the badge is that it never talks to
+            Prometheus, Proxmox, or Zabbix directly. Every 20 seconds,
+            <code>nudge.ts</code> was already fetching from all three to
+            check whether anything changed — the badge just needed that
+            same tick to also derive an overall status and hold onto it.
+            <code>getCachedOverallStatus()</code> reads that value
+            synchronously, no network call, no matter how many times the
+            badge gets requested. A badge embedded somewhere gets hit on
+            every pageview of whatever's embedding it — computing status
+            fresh per request would mean this project's own data sources
+            take traffic that has nothing to do with anyone actually
+            visiting the status page.
+          </p>
+
+          <p>
+            The SVG itself is hand-rolled, same precedent
+            <code>UptimeBars</code> and <code>MiniLineChart</code> already
+            set — a colored dot, a label, no image library. Colors match
+            <code>StatusBadge.tsx</code>'s existing mapping exactly, so
+            the badge never disagrees with the page it represents.
+          </p>
+
+          <h2>The checklist that's caught three bugs before this one</h2>
+
+          <p class="callout">
+            <code>/incidents</code> in July, <code>/history/</code> in
+            late July, both times the same shape of bug: works against
+            the proxy directly, silently broken against the real public
+            domain, because nginx never got a forward rule. Checked this
+            one against both — <code>curl</code> against
+            <code>10.10.20.55:3001/badge.svg</code> directly, then
+            <code>https://status.michaelrooney.dev/badge.svg</code>
+            through the actual public path. Both came back clean.
+            Cheap insurance against a bug this project has now made
+            three times.
+          </p>
+
+          <h2>The gap that had been sitting open since August 7th</h2>
+
+          <p>
+            <code>deriveOverallStatus</code> needed a second copy on the
+            proxy side — the badge can't call into client code — joining
+            the Zabbix status logic already duplicated three times across
+            this codebase. That duplication was flagged back when
+            <code>04-Services Index</code> first named the real
+            threshold for when it's worth fixing with actual shared
+            code versus just watching for drift: two Dockerfiles, two
+            separate build contexts, a decision that size isn't
+            justified by two small functions. The stated fix was a
+            fixture-based parity check — one shared JSON file of
+            input/output pairs, read independently by both suites. Real,
+            written down, never built. <code>18-</code>'s Phase 2 sat
+            scoped and open for exactly this reason.
+          </p>
+
+          <p>
+            Built it this session instead of letting it sit open a
+            second time. A <code>fixtures/parity/</code> folder at the
+            repo root — genuinely a sibling of both <code>client/</code>
+            and <code>proxy/</code>, not inside either — holding two JSON
+            files: expected outputs for every real combination of
+            statuses <code>deriveOverallStatus</code> should handle, and
+            the same for the Zabbix availability derivation. Both the
+            client's Vitest suite and a new one in <code>proxy/</code>
+            read the identical file and assert their own local copy still
+            produces the fixture's answer. If either copy ever drifts
+            from the other, a test fails immediately — the direct,
+            addressable fix for how the real <code>nut_exporter</code>
+            vs. <code>nut</code> job-name bug went unnoticed back in
+            July: not the duplication itself, but duplication with no
+            mechanism to notice drift.
+          </p>
+
+          <h2>Two real environment differences, caught by the editor before the terminal</h2>
+
+          <p>
+            The client-side test file hit two errors the proxy-side one
+            never did — <code>fs</code>/<code>path</code> unresolved, and
+            <code>__dirname</code> undefined. Not a mistake in the test
+            logic, a real difference in how the two packages build:
+            <code>proxy/</code> is CommonJS, where <code>__dirname</code>
+            and Node's types are just there. <code>client/</code> builds
+            as ESM through Vite, which has no <code>__dirname</code>
+            global at all, and its <code>tsconfig</code> has an explicit
+            <code>types</code> array that doesn't include
+            <code>node</code> by default. Fixed with
+            <code>@types/node</code> added to that array and
+            <code>import.meta.url</code> swapped in for
+            <code>__dirname</code> — the actual ESM equivalent, not a
+            workaround.
+          </p>
+
+          <p>
+            32 client tests, 14 proxy tests, all green locally, then
+            confirmed the way this project confirms things — a real push,
+            a real CI run, both jobs passing on the actual GitHub Actions
+            infrastructure built two sessions ago. The fixture-parity gap
+            is closed for real now, not just documented as closed.
+          </p>
+
+          <h2>One more thing, since it was already open</h2>
+
+          <p>
+            <code>20-</code>'s own doc left the portfolio switch-over as
+            a reasonable follow-up, not required scope. Turned out
+            there'd never been a static status representation on
+            <code>capstone-index.html</code> to begin with — nothing to
+            swap, just a plain <code>&lt;img&gt;</code> pointing at the
+            new badge route, wrapped in its own link rather than folded
+            into the existing "View Live Site" button's text. Left the
+            image without fixed <code>width</code>/<code>height</code>
+            attributes on purpose — the badge's own width isn't
+            constant, since <code>Operational</code> and
+            <code>Outage</code> aren't the same length, and forcing a
+            fixed box would stretch whichever one doesn't match. Turns
+            out that's a feature, not just a tolerance: a wider badge
+            reading something other than <code>Operational</code>
+            visibly shifts the layout next to it, a second signal on
+            top of the color change, free.
+          </p>
+
+        </div>
+
+<nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-09-2026b.html">← Session 22</a>
+          <a href="08-09-2026d.html">Session 24 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 7 — A VM, a VLAN, and a Backwards Firewall Rule — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug that broke Layer 2 entirely, three cloudflared token mistakes, and an OPNsense firewall rule that had source and destination reversed."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 7 — A VM, a VLAN, and a Backwards Firewall Rule — Michael Rooney" />
+    <meta property="og:description" content="Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug that broke Layer 2 entirely, three cloudflared token mistakes, and an OPNsense firewall rule that had source and destination reversed." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal07-12-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 7 — A VM, a VLAN, and a Backwards Firewall Rule — Michael Rooney" />
+    <meta name="twitter:description" content="Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug, three cloudflared token mistakes, and a reversed OPNsense firewall rule." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/07-12-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 7 — A VM, a VLAN, and a Backwards Firewall Rule",
+      "description": "Provisioning the capstone Docker VM on Dega — a cloud-init build instead of the netinst installer, a VLAN double-tagging bug that broke Layer 2 entirely, three cloudflared token mistakes, and an OPNsense firewall rule that had source and destination reversed.",
+      "datePublished": "2026-07-12",
+      "url": "https://michaelrooney.dev/work/capstone/journal/07-12-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="07-12-2026">July 12, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 7 — A VM, a VLAN, and a Backwards Firewall Rule</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Session 6 ended with the data layer complete and a clear next
+            step: deployment. Docker Compose to bundle the client and proxy,
+            a Cloudflare Zero Trust tunnel to make the status page public,
+            and Dega — the isolated VLAN 20 node built specifically for this
+            — as the actual home for it. Today was supposed to be "spin up
+            the VM, run the two playbooks, done." It took four separate
+            detours to get there, each one worth writing down.
+          </p>
+
+          <h2>Skipping Portainer</h2>
+
+          <p>
+            Before touching the VM, one open question from the 07-10 session
+            needed an answer: Portainer or not. The documented plan never
+            actually called for it — <code>capstone_deploy.yml</code> brings
+            the stack up directly via <code>docker compose up -d --build</code>
+            through Ansible, no GUI layer involved. Given the entire reason
+            Dega is a VM instead of the fleet's usual privileged LXC is
+            reduced exposure for something internet-facing, adding a second
+            web UI with its own auth surface on that same node would have
+            worked against the reasoning that justified the VM in the first
+            place. Skipped it — Ansible-driven Compose only, matching what
+            was already planned.
+          </p>
+
+          <h2>Netinst is gone, cloud-init is better anyway</h2>
+
+          <p>
+            First real snag: the Debian 12 netinst ISO referenced in the
+            original plan no longer exists on Debian's mirrors —
+            <code>404</code>. A directory listing against
+            <code>cdimage.debian.org</code> confirmed current stable had
+            moved to Debian 13 (Trixie), which — usefully — already matches
+            what's documented for Dega's own host OS. Not a departure, just
+            catching up to what's already true one layer down.
+          </p>
+
+          <p>
+            Rather than fight through the interactive installer a second
+            time, this was the right moment to switch to a cloud image +
+            cloud-init build instead — <code>qm importdisk</code> against a
+            pre-built <code>genericcloud-amd64.qcow2</code>, network and SSH
+            key trust configured via <code>--ipconfig0</code> and
+            <code>--sshkeys</code> rather than clicking through installer
+            menus. Meaningfully faster, and repeatable in under a minute if
+            Dega ever needs a second VM later.
+          </p>
+
+          <p>
+            Two small gotchas in that flow worth remembering next time:
+            <code>qm importdisk</code> attaches the new disk as
+            <code>unused0</code>, not <code>scsi0</code> directly — has to be
+            checked with <code>qm config 200 | grep unused</code> and
+            attached explicitly. And <code>--sshkeys</code> pointed at
+            <code>~/.ssh/ansible_ed25519.pub</code> failed outright, because
+            that keypair lives on the Ansible control node, not on Dega —
+            had to <code>scp</code> the public key over first.
+          </p>
+
+          <h2>The VM that couldn't reach its own gateway</h2>
+
+          <p>
+            Once the VM was up, SSH from the control node timed out. Console
+            access via <code>qm terminal</code> confirmed the VM had the
+            right IP and a correct route table — but
+            <code>ping 10.10.20.1</code> from inside the VM came back
+            <code>Destination Host Unreachable</code>, on the very first
+            hop.
+          </p>
+
+          <p class="callout">
+            A host that can't reach one hop away, despite a correct IP and
+            route table, is a Layer 2 problem — not a firewall problem.
+            Firewall rules produce clean timeouts on already-established L3
+            connectivity. An ARP-level failure one hop out points at the
+            bridge or VLAN config instead. Worth knowing the difference
+            before spending time in OPNsense chasing a symptom that lives
+            below it.
+          </p>
+
+          <p>
+            The cause: the original <code>qm create</code> included
+            <code>tag=20</code> on the virtual NIC. But Dega's physical
+            uplink lands on switch ports 5–8, which are VLAN 20
+            <strong>untagged access ports</strong> — the switch already
+            strips any tag before frames reach Dega at all. Adding
+            <code>tag=20</code> on top of a bridge that's already implicitly
+            untagged VLAN 20 produced double-tagged frames the switch
+            couldn't make sense of. Dropping the tag entirely —
+            <code>qm set 200 --net0 virtio,bridge=vmbr0</code>, no tag —
+            fixed it immediately.
+          </p>
+
+          <h2>Three wrong tokens</h2>
+
+          <p>
+            <code>capstone_provision.yml</code> failed twice on the
+            cloudflared install step before the token was actually right.
+            First attempt used the Tunnel ID from the dashboard's summary
+            view — a UUID, not the connector token — which produced
+            <code>illegal base64 data at input byte 8</code>. Worth noting:
+            byte 8 lines up exactly with the first hyphen in that UUID
+            string, which is a genuinely useful signature for "you copied
+            the wrong field" rather than "the token is corrupted."
+          </p>
+
+          <p>
+            Second attempt copied the full Windows PowerShell install
+            command wholesale — <code>cloudflared.exe service install
+            &lt;token&gt;</code> — instead of extracting just the token
+            itself. Same error class, different byte offset. The actual fix
+            was realizing the token value is identical across every OS tab
+            in the dashboard; only the surrounding install command syntax
+            changes. Pasting just the raw base64 blob, with nothing before
+            or after it, finally worked.
+          </p>
+
+          <h2>The rule that was pointed the wrong way</h2>
+
+          <p>
+            With cloudflared running, the playbook's three
+            <code>wait_for</code> checks — confirming outbound reach to
+            Ankhh, Prometheus, and Zabbix — all hung for the full timeout.
+            Not a fast reject. A hang.
+          </p>
+
+          <p>
+            First ruled out the obvious suspect: <code>pve-firewall
+            status</code> on Ankhh came back <code>disabled/running</code>,
+            so the Proxmox host firewall wasn't the cause. The real answer
+            was sitting in the OPNsense rule list the whole time — all three
+            pinhole rules on the <code>edge_Lab</code> interface had source
+            and destination reversed. They were written as "Ankhh /
+            Prometheus / Zabbix → capstone VM," when the actual traffic that
+            needs to flow is the reverse: the capstone proxy is the one
+            initiating these connections on every poll cycle, not the other
+            way around.
+          </p>
+
+          <p class="callout">
+            A firewall rule written backwards doesn't fail loudly — it just
+            never matches. The packet falls through to whatever the next
+            rule is, which in this case was the VLAN20 block rule. That's
+            exactly why this looked identical to a missing rule rather than
+            a wrong one, right up until actually reading the source and
+            destination columns side by side.
+          </p>
+
+          <p>
+            There was also a second, compensating rule sitting on the
+            <strong>LAN</strong> interface page — source Ankhh, destination
+            the capstone VM, port 8006 — that looked like an earlier
+            attempt to work around this same bug from the return-traffic
+            side. Not needed once the real rule is fixed the right way;
+            OPNsense's stateful firewall already permits return traffic for
+            anything it allowed outbound. Flagged for cleanup rather than
+            fixed in the moment, since Dega was mid-debugging and this
+            wasn't blocking anything.
+          </p>
+
+          <p>
+            One more wrinkle before the fix actually took: the first attempt
+            at correcting the rule direction still failed identically,
+            because the edited rules had never actually been applied — a
+            banner at the top of the OPNsense rules page warns about exactly
+            this, staged changes that don't take effect until "Apply
+            changes" is explicitly clicked, and it's an easy thing to miss
+            mid-troubleshooting when the instinct is to immediately retest.
+          </p>
+
+          <h2>What's still a known gap</h2>
+
+          <p>
+            <code>capstone_provision.yml</code>'s cloudflared install task
+            checks <code>creates: /etc/cloudflared/config.yml</code> to
+            decide whether to skip re-installing — but token-based installs
+            never write to that path at all, writing the config into the
+            systemd unit file instead. Every full re-run after the first
+            successful one will try to reinstall a service that's already
+            there and fail loudly. Same category of issue as the Zabbix
+            repo idempotency gap from a few weeks back — documented, not
+            fixed today, not blocking anything since provisioning itself is
+            confirmed working via <code>--tags verify</code>.
+          </p>
+
+          <h2>Where things stand</h2>
+
+          <p>
+            The capstone Docker VM is live on Dega at
+            <code>10.10.20.55</code>, running Debian 13 via cloud-init, with
+            correct untagged VLAN 20 networking. Docker and cloudflared are
+            both installed and running. All three firewall pinholes —
+            Ankhh, Prometheus, Zabbix — are corrected and confirmed
+            reachable. <code>capstone_provision.yml</code> passes clean.
+          </p>
+
+          <h2>What's next</h2>
+
+          <p>
+            <code>capstone_deploy.yml</code> — clone the repo, write the
+            proxy's <code>.env</code> from Vault, bring the Compose stack
+            up. Then the public hostname route in the Cloudflare Zero Trust
+            dashboard, and confirming
+            <code>status.michaelrooney.dev</code> actually resolves end to
+            end through everything fixed today.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="06-27-2026.html">← Session 6</a>
+          <a href="07-16-2026.html">Session 8 →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
