@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixing It Myself, Then Measuring Against a Real Part — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A hands-on session: fixing a stray face in the corner piece directly in Blender instead of waiting on another generated file, correcting the rack's width against a real 10-inch shelf bracket, and starting to learn booleans by doing them myself."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Fixing It Myself, Then Measuring Against a Real Part — Michael Rooney" />
+    <meta property="og:description" content="Fixing a stray face by hand in Blender, correcting the rack's width against a real measured shelf bracket, and starting to learn booleans hands-on instead of just watching them happen." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/08-17-2026.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Fixing It Myself, Then Measuring Against a Real Part — Michael Rooney" />
+    <meta name="twitter:description" content="Fixing a stray face by hand in Blender, correcting the rack's width against a real measured shelf bracket, and starting to learn booleans hands-on instead of just watching them happen." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/08-17-2026.html" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Fixing It Myself, Then Measuring Against a Real Part",
+      "description": "Fixing a stray face by hand in Blender, correcting the rack's width against a real measured shelf bracket, and starting to learn booleans hands-on instead of just watching them happen.",
+      "datePublished": "2026-08-17",
+      "url": "https://michaelrooney.dev/work/leftfootlabs/journal/08-17-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-17-2026">August 17, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Fixing It Myself, Then Measuring Against a Real Part</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A stray leftover face had been sitting in the corner piece's
+            cavity for a couple of sessions now — a small boolean
+            artifact that never got fully root-caused. Rather than wait
+            on another round of regenerated files, I opened the part
+            directly in Blender and went after it myself: <code>Select →
+            All by Trait → Non-Manifold</code> to find every piece of
+            geometry that didn't properly belong to a closed solid, then
+            deleted and cleaned it up by hand. Checked after — zero
+            non-manifold edges, watertight, correct bounding box. That
+            fixed version is now the one actually used going forward,
+            not the script-generated one that still has the bug
+            somewhere in it I haven't found.
+          </p>
+
+          <p>
+            Worth being honest about the order of operations there:
+            sometimes the fastest fix isn't finding the root cause in
+            the generation script — it's fixing the actual output
+            directly and moving on. The parametric model is still worth
+            debugging eventually, but it stopped being the thing
+            blocking progress today.
+          </p>
+
+          <h2>The rack was too narrow, and now there's a real number for it</h2>
+          <p>
+            The interior width had been a placeholder since the very
+            first version of this design — a proportional guess, never
+            checked against anything real. Found the gap the hard way:
+            a universal 10-inch rack shelf bracket, measured at
+            208.233mm rail-to-rail, didn't fit between the front and
+            back beams. The old interior clearance was only 180mm.
+            Widened the rack to give 214mm of clearance instead —
+            comfortable margin over the real part, not just barely
+            enough. Every downstream measurement (beam length, panel
+            size) follows from that one number automatically now that
+            it's corrected.
+          </p>
+
+          <h2>Starting to drive the modeling myself</h2>
+          <p>
+            Also spent part of today just learning Blender directly
+            — modifying the top
+            corner by hand, adding bolt holes with a cylinder and a
+            Boolean Difference modifier, and hitting the kind of small
+            snags that turn into real lessons: accidentally merging two
+            objects into one by adding geometry while still in Edit
+            Mode, then learning to pull them back apart with
+            <code>L</code> to select linked geometry and <code>P</code>
+            to separate it into its own object. Small shortcut, but the
+            kind that immediately becomes useful for a dozen other
+            things once it clicks.
+          </p>
+
+          <p>
+            The two biggest technical lessons from cutting holes by hand
+            so far: a cylinder's axis has to point straight into the
+            surface you're drilling, not lie parallel to it, or the
+            "hole" comes out as a slot instead of a circle — and a
+            through-hole needs to poke out past both surfaces slightly,
+            not land exactly on them, or the cut doesn't open cleanly.
+            Both of those cost real time in the parametric model before
+            they became obvious enough to state as rules.
+          </p>
+
+          <p>
+            For anyone starting from zero with Blender, the two
+            resources that keep coming up as the right place to
+            start: Blender Guru's
+            <a href="https://www.blenderguru.com/posts/blender-donut-v5-tutorial"   class="entry-excerpt" target="_blank" rel="noopener noreferrer">donut tutorial</a>
+            for the interface and fundamentals, and the
+            <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/generate/booleans.html"  class="entry-excerpt" target="_blank" rel="noopener noreferrer">official manual's Boolean modifier page</a>
+            once you're past basics and doing the kind of hard-surface,
+            mechanical-part work this project actually needs.
+          </p>
+
+          <p>
+            Related: the
+            <a href="08-16-2026.html"  class="entry-excerpt">first test print</a> is what
+            surfaced most of what's getting fixed this week — bridging,
+            a missing socket, bore holes that weren't actually round.
+            None of today's fixes would have made sense without that
+            print coming back wrong first.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-16-2026.html">← What the First Test Print Actually Taught Me</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

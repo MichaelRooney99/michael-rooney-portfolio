@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Sun, 16 Aug 2026 19:21:02 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 17 Aug 2026 16:59:54 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fixing It Myself, Then Measuring Against a Real Part</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-17-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/08-17-2026.html</guid>
+      <pubDate>Mon, 17 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Fixing a stray face by hand in Blender, correcting the rack's width against a real measured shelf bracket, and starting to learn booleans hands-on instead of just watching them happen.]]></description>
+    </item>
     <item>
       <title>What the First Test Print Actually Taught Me</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-16-2026.html</link>
@@ -43,7 +50,7 @@
       <description><![CDATA[A backward code-review pass, starting from a real live outage and tracing it back through the codebase to a single Zabbix poll — plus a real corrected misconception about how live updates actually reach the detail modal.]]></description>
     </item>
     <item>
-      <title>Redesigning the Rack in the Tool I Actually Use</title>
+      <title>Redesigning the Rack</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html</link>
       <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/08-15-2026.html</guid>
       <pubDate>Sat, 15 Aug 2026 00:00:00 GMT</pubDate>
