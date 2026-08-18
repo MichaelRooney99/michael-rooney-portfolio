@@ -26,6 +26,21 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://michaelrooney.dev/journal/08-18-2026b.html</loc>
+    <lastmod>2026-08-18</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/08-18-2026.html</loc>
+    <lastmod>2026-08-18</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/work/capstone/journal/08-18-2026.html</loc>
+    <lastmod>2026-08-18</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://michaelrooney.dev/journal/08-17-2026.html</loc>
     <lastmod>2026-08-17</lastmod>
     <priority>0.6</priority>
@@ -47,7 +62,7 @@
   </url>
   <url>
     <loc>https://michaelrooney.dev/journal/08-15-2026c.html</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -242,7 +257,7 @@
   </url>
   <url>
     <loc>https://michaelrooney.dev/journal/08-02-2026.html</loc>
-    <lastmod>2026-08-09</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <priority>0.6</priority>
   </url>
   <url>

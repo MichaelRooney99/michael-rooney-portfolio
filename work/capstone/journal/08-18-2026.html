@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 36 — Finishing the Proxy Review: Rollups, Thresholds, and What a "Signature" Actually Is — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Closing out the proxy side of the test-files-first review — db.test.ts's worst-of-day rollup, poller.test.ts's incident decision matrix, and nudge.test.ts's fixture-driven parity tests, built specifically to catch the kind of silent client/proxy drift that already caused a real bug once."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 36 — Finishing the Proxy Review: Rollups, Thresholds, and What a &quot;Signature&quot; Actually Is — Michael Rooney" />
+    <meta property="og:description" content="Closing out the proxy side of the test-files-first review — three test files walked in full, and the fixture-parity design closing a gap that once caused a real bug." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-18-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 36 — Finishing the Proxy Review: Rollups, Thresholds, and What a &quot;Signature&quot; Actually Is — Michael Rooney" />
+    <meta name="twitter:description" content="Closing out the proxy side of the test-files-first review, and the fixture-parity design closing a gap that once caused a real bug." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-18-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 36 — Finishing the Proxy Review: Rollups, Thresholds, and What a \"Signature\" Actually Is",
+      "description": "Closing out the proxy side of the test-files-first review — db.test.ts's worst-of-day rollup, poller.test.ts's incident decision matrix, and nudge.test.ts's fixture-driven parity tests.",
+      "datePublished": "2026-08-18",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-18-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-18-2026">August 18, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 36 — Finishing the Proxy Review: Rollups, Thresholds, and What a "Signature" Actually Is</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Same test-files-first technique from
+            <a href="08-17-2026.html">Session 35</a> — read a test's
+            name, form a real hypothesis before looking at the code,
+            then get corrected against the actual test and source when
+            the guess doesn't quite land. This session closed out the
+            last three proxy files: <code>db.test.ts</code>,
+            <code>poller.test.ts</code>, and <code>nudge.test.ts</code>.
+            All three were built back in the
+            <a href="08-10-2026.html">08-10 session</a> that closed out
+            <code>18-Automated Test Coverage</code> Phase 2 — this was
+            the first time actually walking through what they check and
+            why, one test at a time.
+          </p>
+
+          <h2>The recurring mistake: naming the helper instead of the behavior</h2>
+
+          <p>
+            The clearest pattern across <code>db.test.ts</code>'s nine
+            tests wasn't any one test — it was a description habit that
+            needed correcting twice early on. <code>uniqueServiceId()</code>
+            generates one id per test so fixtures can't collide with each
+            other in the shared in-memory database; it's scaffolding, not
+            behavior. Describing it as "scanning each service" or
+            "checking each id" was naming the test's plumbing instead of
+            what's actually inside the <code>expect(...)</code>. Once that
+            distinction landed, the rest of the file read cleanly:
+            <code>unknown</code> readings are deliberately excluded from
+            the worst-of-day severity ranking rather than treated as a
+            low-severity status, a genuinely recorded <code>unknown</code>
+            reading can't mask a real outage recorded the same day, and
+            the actual "worst of day, not most recent of day" rollup gets
+            proven by deliberately sandwiching the bad reading in the
+            middle of three snapshots — ruling out a lazy "last reading
+            wins" implementation that would pass by accident if the bad
+            reading happened to be listed last.
+          </p>
+
+          <h2>A decision matrix, not a handful of spot checks</h2>
+
+          <p>
+            <code>poller.test.ts</code>'s eight tests cover
+            <code>decideIncidentAction</code>, the pure function extracted
+            from the auto-incident threshold check specifically so it's
+            testable without a database. The two tests that actually
+            matter most aren't the obvious "outage drafts an incident"
+            case — they're the two guarding against the wrong kind of
+            eagerness in both directions: a service flapping between
+            outage and operational readings shouldn't draft a new
+            incident on a single bad tick, and it shouldn't get
+            auto-resolved early just because its most recent reading
+            happened to look fine. The eighth test — drafting on more
+            than the threshold count of readings — doesn't reflect
+            anything the real poller currently produces (it always asks
+            for exactly two rows), but it exists to catch a subtly wrong
+            implementation that checked specific array indices instead of
+            a genuine <code>.every()</code> across all readings.
+          </p>
+
+          <h2>What a "signature" actually is, and why fixtures instead of hand-written tests</h2>
+
+          <p>
+            <code>nudge.ts</code>'s <code>compareSignature</code> turned
+            into a real vocabulary question worth pausing on: a signature
+            isn't anything exotic, just a sorted, normalized string
+            snapshot of what a check currently sees — built specifically
+            so two ticks can be compared with plain string equality
+            instead of a real deep diff. Three hand-written tests cover
+            it: a <code>null</code> baseline reads as <code>'initial'</code>,
+            not <code>'changed'</code> — the case that matters most in
+            production, since a proxy restart wipes the in-memory
+            signature and a naive comparison would broadcast a false
+            "something changed" nudge to every connected client the
+            moment the proxy comes back up.
+          </p>
+
+          <p>
+            The other fourteen tests in this file aren't hand-written at
+            all — they're generated by looping over two shared JSON
+            fixture files, one entry per test. That structure isn't
+            arbitrary. Both the client's and the proxy's own copies of
+            <code>deriveOverallStatus</code> and <code>deriveZabbixStatus</code>
+            read the exact same fixtures independently. If either copy's
+            logic ever drifts from the other, one side's suite fails
+            immediately instead of the mismatch shipping silently — which
+            is exactly what happened once already, when a mismatched
+            metric job name between the two copies went unnoticed for a
+            while. Full write-up of that reasoning is in the
+            <a href="https://michaelrooney.dev/journal/08-18-2026b.html">general journal</a>,
+            since it's more about the design pattern than anything
+            specific to this codebase.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            All three proxy test files are now fully walked, closing out
+            the proxy half of the test-files-first review that started
+            with <code>uptime.test.ts</code> and <code>services/index.test.ts</code>
+            back in Session 35. Next up: the client side —
+            <code>useCommandPalette.test.ts</code>, then
+            <code>CommandPalette.test.tsx</code>, then
+            <code>ServiceDetailModal.test.tsx</code>.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-17-2026.html">← Session 35</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

@@ -5,8 +5,29 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 17 Aug 2026 20:35:46 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 18 Aug 2026 18:39:49 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fourteen Tests I Didn't Write, and Why That's the Point</title>
+      <link>https://michaelrooney.dev/journal/08-18-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-18-2026b.html</guid>
+      <pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Most of a test file's tests weren't hand-written at all — generated from a shared data file two separate codebases both read independently, closing the exact gap that let a real bug slip through once before.]]></description>
+    </item>
+    <item>
+      <title>The Isolated Node That Had No Backup</title>
+      <link>https://michaelrooney.dev/journal/08-18-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-18-2026.html</guid>
+      <pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A firewall isolation boundary built on purpose turned out to be quietly hiding a real gap — the capstone's own host had no backup coverage at all, closed before a planned hardware swap.]]></description>
+    </item>
+    <item>
+      <title>Session 36 — Finishing the Proxy Review: Rollups, Thresholds, and What a "Signature" Actually Is</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-18-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-18-2026.html</guid>
+      <pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Closing out the proxy side of the test-files-first review — three test files walked in full, and the fixture-parity design closing a gap that once caused a real bug.]]></description>
+    </item>
     <item>
       <title>Let the Tests Tell You What the Code Promises</title>
       <link>https://michaelrooney.dev/journal/08-17-2026.html</link>

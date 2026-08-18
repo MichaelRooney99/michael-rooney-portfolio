@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Isolated Node That Had No Backup — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A firewall isolation boundary built on purpose turned out to be quietly hiding a real gap — the capstone's own host had no backup coverage at all. Closing it before a planned hardware swap, and a real lesson about what a job's own success message does and doesn't prove."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Isolated Node That Had No Backup — Michael Rooney" />
+    <meta property="og:description" content="A firewall isolation boundary built on purpose turned out to be quietly hiding a real gap — the capstone's own host had no backup coverage at all, closed before a planned hardware swap." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-18-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Isolated Node That Had No Backup — Michael Rooney" />
+    <meta name="twitter:description" content="A firewall isolation boundary built on purpose turned out to be quietly hiding a real gap — closed before a planned hardware swap." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-18-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Isolated Node That Had No Backup",
+      "description": "A firewall isolation boundary built on purpose turned out to be quietly hiding a real gap — the capstone's own host had no backup coverage at all, closed before a planned hardware swap.",
+      "datePublished": "2026-08-18",
+      "url": "https://michaelrooney.dev/journal/08-18-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-18-2026">August 18, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Isolated Node That Had No Backup</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Dega — the sixth Proxmox node, standalone, sitting on its own
+            isolated VLAN specifically so a lab-tier host can't reach
+            anything on the main network it shouldn't — hosts the
+            capstone status page. It's genuinely the most important
+            single machine in the whole homelab right now, given what's
+            riding on it. It also had zero backup coverage. Not
+            degraded, not stale — none at all, and had never had any,
+            since the day it was <a href="07-10-2026.html" class="prose-link" >stood up on
+            VLAN 20</a>.
+          </p>
+
+          <h2>How isolation quietly became a blind spot</h2>
+
+          <p>
+            The isolation itself isn't the mistake — it's working exactly
+            as designed. Dega can't reach the main LAN, and the main LAN
+            can't reach Dega, except through a small number of
+            deliberately scoped exceptions already carved out for the
+            capstone app's own outbound calls. Proxmox Backup Server
+            just never got one of those exceptions. It wasn't a decision
+            anyone made on purpose — it was a gap that never surfaced,
+            because nothing about daily operation ever asked the
+            question "does this specific node have a real backup." The
+            other five nodes all route through PBS's staged nightly job
+            without anyone thinking about it. Dega quietly never joined
+            that list.
+          </p>
+
+          <p class="callout">
+            An isolation boundary built for a good reason doesn't
+            automatically come with a checklist of everything that now
+            has to be re-threaded through it on purpose. Backup coverage
+            was one of those threads, and it stayed missing for months
+            simply because nothing forced the question.
+          </p>
+
+          <p>
+            What actually surfaced it: planning an unrelated hardware
+            upgrade — swapping Dega's NVMe for more capacity — and asking
+            what the safe recovery path looked like if something went
+            wrong mid-swap. The honest answer was "there isn't one."
+            That's not a great place to discover a gap from, but it's a
+            far better one than discovering it after a bad clone.
+          </p>
+
+          <h2>A firewall rule the isolation deserved, not a subnet-wide hole</h2>
+
+          <p>
+            Fixing it meant one narrow OPNsense rule — Dega's specific
+            IP, to PBS's specific IP, on PBS's one real port, nothing
+            broader. The isolation boundary already has a handful of
+            rules shaped exactly this way for the capstone app itself,
+            so this was matching an existing pattern rather than
+            inventing a new one. The alternative — opening the whole
+            VLAN to the whole main subnet just to make one backup job
+            work — would have quietly undone most of the reason the
+            isolation exists in the first place.
+          </p>
+
+          <p>
+            The actual PBS registration hit one real snag worth naming:
+            the first attempt used the root account's password and
+            failed with a vague "error fetching datastores" message from
+            Proxmox's own UI. Tailing PBS's own service log during a
+            retry — rather than guessing from the dialog box — showed
+            the real rejection reason immediately. The fix was switching
+            to an existing API token instead of the root password. Querying the actual
+            source instead of trusting a relayed error message answered
+            in under a minute what guessing could have burned twenty on.
+          </p>
+
+          <h2>Verifying from the right side</h2>
+
+          <p>
+            A backup job reporting success in its own UI isn't proof
+            anything backup-shaped actually exists — it's proof the job
+            <em>ran</em>. The real confirmation came from checking PBS's
+            own datastore view directly and seeing a genuine new backup
+            group appear for the capstone VM. Trusting a job's own
+            "success" message without checking the destination is the
+            same shape of mistake as trusting a
+            <a href="https://michaelrooney.dev/work/capstone/journal/08-10-2026c.html" class="prose-link" >smoke test that only confirms a process ran</a>,
+            not that it did anything real — a pattern this project keeps
+            running into in different disguises.
+          </p>
+
+          <h2>Where this leaves the hardware upgrade</h2>
+
+          <p>
+            The NVMe swap that prompted all of this hasn't happened yet
+            — it was deliberately sequenced <em>after</em> backup
+            coverage existed, not before. Getting the precondition right
+            first, even though it delayed the thing that was actually
+            planned, is the same discipline as everything else in this
+            project: confirm the safety net exists before doing the
+            thing that might need it, not after.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-17-2026.html">← Previous: 08-17-2026 Entry</a>
+          <a href="08-18-2026b.html">Next: 08-18-2026b Entry →</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+    
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

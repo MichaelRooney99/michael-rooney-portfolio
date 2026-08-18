@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fourteen Tests I Didn't Write, and Why That's the Point — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Most of a test file's tests weren't hand-written at all — generated from a shared data file two separate codebases both read independently. Why that structure exists, revisited during a code review months after it was built."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Fourteen Tests I Didn't Write, and Why That's the Point — Michael Rooney" />
+    <meta property="og:description" content="Most of a test file's tests weren't hand-written at all — generated from a shared data file two separate codebases both read independently, closing the exact gap that let a real bug slip through once before." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-18-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Fourteen Tests I Didn't Write, and Why That's the Point — Michael Rooney" />
+    <meta name="twitter:description" content="Most of a test file's tests were generated from a shared data file two separate codebases both read independently — closing a gap that once caused a real bug." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-18-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Fourteen Tests I Didn't Write, and Why That's the Point",
+      "description": "Most of a test file's tests weren't hand-written at all — generated from a shared data file two separate codebases both read independently, closing the exact gap that let a real bug slip through once before.",
+      "datePublished": "2026-08-18",
+      "url": "https://michaelrooney.dev/journal/08-18-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-18-2026">August 18, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Fourteen Tests I Didn't Write, and Why That's the Point</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Doing a test-files-first code review means reading a test's
+            name, guessing what it checks, then confirming against the
+            real code — the same technique from
+            <a href="https://michaelrooney.dev/journal/08-17-2026.html" class="prose-link" >the previous entry on this method</a>.
+            That technique quietly assumes every test has a name to read
+            in the first place. Most of <code>nudge.test.ts</code> — 14
+            of its 17 tests — don't. They're generated, one per entry, by
+            looping over a shared JSON file. No hand-written
+            <code>it(...)</code> block to hypothesize about at all.
+            Working out why that's true turned into a better lesson than
+            any individual test in the file.
+          </p>
+
+          <h2>The thing being tested twice, on purpose</h2>
+
+          <p>
+            The proxy and the browser client both need to answer the
+            same small question — given a handful of service statuses,
+            what's the single overall status to show — and they can't
+            share code to do it. The browser can't import from an
+            Express server's bundle. So the same tiny piece of logic
+            exists twice, by necessity, in two different files, in two
+            different packages that never talk to each other at build
+            time.
+          </p>
+
+          <p class="callout">
+            Two copies of the same idea, with no mechanism to notice if
+            they ever stop agreeing, is exactly the situation that
+            already caused a real bug in this project —
+            <a href="https://michaelrooney.dev/journal/08-09-2026.html" class="prose-link" >documented back in early August</a>,
+            where one copy checked for a Prometheus metric labeled
+            <code>nut_exporter</code> and the other checked for
+            <code>nut</code>. Both looked correct in isolation. Neither
+            test suite caught it, because neither suite knew the other
+            copy existed.
+          </p>
+
+          <h2>What actually closes that gap</h2>
+
+          <p>
+            Not more hand-written tests — more hand-written tests would
+            just be two more places for someone to update one copy and
+            forget the other, the exact failure mode that caused the bug
+            in the first place. The real fix is a single JSON file of
+            input/output pairs, sitting outside both packages so neither
+            one owns it, that both test suites read independently and
+            check their own local logic against. One definition of "the
+            correct answer" for a given input, referenced by two
+            completely separate copies of the code that's supposed to
+            produce it. If either copy ever drifts, its own suite fails
+            immediately — not eventually, not "whenever someone happens
+            to compare the two by hand."
+          </p>
+
+          <h2>Revisiting it months after building it</h2>
+
+          <p>
+            The genuinely interesting part of coming back to this during
+            a review, rather than while building it, was realizing how
+            little the individual generated test cases matter compared
+            to the reason the whole structure exists. Reading through
+            fourteen auto-generated test names one at a time would have
+            been a strange use of time — the value isn't in any single
+            case, it's in the fact that the same fixture file backs both
+            copies at once. That's a different kind of thing to
+            understand than "here's what this specific test checks," and
+            it took actually sitting with the "why fixtures, why not just
+            write more tests by hand" question directly to see it
+            clearly.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-18-2026.html">← Previous: 08-18-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+    
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
