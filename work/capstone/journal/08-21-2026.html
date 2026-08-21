@@ -78,11 +78,13 @@
         <div class="prose">
 
           <p>
-            <a href="08-18-2026.html" class="prose-link">30-Incident Retirement</a>
-            went from a fully-decided scope doc to real code this
-            session — two new functions in <code>db.ts</code>, a new
-            route, a new admin UI action, and the whole thing tested
-            live on production the same day it shipped.
+            Incidents on this status page have always been able to
+            pile up forever — nothing ever removed one, whether it
+            genuinely needed to stay visible or not. This session
+            closed that gap: a real delete action for the admin page,
+            plus automatic cleanup that ages old resolved incidents out
+            on its own after 90 days, matching the same 90-day window
+            the uptime history already uses.
           </p>
 
           <h2>What actually got built</h2>
