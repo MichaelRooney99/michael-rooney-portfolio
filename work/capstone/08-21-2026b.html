@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 39 — One Promotion Button, and the Gap It Opened the Same Day | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building a real promotion action for old file-backed incidents, and closing a real double-promotion gap it opened the same day, rather than leaving it as a known issue for later."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 39 — One Promotion Button, and the Gap It Opened the Same Day — Michael Rooney" />
+    <meta property="og:description" content="Building a promotion action for old incidents, a real proactive-signal gap found along the way, and closing a double-promotion risk it opened the same day." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-21-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 39 — One Promotion Button, and the Gap It Opened the Same Day — Michael Rooney" />
+    <meta name="twitter:description" content="Building a promotion action for old incidents, and closing a real double-promotion risk it opened the same day." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-21-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 39 — One Promotion Button, and the Gap It Opened the Same Day",
+      "description": "Building a real promotion action for old file-backed incidents, and closing a real double-promotion gap it opened the same day.",
+      "datePublished": "2026-08-21",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-21-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-21-2026">August 21, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 39 — One Promotion Button, and the Gap It Opened the Same Day</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The oldest incidents on this status page — the ones seeded
+            from a hand-edited file rather than created through the
+            admin page — have never been editable through the UI at
+            all. This session gave them a real way in: a promotion
+            action that copies one into the database, fully editable
+            from that point forward, without ever touching the
+            original file directly.
+          </p>
+
+          <h2>A gap that only showed up while actually building the button</h2>
+
+          <p>
+            The plan going in was straightforward — add a Promote
+            button next to old incidents, wire it to a new endpoint,
+            done. Building the button surfaced something the plan
+            hadn't accounted for: the admin page had no way to know,
+            <em>before</em> attempting anything, whether a given
+            incident was even eligible. The old behavior found out
+            reactively — try to edit it, get a 404 back, then explain
+            after the fact why it failed. That's a workable pattern for
+            an error case, but a genuinely bad one for something that's
+            supposed to be a real, visible action a person chooses to
+            take.
+          </p>
+
+          <p class="callout">
+            The fix was small — one extra field on every incident the
+            API already returns, marking whether it came from the file
+            or the database — but it's the kind of small addition that
+            only becomes obvious once you're trying to build the real
+            UI around it, not while just reading the plan on paper.
+          </p>
+
+          <h2>A dismissable alert wasn't good enough for this one</h2>
+
+          <p>
+            Promoting an incident can't fully finish itself — the
+            original file entry still needs a small manual edit
+            afterward, on purpose, since nothing in this app is allowed
+            to write back to that file directly. The first instinct was
+            a browser <code>alert()</code> explaining the follow-up
+            step. Worth pushing back on that instinct: an alert is
+            trivial to dismiss without really reading, and this is
+            exactly the kind of one-time instruction that's easy to
+            forget the moment it disappears. It became a real, persistent
+            block on the page instead — sitting in place of the
+            incident's normal buttons until explicitly acknowledged,
+            impossible to accidentally click past.
+          </p>
+
+          <h2>The double-promotion gap, closed the same day</h2>
+
+          <p>
+            One real gap got flagged rather than fixed in the moment:
+            nothing stopped the same old incident from being promoted
+            twice if the manual file edit got delayed. Worth actually
+            closing before moving on rather than letting it sit as a
+            known issue — the fix is a single new column tracking which
+            original entry a promotion came from, checked before a
+            second promotion is ever allowed to run. If it fires again
+            on the same entry, the response now points back at the
+            incident that already exists instead of quietly creating a
+            duplicate — useful specifically because the realistic cause
+            of a repeat click isn't someone trying to break anything,
+            it's just forgetting the file-edit step the first time
+            around.
+          </p>
+
+          <h2>Confirmed the honest way</h2>
+
+          <p>
+            Full test suite, both packages, run for real rather than
+            assumed clean from reading the new code: 48 proxy tests,
+            67 client tests, 115 total, all green — including the six
+            new tests covering the promotion function itself, one of
+            which exists specifically to prove a promoted incident
+            keeps its real original date rather than quietly getting a
+            fresh one the moment it's promoted.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-21-2026.html" class="prose-link">← Session 38</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
