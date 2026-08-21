@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Finishing the client side of the test-files-first review, then closing the loop with a real deliberate outage — taking a node offline and watching two independent monitoring sources each auto-detect and auto-resolve their own incident for it."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back — Michael Rooney" />
+    <meta property="og:description" content="Finishing the test-files-first review, then a real deliberate outage test — two independent monitoring sources each auto-detecting and auto-resolving their own incident for the same event." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-20-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back — Michael Rooney" />
+    <meta name="twitter:description" content="Finishing the test-files-first review, then a real deliberate outage test proving the auto-incident system works on live infrastructure." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-20-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back",
+      "description": "Finishing the client side of the test-files-first review, then a real deliberate outage test — two independent monitoring sources each auto-detecting and auto-resolving their own incident for the same event.",
+      "datePublished": "2026-08-20",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-20-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-20-2026">August 20, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Same test-files-first technique running since
+            <a href="08-17-2026.html" class="prose-link">Session 35</a>,
+            finished now across two more sessions:
+            <code>CommandPalette.test.tsx</code> and
+            <code>ServiceDetailModal.test.tsx</code>. That closes out
+            every remaining file — the whole test suite, proxy and
+            client, has now been walked one test at a time, name first,
+            hypothesis before answer, corrected against the real source
+            wherever the guess didn't quite land.
+          </p>
+
+          <h2>A real jump in technique, not just complexity</h2>
+
+          <p>
+            <code>CommandPalette.test.tsx</code>'s 15 tests marked a
+            genuine shift from everything before it. Every earlier file
+            — pure functions, a rollup, a decision matrix, even
+            <code>useCommandPalette</code>'s dispatched
+            <code>KeyboardEvent</code>s — tested logic in isolation.
+            This file simulates a real user: typing into a search field
+            with <code>@testing-library/user-event</code>, clicking
+            specific rows, navigating with arrow keys, distinguishing a
+            click on the modal's backdrop from a click inside the dialog
+            itself. The most useful correction along the way was a
+            click-event mechanics one: <code>getByRole('option')</code>
+            returns the outer <code>&lt;li&gt;</code>, but the actual
+            click handler lives on a nested <code>&lt;button&gt;</code>
+            that visually fills the row. A synthetic click dispatched
+            directly at the <code>&lt;li&gt;</code> never reaches that
+            handler — click events only ever bubble <em>up</em> from
+            wherever they actually land, never down into a descendant
+            that wasn't the real target. A real mouse click anywhere in
+            that row does land on the button; a test needs to as well,
+            explicitly.
+          </p>
+
+          <h2>Mocking at the right boundary</h2>
+
+          <p>
+            <code>ServiceDetailModal.test.tsx</code>'s 10 tests cover
+            async data-fetching, and the deliberate choice there was
+            mocking <code>services/detail.ts</code>'s
+            <code>fetchServiceDetail</code> directly rather than global
+            <code>fetch</code>. That boundary already exists for a real
+            architectural reason in this app — the adapter layer is the
+            documented seam between "real data" and "everything else" —
+            so testing against that same seam means the test suite
+            doesn't need to change if <code>detail.ts</code>'s own
+            internal Prometheus query shape ever changes; only
+            <code>detail.ts</code>'s own tests would need to.
+          </p>
+
+          <p>
+            The sort-and-cap test was worth sitting with a moment
+            longer than the others: it feeds in 25 status-log entries in
+            strict ascending order, then shuffles them before handing
+            them to the mock. That's deliberate, not incidental — a test
+            built on already-sorted input could pass even with a
+            completely broken sort function, since the "sorted" output
+            would look identical to the unsorted input by coincidence.
+            Shuffling first means the only way this test passes is if
+            the real sort logic actually ran.
+          </p>
+
+          <h2>Proof, not just a reading of the code</h2>
+
+          <p>
+            The review itself only confirms that the tests describe the
+            code correctly — it doesn't confirm the code behaves
+            correctly against a real outage. Worth closing the loop on
+            that too, so this session also included deliberately taking
+            Murloc offline for about an hour and watching what the live
+            site actually did with it.
+          </p>
+
+          <p>
+            The result matched <code>decideIncidentAction</code>'s
+            decision matrix from
+            <a href="08-18-2026.html" class="prose-link">the previous session</a>
+            exactly, on real infrastructure rather than a fixture: two
+            consecutive outage readings triggered an auto-detected
+            incident, and two consecutive operational readings
+            auto-resolved it once Murloc came back — the same
+            threshold logic walked test by test, now watched firing for
+            real. What's genuinely useful about this specific test,
+            though, is that it produced <em>two</em> separate incidents
+            for the same outage, not one — <code>proxmox-murloc</code>
+            from the Proxmox API check, and a distinct
+            <code>zabbix-10783</code> incident from Zabbix's own
+            independent check on the same host. Two different
+            monitoring sources, watching the same real machine, each
+            noticing the same outage on their own and each drafting
+            their own incident for it.
+          </p>
+
+          <p class="callout">
+            That's not a bug — every check running its own independent
+            threshold logic is exactly how the system is built. But
+            seeing it produce two incidents for one real event, instead
+            of one, is directly relevant to the open
+            <code>28-Incidents.json Integration</code> and
+            <code>29-Source-Level Outage Visibility</code> decisions
+            waiting after this — live evidence to bring into that
+            conversation rather than reasoning about it in the
+            abstract.
+          </p>
+
+          <h2>Where this leaves the review</h2>
+
+          <p>
+            Every test file in the codebase has now been read this way —
+            proxy and client, pure functions and full component
+            interaction, hand-written tests and fixture-generated ones.
+            Next up: the two scope decisions that were deliberately held
+            until this pass finished —
+            <code>28-Incidents.json Integration</code> and
+            <code>29-Source-Level Outage Visibility</code>.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-18-2026.html" class="prose-link">← Session 36</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

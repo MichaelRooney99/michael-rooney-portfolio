@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Aug 2026 18:44:04 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 19:02:59 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-20-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-20-2026.html</guid>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Finishing the test-files-first review, then a real deliberate outage test — two independent monitoring sources each auto-detecting and auto-resolving their own incident for the same event.]]></description>
+    </item>
     <item>
       <title>Fourteen Tests I Didn't Write, and Why That's the Point</title>
       <link>https://michaelrooney.dev/journal/08-18-2026b.html</link>
