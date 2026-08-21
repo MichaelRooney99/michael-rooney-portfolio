@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 21 Aug 2026 21:25:13 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 22:48:33 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-21-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-21-2026.html</guid>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building incident retirement end to end, a caching red herring that turned out to be nothing, a real DOM-scraping bug caught live, and two new gaps worth their own scope docs.]]></description>
+    </item>
     <item>
       <title>Session 37 — Closing the Loop: The Full Test Suite, Read Front to Back</title>
       <link>https://michaelrooney.dev/work/capstone/journal/08-20-2026.html</link>
