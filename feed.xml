@@ -5,8 +5,22 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 21 Aug 2026 22:48:33 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 23:41:13 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 40 — Giving the Admin Page a Log It Already Had the Data For</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-21-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-21-2026c.html</guid>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Adding a collapsible update-history view to the admin page — no backend changes needed, since the data was already being fetched, just never shown.]]></description>
+    </item>
+    <item>
+      <title>Session 39 — One Promotion Button, and the Gap It Opened the Same Day</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-21-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-21-2026b.html</guid>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Building a promotion action for old incidents, a real proactive-signal gap found along the way, and closing a double-promotion risk it opened the same day.]]></description>
+    </item>
     <item>
       <title>Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding</title>
       <link>https://michaelrooney.dev/work/capstone/journal/08-21-2026.html</link>

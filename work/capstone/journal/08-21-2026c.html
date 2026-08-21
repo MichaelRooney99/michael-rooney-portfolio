@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 40 — Giving the Admin Page a Log It Already Had the Data For | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Adding a collapsible update-history view to the admin page — the one place incident updates get written, and until now the one place they couldn't be read back."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 40 — Giving the Admin Page a Log It Already Had the Data For — Michael Rooney" />
+    <meta property="og:description" content="Adding a collapsible update-history view to the admin page — no backend changes needed, since the data was already being fetched, just never shown." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-21-2026c.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 40 — Giving the Admin Page a Log It Already Had the Data For — Michael Rooney" />
+    <meta name="twitter:description" content="Adding a collapsible update-history view to the admin page — the data was already being fetched, just never shown." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-21-2026c.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 40 — Giving the Admin Page a Log It Already Had the Data For",
+      "description": "Adding a collapsible update-history view to the admin page — the one place incident updates get written, and until now the one place they couldn't be read back.",
+      "datePublished": "2026-08-21",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-21-2026c.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-21-2026">August 21, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Session 40 — Giving the Admin Page a Log It Already Had the Data For</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The admin page has always been the only place an incident's
+            update history actually gets written — every "Add an
+            update" or "Resolve" action happens there and nowhere else.
+            Until this session, it was also the one place that history
+            couldn't be read back. Checking whether a just-written
+            update actually landed with the right wording meant leaving
+            the admin page entirely and going to check the public site
+            instead.
+          </p>
+
+          <h2>A rendering gap, not a data gap</h2>
+
+          <p>
+            The fix turned out to be smaller than the problem sounded.
+            The admin page already fetches every incident's full update
+            timeline on every load — it just never rendered it. No new
+            endpoint, no new fetch, nothing on the backend changed at
+            all. Each incident now gets a small, collapsed-by-default
+            toggle showing how many updates it has; opening it reveals
+            the same timestamp-and-message history the public page has
+            always shown, styled to match this page's own plain CSS
+            rather than pulled in from the client app's design system.
+          </p>
+
+          <p class="callout">
+            Collapsed by default here on purpose, which is the opposite
+            default from the public page. The public page opens active
+            incidents automatically because a visitor is scanning for
+            what's currently wrong. The admin page's real use case is
+            different — confirming one specific incident's history on
+            demand, right after touching it — so keeping every entry
+            compact until asked for reads better for that actual
+            workflow.
+          </p>
+
+          <h2>Confirmed the honest way</h2>
+
+          <p>
+            Full test suite still green, and the feature itself
+            confirmed live — opened, read, collapsed again, against
+            real incidents already sitting on the production page,
+            not just clicked through once locally and assumed correct.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-21-2026b.html" class="prose-link">← Session 39</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
