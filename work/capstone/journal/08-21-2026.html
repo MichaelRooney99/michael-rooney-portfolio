@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building incident retirement end to end — a new prune function, a real workflow-discipline guard on delete, a caching red herring that turned out to be nothing, and a real DOM-scraping bug caught in the confirm() dialog text along the way."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding — Michael Rooney" />
+    <meta property="og:description" content="Building incident retirement end to end, a caching red herring that turned out to be nothing, a real DOM-scraping bug caught live, and two new gaps worth their own scope docs." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-21-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding — Michael Rooney" />
+    <meta name="twitter:description" content="Building incident retirement end to end, a caching red herring, a real DOM-scraping bug caught live, and two new gaps worth their own scope docs." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-21-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding",
+      "description": "Building incident retirement end to end — a new prune function, a workflow-discipline guard on delete, a caching red herring, and a real DOM-scraping bug caught in the confirm() dialog.",
+      "datePublished": "2026-08-21",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-21-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-21-2026">August 21, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <a href="08-18-2026.html" class="prose-link">30-Incident Retirement</a>
+            went from a fully-decided scope doc to real code this
+            session — two new functions in <code>db.ts</code>, a new
+            route, a new admin UI action, and the whole thing tested
+            live on production the same day it shipped.
+          </p>
+
+          <h2>What actually got built</h2>
+
+          <p>
+            <code>deleteIncident</code> and <code>pruneOldIncidents</code>
+            joined <code>db.ts</code>, called from the same poller tick
+            <code>pruneOldSnapshots</code> already runs on. The real
+            interesting piece was the interaction between the two
+            retirement mechanisms the scope doc settled on: an incident
+            still unresolved at the 90-day mark gets force-resolved with
+            an honest system note before deletion, rather than either
+            sitting open forever or vanishing with no trace. A real
+            wrinkle only became visible while actually writing that
+            function — force-resolve and delete both key off the same
+            <code>created_at</code> cutoff, which means a force-resolved
+            incident becomes eligible for deletion in the very same
+            pass that closes it, not after some second grace window.
+            The doc had said "around the 180-day mark" before this was
+            built; that line didn't survive contact with the real
+            implementation and got corrected in place.
+          </p>
+
+          <p>
+            The admin UI's new Delete button only renders for already-
+            resolved incidents, and the server enforces that same rule
+            independently with a real <code>409</code> — not just a UI
+            nicety, the actual guard. That split matters: the
+            <code>confirm()</code> dialog on the button is a courtesy
+            for the person clicking it, but the workflow discipline
+            itself — investigating → resolved → retired, never a
+            shortcut straight from active to gone — is enforced
+            server-side, where it can't be bypassed by a stale page or
+            a direct request.
+          </p>
+
+          <h2>A production test that turned out to be nothing</h2>
+
+          <p>
+            The Delete button didn't show up in the browser right after
+            deploying. Before assuming a logic bug, the real question
+            was simpler: had the deploy actually happened, and was this
+            genuinely the new code being served? A private-browsing
+            load answered it in one step — the button, and its
+            <code>confirm()</code> dialog, both worked exactly as built.
+            Pure browser caching on the regular window, nothing wrong
+            server-side at all. Worth remembering as a first move next
+            time something "isn't working" right after a deploy: rule
+            out cache before debugging code that might not actually be
+            broken.
+          </p>
+
+          <h2>A real bug the private-window test surfaced anyway</h2>
+
+          <p>
+            That same screenshot caught something genuinely wrong,
+            separate from the caching question: the confirmation dialog
+            read <code>Delete "delete? resolved manual"?</code> instead
+            of just the incident's real title. The message was pulling
+            from <code>.incident-title</code>'s <code>textContent</code>
+            — but that element also contains the status and source
+            badge <code>&lt;span&gt;</code>s as children, and
+            <code>textContent</code> grabs every descendant's text, not
+            just the direct one. Fixed by storing the real title as its
+            own <code>data-title</code> attribute at render time,
+            straight from the fetched incident object — sidesteps the
+            scraping problem entirely instead of writing a more careful
+            selector around it.
+          </p>
+
+          <h2>Real test coverage, and a bigger gap it made visible</h2>
+
+          <p>
+            The three new functions got ten real tests in
+            <code>db.test.ts</code>, matching the file's existing
+            conventions — real in-memory SQLite, no mocking. Writing
+            them surfaced something worth being honest about directly
+            in the test file itself rather than glossing over: because
+            force-resolve and delete share one cutoff, there's no way
+            for a test to observe the "auto-closed but not yet deleted"
+            state from outside — by the time anything could check, it's
+            already gone. The tests confirm the real, external outcome
+            instead of pretending to verify an internal step that
+            doesn't actually persist long enough to check.
+          </p>
+
+          <p>
+            Writing those tests also made a bigger, pre-existing gap
+            obvious by contrast: <code>db.test.ts</code> has never
+            tested a single one of its incident-related functions —
+            not the auto-threshold write path, not the manual-incident
+            write path, nothing. That's not a small oversight; it's the
+            entire incident subsystem's write logic running on trust
+            alone. Scoped as its own follow-up rather than patched in
+            here, since fixing it properly is real, separate work, not
+            an afterthought to bolt onto this session.
+          </p>
+
+          <h2>A second gap, found by trying to use my own feature</h2>
+
+          <p>
+            Testing the new Delete button meant actually looking at the
+            admin page's incident list closely for the first time in a
+            while — and noticing it shows a title, a status, a source
+            tag, and nothing else. No way to see the actual update
+            history an incident has accumulated, even though the admin
+            page is the only place that history ever gets written. The
+            public page already solves this well with an expand/collapse
+            pattern; the admin page just never got the equivalent.
+            Scoped as its own follow-up too, rather than folded into an
+            already-shipped session.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-20-2026.html" class="prose-link">← Session 37</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
