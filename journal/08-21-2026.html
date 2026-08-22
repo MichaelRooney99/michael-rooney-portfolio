@@ -246,24 +246,56 @@ pvresize /dev/nvme0n1p3</code></pre>
             command's output looking right.
           </p>
 
-          <h2>What actually caught the outage</h2>
+          <h2>What the outage actually revealed — and what it didn't quite prove</h2>
 
           <p>
             The physical swap meant Dega, and the capstone VM running on
             it, were genuinely offline for a stretch. No incident got
             drafted — there was nothing left running to draft one — but
-            the status page's own uptime history still recorded the gap
-            once everything came back. Not a designed test, just an
-            honest, unplanned confirmation that the monitoring stack
-            degrades gracefully instead of silently losing the record
-            entirely.
+            the status page's own uptime history still showed the day as
+            unhealthy once everything came back. Not a designed test,
+            just an honest, unplanned confirmation that the monitoring
+            stack degrades toward "something was wrong" instead of
+            silently defaulting to "everything looked fine."
+          </p>
+
+          <p>
+            Worth being precise about what that red day actually proves,
+            though, rather than taking the tidy result at face value. The
+            process that polls and records this app's own history runs
+            on the capstone VM — which lives on Dega, the exact machine
+            that was physically powered off. For the real duration of
+            the outage, that process wasn't running at all, which means
+            there's no way it recorded a continuous string of "this is
+            down" readings through the middle of the gap. What almost
+            certainly happened instead: the last reading right before
+            shutdown and the first reading right after boot each caught
+            something other than a clean "everything's fine" result, and
+            the day-level summary correctly rolled the whole day up as
+            bad based on those two edge readings — not because the
+            multi-hour blackout in between was itself being watched.
+          </p>
+
+          <p class="callout">
+            That's a real, meaningful distinction, even though the
+            visible result — a red day, honestly shown — looks identical
+            either way. A monitoring source that goes fully unreachable
+            for a while and a monitoring source that's actually reporting
+            continuous bad status currently produce the same red day on
+            this page, but they aren't the same fact. The page got the
+            right answer here mostly because the edges of the outage
+            happened to be ugly enough to flag the whole day — it got
+            lucky on presentation, not because the gap in the middle was
+            genuinely being tracked. A more honest version of this system
+            would be able to tell those two situations apart instead of
+            them looking coincidentally the same.
           </p>
 
         </div>
 
         <nav class="entry-nav" aria-label="Entry navigation">
           <span></span>
-          <a href="08-18-2026b.html">← Previous: 08-18-2026b Entry</a>
+          <a href="08-18-2026b.html" class="prose-link">← Previous: 08-18-2026b Entry</a>
           <span></span>
         </nav>
       </article>
