@@ -5,7 +5,7 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 21 Aug 2026 23:41:13 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 22 Aug 2026 01:08:20 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Session 40 — Giving the Admin Page a Log It Already Had the Data For</title>
@@ -20,6 +20,13 @@
       <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-21-2026b.html</guid>
       <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Building a promotion action for old incidents, a real proactive-signal gap found along the way, and closing a double-promotion risk it opened the same day.]]></description>
+    </item>
+    <item>
+      <title>The Benchmark That Lied, Twice</title>
+      <link>https://michaelrooney.dev/journal/08-21-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-21-2026.html</guid>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A drive that looked fine wasn't actually being tested the way I thought, and a spread of numbers that looked unstable wasn't. Neither one was true until the math actually got done.]]></description>
     </item>
     <item>
       <title>Session 38 — Built, Broken by a Cache, and Two Gaps It Was Worth Finding</title>

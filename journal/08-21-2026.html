@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Benchmark That Lied, Twice — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Upgrading a homelab node's storage should have been the boring part. Getting the drive to prove itself first, and then actually resizing the storage under a live VM without breaking it, turned into two separate lessons about trusting a benchmark's default settings and trusting your own read of the numbers."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Benchmark That Lied, Twice — Michael Rooney" />
+    <meta property="og:description" content="A drive that looked fine wasn't actually being tested the way I thought, and a spread of numbers that looked unstable wasn't. Neither one was true until the math actually got done." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-21-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Benchmark That Lied, Twice — Michael Rooney" />
+    <meta name="twitter:description" content="A drive that looked fine wasn't actually being tested the way I thought, and a spread of numbers that looked unstable wasn't." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-21-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Benchmark That Lied, Twice",
+      "description": "A drive that looked fine wasn't actually being tested the way I thought, and a spread of numbers that looked unstable wasn't — neither one was true until the math actually got done.",
+      "datePublished": "2026-08-21",
+      "url": "https://michaelrooney.dev/journal/08-21-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-21-2026">August 21, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The Benchmark That Lied, Twice</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Dega — the standalone node hosting the capstone status page —
+            needed more room. 256GB was tight with two VMs on the roadmap
+            instead of one, and the RAM was down to a single stick. The
+            actual hardware swap ended up being the easy part. Trusting the
+            new drive, and then trusting my own read of whether I could
+            trust it, took two separate corrections before either one held
+            up.
+          </p>
+
+          <h2>A budget drive with a real reason to be suspicious of it</h2>
+
+          <p>
+            The replacement was a 1TB KingSpec NX-1TB-FB — inexpensive,
+            and I'd already been burned once by DRAM-less NVMe drives
+            struggling under real load. Worth checking before it went
+            anywhere near production. KingSpec's own product
+            announcement for the NX series is explicit about it: built
+            around a cache-free controller, relying on Host Memory
+            Buffer instead of onboard DRAM. A firmware readout of this
+            exact model confirmed HMB active at 64MB — consistent with
+            that, not contradicting it. One review site claimed a 256MB
+            onboard cache; the manufacturer's own words and the actual
+            firmware telemetry outweighed that.
+          </p>
+
+          <p>
+            DRAM-less drives specifically struggle with sustained,
+            concurrent random I/O — the exact pattern multiple VMs
+            sharing one physical drive under Proxmox produce. Worth a
+            real test before trusting it, not just a vibe check from
+            watching an install run.
+          </p>
+
+          <h2>The first test wasn't actually testing anything</h2>
+
+          <p>
+            First pass in a dummy M920Q: installing Proxmox itself felt
+            noticeably slow. Before drawing any conclusion from that,
+            the honest answer was that the drive had leftover
+            configuration from a previous install — a plain reformat
+            wouldn't have caught it. <code>wipefs -a</code>,
+            <code>sgdisk --zap-all</code>, and <code>blkdiscard -f</code>
+            cleared it properly — the last one matters specifically
+            because it TRIMs the whole device, clearing data still
+            sitting in flash cells that a reformat alone leaves behind.
+          </p>
+
+          <p>
+            Real testing needed a real tool, not a consumer benchmark —
+            <a href="https://fio.readthedocs.io/" target="_blank" rel="noopener noreferrer" class="prose-link">fio</a>,
+            the actual industry-standard for this. First real run
+            specified <code>--iodepth=32</code>, meant to simulate
+            several concurrent I/O streams the way multiple VMs would
+            genuinely contend for one drive. The tool printed a warning
+            that was easy to miss:
+          </p>
+
+          <pre><code>note: both iodepth >= 1 and synchronous I/O engine are selected, queue depth will be capped at 1</code></pre>
+
+          <p>
+            <code>fio</code>'s default I/O engine, <code>psync</code>,
+            is synchronous — one request in flight at a time, full stop,
+            no matter what depth is requested. The results confirmed it:
+            <code>IO depths: 1=100.0%</code>. The entire first test
+            measured something real, but not the thing it was built to
+            measure — a single-request-at-a-time workload, not
+            concurrent contention. Swapping to
+            <code>--ioengine=libaio</code> (an async-capable engine)
+            fixed it — the corrected run showed
+            <code>32=100.0%</code>, real depth-32 concurrency, and a
+            meaningfully different latency profile than the broken run
+            had shown.
+          </p>
+
+          <h2>"Huge swings" that didn't survive actual math</h2>
+
+          <p>
+            Even with the engine fixed, one read of the results was
+            still wrong. The IOPS summary reported a min/max spread from
+            31k to 71k reads per second — eyeballed, that looks like a
+            drive lurching between good and bad performance. It wasn't.
+          </p>
+
+          <p>
+            <code>fio</code> samples instantaneous IOPS repeatedly
+            throughout a run — nearly 2,400 times over five minutes here
+            — and reports <code>stdev</code> alongside the min/max
+            range. Actually dividing <code>stdev</code> by
+            <code>avg</code> — the
+            <a href="https://en.wikipedia.org/wiki/Coefficient_of_variation" target="_blank" rel="noopener noreferrer" class="prose-link">coefficient of variation</a>,
+            the right metric for comparing consistency across numbers
+            with different scales — came out to roughly 3.3–3.4%. That's
+            a tight, consistent distribution. Min and max are each a
+            single most-extreme sample out of nearly 2,400 data points,
+            not a representative picture of typical behavior on their
+            own. The visual impression from the range alone was flatly
+            wrong until the actual math got done.
+          </p>
+
+          <h2>Forcing the real answer: a fixed 100GB, no shortcuts</h2>
+
+          <p>
+            One thing hadn't been settled yet: a freshly wiped, mostly
+            empty drive can dynamically borrow a large pool of spare
+            flash as a fast SLC write cache — meaning an early-run
+            benchmark can look fast simply because it never wrote enough
+            to exhaust that cache, not because the drive is actually
+            fast once it's full.
+          </p>
+
+          <p>
+            The fix was dropping <code>--runtime</code> entirely and
+            setting a fixed <code>--size</code> per job instead — four
+            jobs at 25G each, guaranteeing a full 100GB written
+            regardless of how long it took. It never dropped. Sustained
+            ~296MiB/s and 75.7k IOPS across the entire 100GB, coefficient
+            of variation around 1.7% — tighter than the earlier test, not
+            looser. A small latency tail out at the 99.9th percentile
+            (~13ms against a ~1.5ms median) turned out to be ordinary
+            background garbage collection, not a cache running dry —
+            negligible at the actual scale of I/O two lightweight VMs
+            will ever throw at it.
+          </p>
+
+          <h2>The part that actually mattered: resizing storage under a live VM</h2>
+
+          <p>
+            Cloning is a 1:1 sector-level copy — the new 1TB drive booted
+            still behaving like a 256GB one until the partition table,
+            physical volume, and thin pool all got told about the extra
+            space, one layer at a time. <code>parted</code> flagged it
+            immediately on first inspection: the GPT header still
+            described the old disk size. Fixing that only updates the
+            table's awareness of the disk — the partition itself was
+            still sitting at its original 255GB until
+            <code>parted resizepart 3 100%</code> actually grew it.
+          </p>
+
+          <pre><code>parted /dev/nvme0n1 resizepart 3 100%
+pvresize /dev/nvme0n1p3</code></pre>
+
+          <p>
+            That freed up roughly 731GB inside the LVM volume group —
+            confirmed via <code>vgs</code>, not assumed. Extending the
+            thin pool that actually backs VM disks came with one real
+            trap: a plain
+            <code>lvextend -l +100%FREE /dev/pve/data</code> only grows
+            the pool's data portion. A thin pool's metadata volume —
+            tracking which chunks belong to which VM disk — doesn't
+            scale automatically, and growing the data pool roughly 6x
+            without growing metadata alongside it is exactly the kind of
+            thing that looks fine today and turns into a genuinely ugly
+            failure mode months later once it actually fills. One extra
+            flag closed that gap in the same command:
+          </p>
+
+          <pre><code>lvextend -l +100%FREE --poolmetadatasize +1G /dev/pve/data</code></pre>
+
+          <p>
+            Verified from three independent angles before calling it
+            done — <code>lvs</code> from the shell, the Proxmox Disks
+            panel showing the drive at its full size with a clean
+            S.M.A.R.T. pass, and <code>pvesm status</code> confirming
+            Proxmox's own storage layer agreed with what LVM reported.
+            Three sources agreeing is a much stronger claim than one
+            command's output looking right.
+          </p>
+
+          <h2>What actually caught the outage</h2>
+
+          <p>
+            The physical swap meant Dega, and the capstone VM running on
+            it, were genuinely offline for a stretch. No incident got
+            drafted — there was nothing left running to draft one — but
+            the status page's own uptime history still recorded the gap
+            once everything came back. Not a designed test, just an
+            honest, unplanned confirmation that the monitoring stack
+            degrades gracefully instead of silently losing the record
+            entirely.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-18-2026b.html">← Previous: 08-18-2026b Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
