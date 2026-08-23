@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What vi.mock Actually Does, and Why Order Doesn't Matter the Way It Looks Like It Should — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Vitest's mocking API looks like ordinary JavaScript until you ask why a mock declared after an import statement can affect that same import. It can't, actually — not the way it's written on the page. Working through what vi.mock really does at compile time, not just at runtime."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="What vi.mock Actually Does, and Why Order Doesn't Matter the Way It Looks Like It Should — Michael Rooney" />
+    <meta property="og:description" content="Vitest's vi.mock looks like an ordinary function call sitting after an import. It isn't, and understanding why it isn't is the difference between using it correctly and getting confusing failures." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-22-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="What vi.mock Actually Does, and Why Order Doesn't Matter the Way It Looks Like It Should — Michael Rooney" />
+    <meta name="twitter:description" content="Vitest's vi.mock looks like ordinary JavaScript sitting after an import. It isn't — and knowing why matters." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-22-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "What vi.mock Actually Does, and Why Order Doesn't Matter the Way It Looks Like It Should",
+      "description": "Vitest's vi.mock looks like ordinary JavaScript until you ask why a mock declared after an import can affect that same import. It can't, at runtime — because it isn't actually running at runtime, in the order it's written.",
+      "datePublished": "2026-08-22",
+      "url": "https://michaelrooney.dev/journal/08-22-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-22-2026">August 22, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>What vi.mock Actually Does, and Why Order Doesn't Matter the Way It Looks Like It Should</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Testing one function that depends on five other functions
+            doing real network requests meant needing a way to control
+            exactly what those five functions returned, without
+            actually calling out to anything real. Vitest's answer to
+            that is <code>vi</code> — its own built-in mocking toolkit,
+            the direct equivalent of what people coming from Jest would
+            know as the global <code>jest</code> object. The part worth
+            actually understanding, rather than just copying the
+            pattern, is that one specific piece of it —
+            <code>vi.mock</code> — doesn't run when it looks like it
+            runs, and that's not a minor detail. It's the whole reason
+            the pattern works at all.
+          </p>
+
+          <h2>What a mock actually is</h2>
+
+          <p>
+            A mock function, created with <code>vi.fn()</code>, is a
+            fake stand-in for a real one — it remembers how it was
+            called, and it returns whatever the test tells it to return
+            instead of doing real work. That much is intuitive.
+            <code>vi.mock()</code> does the same idea at the level of an
+            entire module instead of a single function: point it at an
+            import path, and every function that module normally
+            exports gets replaced with a mock version for the whole
+            test file.
+          </p>
+
+          <pre><code>vi.mock('./proxmox', () => ({ fetchProxmoxNodeStatus: vi.fn() }))</code></pre>
+
+          <p>
+            Written like that, it reads as an ordinary function call —
+            something that runs top to bottom, in the order it's
+            written, same as everything else in JavaScript. That
+            reading is wrong, and the wrongness is exactly the thing
+            worth understanding.
+          </p>
+
+          <h2>Hoisting: why the "wrong" order actually works</h2>
+
+          <p>
+            A real test file has its imports at the very top, before
+            any <code>vi.mock()</code> calls appear on the page. If
+            <code>vi.mock</code> genuinely ran in written order, it
+            would always be too late — the real module would already be
+            imported and already in use by the time the mock call
+            executed a few lines later. That's not how it behaves in
+            practice, and the reason is that Vitest doesn't just run the
+            file as-written. It rewrites it first. Every
+            <code>vi.mock()</code> call gets hoisted — physically moved,
+            during a compile step, to the very top of the file, above
+            every import statement — before any of it actually runs.
+            By the time a real import statement executes, the module
+            it's pointing at has already been swapped out.
+          </p>
+
+          <p class="callout">
+            This is the single most important thing to internalize about
+            <code>vi.mock</code>: it isn't a runtime instruction telling
+            JavaScript what to do next. It's closer to a build-time
+            instruction telling the test runner what to construct before
+            anything runs at all. Writing it in a spot that reads
+            naturally — right under the imports it affects — works
+            specifically because the tool doesn't care where it's
+            written, only that it's present somewhere in the file.
+          </p>
+
+          <h2>vi.mocked: making TypeScript agree with reality</h2>
+
+          <p>
+            Once a module's been mocked, the imported function still
+            has its real type as far as TypeScript is concerned — an
+            async function that returns a real promise, with none of
+            the extra methods a mock actually has, like telling it what
+            to resolve or reject with on the next call.
+            <code>vi.mocked()</code> exists purely to bridge that gap —
+            it doesn't change anything about how the mock behaves at
+            runtime, it just tells the type checker "trust me, this is
+            actually a mock," which is what makes autocomplete and type
+            safety work on the mock-specific methods that come next.
+          </p>
+
+          <pre><code>vi.mocked(fetchProxmoxNodeStatus).mockRejectedValue(new Error('proxmox API down'))</code></pre>
+
+          <h2>Why this was the right tool here specifically</h2>
+
+          <p>
+            The function under test merges results from four separate
+            data sources, each doing a real fetch, plus a fifth for
+            incidents with its own independent failure handling.
+            Testing it for real would mean either standing up real
+            infrastructure just to run a test suite, or accepting tests
+            that are slow and occasionally flaky depending on network
+            conditions that have nothing to do with whether the actual
+            merging logic is correct. Mocking each dependency means the
+            test can force any combination directly — every source
+            succeeding, one specific source failing while the rest
+            succeed, everything failing at once — and each case runs
+            instantly and identically every time, because nothing real
+            is happening at all. The thing actually being tested is the
+            merging and fallback logic itself, not whether five unrelated
+            services happened to be reachable at the moment the test
+            suite ran.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-21-2026.html" class="prose-link">← Previous: 08-21-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

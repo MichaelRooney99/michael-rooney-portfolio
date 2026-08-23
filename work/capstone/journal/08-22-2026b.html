@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 42 — Auditing Nine Files Against What They Actually Export | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Checking every remaining test file not by how thorough it reads, but against what its own source file actually exports. Eight files held up. One genuinely didn't — the app's main data-fetching function had never been tested at all."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 42 — Auditing Nine Files Against What They Actually Export — Michael Rooney" />
+    <meta property="og:description" content="Checking every remaining test file against what its own source file actually exports, not how thorough it reads. Eight held up. One genuinely didn't." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-22-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 42 — Auditing Nine Files Against What They Actually Export — Michael Rooney" />
+    <meta name="twitter:description" content="Checking every remaining test file against its source file's real exports. Eight held up. One genuinely didn't." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-22-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 42 — Auditing Nine Files Against What They Actually Export",
+      "description": "Checking every remaining test file not by how thorough it reads, but against what its own source file actually exports. Eight files held up. One genuinely didn't.",
+      "datePublished": "2026-08-22",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-22-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-22-2026">August 22, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 42 — Auditing Nine Files Against What They Actually Export</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The first pass closed a specific, already-known gap in the
+            database layer. This one was broader and less predictable:
+            go through every other test file in the project and check
+            it against a real standard — not "does this file look
+            thorough," but "does this file's coverage actually match
+            every function its own source file exports." Those turned
+            out to be genuinely different questions.
+          </p>
+
+          <h2>The method, and where it caught itself once</h2>
+
+          <p>
+            For each of nine remaining test files, the process was the
+            same: pull the real source file, list what it actually
+            exports, then check each one against the test file. Simple
+            in theory. One real near-miss along the way: a first scan
+            for exported functions used a pattern that happened to skip
+            right over an <code>async</code> function, since it was
+            looking for the literal text "export function" and the real
+            declaration read "export async function" instead. A
+            one-word difference that would have let a real gap slip
+            through the audit meant to catch exactly that kind of
+            thing. Worth double-checking the check itself, not just
+            trusting the first pass.
+          </p>
+
+          <h2>Eight files, no real gaps</h2>
+
+          <p>
+            Most of the audit was reassuring rather than eventful. The
+            proxy's poller logic turned out to already be fully covered
+            once the audit accounted for which of its pieces are
+            actually exported at all — several supporting functions
+            aren't part of the public surface to begin with, so there
+            was nothing missing to find. A handful of small utility
+            functions elsewhere in the project — status derivation
+            logic, uptime math, a couple of history-shaping helpers —
+            all checked out clean, one test suite per export, nothing
+            hiding.
+          </p>
+
+          <p>
+            One file had three technically-untested exports worth
+            actually thinking through rather than reflexively padding
+            with tests. Two of them are one-line delegations to a
+            standard library method, operating on state nothing outside
+            the module can even observe — there's genuinely nothing
+            meaningful to assert against without reaching deep into
+            internals a test has no business touching. The third's only
+            real state-changing path already belongs to a background
+            loop that's deliberately been left untested elsewhere in
+            this project, for the same reason integration-style glue
+            code usually is. Not every uncovered line is a real gap;
+            padding tests onto genuinely trivial code just to hit a
+            number would be worse than leaving it alone.
+          </p>
+
+          <h2>The one that actually mattered</h2>
+
+          <p>
+            The app's main data-fetching function — the one merging
+            results from four different monitoring sources into what
+            visitors actually see — had zero test coverage. Not thin,
+            zero. A sibling function in the very same file, doing a much
+            smaller job, had a full suite of its own; the function
+            actually responsible for the real orchestration didn't have
+            a single test.
+          </p>
+
+          <p>
+            Testing it meant controlling exactly what each of its five
+            dependencies returned — every source succeeding, one
+            specific source failing while the rest succeed, everything
+            failing at once — without making any of them do real
+            network work. That's what Vitest's <code>vi.mock</code>
+            tooling is built for, and it's a genuinely different way of
+            thinking about test setup than anything used earlier in
+            this project. Explaining it properly turned into its own
+            <a href="https://michaelrooney.dev/journal/08-22-2026.html" class="prose-link">separate write-up</a>,
+            since doing it justice here would have doubled the length
+            of this entry for a detail that deserved its own space
+            rather than a rushed paragraph.
+          </p>
+
+          <p class="callout">
+            One of the five new tests is worth calling out specifically:
+            it deliberately proves that a single failed source's results
+            just quietly vanish from the merged output today, with
+            nothing in the response signaling which source was actually
+            the problem. Not a bug being fixed here — a real, current
+            behavior, now actually verified rather than just assumed,
+            and a useful, honest baseline for whenever that behavior
+            itself gets revisited.
+          </p>
+
+          <h2>Where this leaves the whole review</h2>
+
+          <p>
+            Twenty tests from the first pass, five more here — the
+            entire test suite now sits at 143 tests across both
+            packages, every one of them confirmed passing on real
+            hardware, not just assumed clean from reading the code. One
+            genuine gap found and closed out of ten files checked total;
+            the rest held up honestly under real scrutiny rather than
+            just looking thorough from a distance.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-22-2026.html" class="prose-link">← Session 41</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

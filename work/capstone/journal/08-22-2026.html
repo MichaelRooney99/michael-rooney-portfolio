@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 41 — Closing a Gap I Only Noticed by Contrast | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Every incident-related function in the database layer had zero test coverage — a gap that only became visible once the newest functions sitting right next to them had real tests and these didn't. Closing it properly, one real function at a time."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 41 — Closing a Gap I Only Noticed by Contrast — Michael Rooney" />
+    <meta property="og:description" content="Every incident-related function in the database layer had zero test coverage, a gap only visible by contrast once the newest functions sitting right next to them had real tests. Closing it properly." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-22-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 41 — Closing a Gap I Only Noticed by Contrast — Michael Rooney" />
+    <meta name="twitter:description" content="Every incident-related function in the database layer had zero test coverage, a gap only visible by contrast. Closing it properly." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-22-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 41 — Closing a Gap I Only Noticed by Contrast",
+      "description": "Every incident-related function in the database layer had zero test coverage — a gap only visible by contrast once the newest functions sitting right next to them had real tests and these didn't.",
+      "datePublished": "2026-08-22",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-22-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-22-2026">August 22, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 41 — Closing a Gap I Only Noticed by Contrast</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Building a real delete-and-retirement flow for incidents a
+            couple sessions back meant writing real tests for the new
+            functions doing that work — and the process of writing
+            those tests made something uncomfortable obvious: every
+            <em>other</em> incident-related function in the database
+            layer had no test coverage at all. Not thin coverage, none.
+            The auto-detection write path, the manual admin write path,
+            the dedup logic — all of it running on trust alone, sitting
+            right next to functions that now had real tests written
+            for them within the same session. That contrast is what
+            actually surfaced the gap; reading the file in isolation
+            never would have.
+          </p>
+
+          <h2>The dedup logic gets the scrutiny it always deserved</h2>
+
+          <p>
+            The function guarding against duplicate auto-drafted
+            incidents filters specifically on a source field — auto
+            versus manual — so a hand-typed incident on the same
+            underlying service never gets confused with one the system
+            drafted itself. That's a one-line filter doing real work,
+            and until this session nothing actually proved it worked.
+            Same for the part making sure an already-resolved incident
+            never gets treated as still active. Both now have direct
+            tests confirming the exact behavior the comments already
+            claimed.
+          </p>
+
+          <h2>A real asymmetry, found by testing rather than assuming</h2>
+
+          <p>
+            Writing a test for the function that closes out an
+            auto-drafted incident surfaced something worth knowing:
+            unlike its two siblings for manual updates and status
+            changes, this one has no return value at all telling the
+            caller whether anything actually happened. Not a bug,
+            necessarily — but a real, previously-unnoticed inconsistency
+            between three functions that otherwise do very similar
+            work. Worth documenting plainly rather than quietly working
+            around it.
+          </p>
+
+          <h2>Testing an old data shape without faking one</h2>
+
+          <p>
+            The trickiest thing to test honestly was a fallback path —
+            older auto-drafted incidents predate a couple of columns
+            that got added later, so the read layer computes a
+            reasonable title and service list on the fly instead of
+            showing a blank. Rather than hand-building a fake row just
+            to exercise that path, it turned out the real
+            auto-drafting function still naturally produces exactly
+            that shape today — it's never been updated to set those
+            newer columns, since nothing needed it to be. A genuinely
+            current code path happened to be the same as the legacy
+            one, which meant the test could use real production
+            behavior as its own fixture instead of a synthetic stand-in.
+          </p>
+
+          <h2>A compiler catching something worth catching</h2>
+
+          <p>
+            Three of the new tests originally used a modern array
+            method to grab the most recent entry off a list — clean to
+            read, and the compiler rejected it immediately, since the
+            proxy's build target doesn't include that method. The fix
+            wasn't touching the build configuration to accommodate
+            three lines of test code; it was writing the same logic in
+            a way that works everywhere, and being a little more
+            careful about it than the first pass was — the original fix
+            still had an unguarded property access buried in it that
+            would've thrown a raw, unhelpful error instead of a clean
+            test failure if a row were ever unexpectedly missing.
+            Caught on a second look, not the first.
+          </p>
+
+          <h2>Where this leaves it</h2>
+
+          <p>
+            Twenty new tests, seven real functions that had none
+            before. Every incident-related write path in the database
+            layer is now under real test coverage for the first time.
+            One more piece remains before this is genuinely done: going
+            through every other test file in the project and checking
+            it the same honest way — not by how it reads, but against
+            what its own source file actually exports.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+            <span></span>
+            <a href="08-21-2026c.html" class="prose-link">← Session 40</a>
+            <a href="08-22-2026b.html" class="prose-link">Session 42 →</a>
+            <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

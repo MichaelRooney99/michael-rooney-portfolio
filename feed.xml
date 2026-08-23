@@ -5,8 +5,29 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Sat, 22 Aug 2026 01:08:20 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 23 Aug 2026 00:32:58 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 42 — Auditing Nine Files Against What They Actually Export</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-22-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-22-2026b.html</guid>
+      <pubDate>Sat, 22 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Checking every remaining test file against what its own source file actually exports, not how thorough it reads. Eight held up. One genuinely didn't.]]></description>
+    </item>
+    <item>
+      <title>What vi.mock Actually Does, and Why Order Doesn't Matter the Way It Looks Like It Should</title>
+      <link>https://michaelrooney.dev/journal/08-22-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-22-2026.html</guid>
+      <pubDate>Sat, 22 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Vitest's vi.mock looks like an ordinary function call sitting after an import. It isn't, and understanding why it isn't is the difference between using it correctly and getting confusing failures.]]></description>
+    </item>
+    <item>
+      <title>Session 41 — Closing a Gap I Only Noticed by Contrast</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-22-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-22-2026.html</guid>
+      <pubDate>Sat, 22 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Every incident-related function in the database layer had zero test coverage, a gap only visible by contrast once the newest functions sitting right next to them had real tests. Closing it properly.]]></description>
+    </item>
     <item>
       <title>Session 40 — Giving the Admin Page a Log It Already Had the Data For</title>
       <link>https://michaelrooney.dev/work/capstone/journal/08-21-2026c.html</link>
