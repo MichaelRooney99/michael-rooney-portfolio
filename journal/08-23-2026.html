@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>When vi.mock Isn't the Right Tool — Michael Rooney</title>
+    <meta
+      name="description"
+      content="vi.mock works by swapping out an entire imported module. That only works if the thing you need to control was actually imported from somewhere. Some functions call fetch directly instead, and mocking those needs a genuinely different technique — routing a single mocked fetch by the shape of the URL itself."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="When vi.mock Isn't the Right Tool — Michael Rooney" />
+    <meta property="og:description" content="vi.mock swaps out an entire imported module — which only works if the thing under test actually imports its dependency. Some functions call fetch directly instead, and need a genuinely different mocking technique." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-23-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="When vi.mock Isn't the Right Tool — Michael Rooney" />
+    <meta name="twitter:description" content="vi.mock swaps out an entire imported module. Some functions call fetch directly instead, and need a genuinely different mocking technique." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-23-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "When vi.mock Isn't the Right Tool",
+      "description": "vi.mock works by swapping out an entire imported module. That only works if the thing under test actually imports its dependency. Some functions call fetch directly instead, and need a genuinely different mocking technique.",
+      "datePublished": "2026-08-23",
+      "url": "https://michaelrooney.dev/journal/08-23-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-23-2026">August 23, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>When vi.mock Isn't the Right Tool</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <a href="https://michaelrooney.dev/journal/08-22-2026.html" class="prose-link">A couple sessions back</a>,
+            the whole point of <code>vi.mock</code> was replacing an
+            imported module's real functions with fake ones — point it
+            at an import path, get controllable stand-ins back. That
+            works perfectly when the function under test actually
+            imports its dependencies from somewhere. It stops working
+            entirely the moment that's not true.
+          </p>
+
+          <h2>The function that doesn't import anything to mock</h2>
+
+          <p>
+            A function fetching real 90-day history from Prometheus
+            doesn't import a Prometheus adapter module the way the
+            earlier example imported four separate service adapters —
+            it just calls the browser's own <code>fetch</code>
+            directly, inline, three or four different times, hitting
+            three or four different real URLs. There's no module
+            boundary to swap out. <code>vi.mock('./prometheus', ...)</code>
+            has nothing to attach to here, because the function being
+            tested doesn't get its network access from a file called
+            <code>prometheus.ts</code> — it gets it straight from the
+            global <code>fetch</code> the whole browser environment
+            provides.
+          </p>
+
+          <h2>Mocking the global instead of a module</h2>
+
+          <p>
+            The fix is a step further up the chain: replace
+            <code>fetch</code> itself, globally, for the duration of the
+            test, using <code>vi.stubGlobal('fetch', ...)</code> instead
+            of <code>vi.mock</code>. That solves the "how do I intercept
+            this at all" problem — but creates a new one immediately.
+            <code>vi.mock</code> naturally gives each mocked function its
+            own separate identity, so <code>fetchNodeStatus</code> and
+            <code>fetchZabbixStatus</code> can be told to behave
+            completely differently from each other without any extra
+            work. A single mocked <code>fetch</code> has no such luxury
+            — every single call in the whole function, no matter which
+            real URL it was headed to, funnels through the exact same
+            one mock function.
+          </p>
+
+          <pre><code>function mockFetchByUrl(handlers) {
+  return vi.fn((url) => {
+    if (url.includes('query_range') && url.includes('node_exporter')) {
+      return handlers.nodeRange?.() ?? okJson(...)
+    }
+    if (url.includes('query_range') && url.includes('nut_ups_status')) {
+      return handlers.upsRange?.() ?? okJson(...)
+    }
+    // ...
+  })
+}</code></pre>
+
+          <p>
+            The real fix is inspecting the URL each call actually
+            receives and routing based on that — checking for
+            <code>query_range</code> versus a plain instant query, and
+            for which real metric name shows up in the query string,
+            since that's the only information available at the point a
+            mocked <code>fetch</code> gets called. It's a genuinely
+            uglier pattern than <code>vi.mock</code>'s clean per-function
+            identity — real conditional logic sitting inside test setup
+            code, string-matching against URLs by hand — but it's the
+            correct shape for what's actually being tested. There's no
+            cleaner version available here, because the thing under test
+            genuinely doesn't offer a cleaner seam to hook into.
+          </p>
+
+          <h2>The actual lesson, not just the workaround</h2>
+
+          <p>
+            The interesting part isn't really the URL-routing trick
+            itself — it's what decided which technique was even on the
+            table in the first place. <code>vi.mock</code> works at the
+            level of "this file imports that file." A function using
+            <code>fetch</code> directly has no such import to intercept.
+            The real question worth asking before reaching for either
+            tool isn't "how do I mock this dependency" — it's "does this
+            function even have an importable dependency to mock, or does
+            it reach past that boundary entirely." The answer changes
+            which tool is even a candidate before any actual mocking
+            code gets written.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-22-2026.html" class="prose-link">← Previous: 08-22-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>Front-End Developer</span>
+    </footer>
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>

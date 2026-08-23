@@ -5,8 +5,36 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Sun, 23 Aug 2026 00:32:58 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 23 Aug 2026 21:51:09 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 45 — A Real Outage Test, and Two Wrong Guesses Along the Way</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-23-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-23-2026c.html</guid>
+      <pubDate>Sun, 23 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Closing a monitoring resilience gap, hitting a real infrastructure limit honestly, then proving the whole thing live — including two wrong guesses corrected by checking real logs instead of theorizing further.]]></description>
+    </item>
+    <item>
+      <title>Session 44 — A Banner That Refuses to Overclaim</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-23-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-23-2026b.html</guid>
+      <pubDate>Sun, 23 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A real signal for which data source failed on the live page, and a banner deliberately worded not to imply anything it can't actually prove.]]></description>
+    </item>
+    <item>
+      <title>When vi.mock Isn't the Right Tool</title>
+      <link>https://michaelrooney.dev/journal/08-23-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/08-23-2026.html</guid>
+      <pubDate>Sun, 23 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[vi.mock swaps out an entire imported module — which only works if the thing under test actually imports its dependency. Some functions call fetch directly instead, and need a genuinely different mocking technique.]]></description>
+    </item>
+    <item>
+      <title>Session 43 — Teaching the Poller to Remember What It Just Saw</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-23-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-23-2026.html</guid>
+      <pubDate>Sun, 23 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Closing the gap between a monitoring source going unreachable and a source with nothing to report — a poller-side cache of last-known service ids, and a real, honest fallback in the history rollup.]]></description>
+    </item>
     <item>
       <title>Session 42 — Auditing Nine Files Against What They Actually Export</title>
       <link>https://michaelrooney.dev/work/capstone/journal/08-22-2026b.html</link>

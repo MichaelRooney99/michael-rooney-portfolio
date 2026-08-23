@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 45 — A Real Outage Test, and Two Wrong Guesses Along the Way | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Closing the last real gap in a monitoring source's visibility, hitting a real limit of the current infrastructure honestly rather than working around it, then proving the whole thing live — including two wrong guesses about why a test wasn't behaving, both corrected by checking real logs instead of theorizing further."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 45 — A Real Outage Test, and Two Wrong Guesses Along the Way — Michael Rooney" />
+    <meta property="og:description" content="Closing a monitoring resilience gap, hitting a real infrastructure limit honestly, then proving the whole thing live — including two wrong guesses corrected by checking real logs instead of theorizing further." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-23-2026c.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 45 — A Real Outage Test, and Two Wrong Guesses Along the Way — Michael Rooney" />
+    <meta name="twitter:description" content="Closing a monitoring gap, hitting a real infrastructure limit honestly, then proving it live — including two wrong guesses corrected by real logs." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-23-2026c.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 45 — A Real Outage Test, and Two Wrong Guesses Along the Way",
+      "description": "Closing the last real gap in a monitoring source's visibility, hitting a real limit of the current infrastructure honestly, then proving the whole thing live, including two wrong guesses corrected by checking real logs instead of theorizing further.",
+      "datePublished": "2026-08-23",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-23-2026c.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-23-2026">August 23, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 45 — A Real Outage Test, and Two Wrong Guesses Along the Way</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The last real code for today's feature was small — a
+            genuine correctness bug found along the way (a single
+            failed query used to silently take down history for two
+            categories that never depended on it at all), and a
+            deliberate refusal to build something that turned out not
+            to be buildable honestly. What actually filled the rest of
+            the session was proving the whole thing works against real
+            infrastructure, and getting corrected twice by real evidence
+            before it did.
+          </p>
+
+          <h2>A real limit, hit honestly instead of worked around</h2>
+
+          <p>
+            Two categories on this page get their history from
+            Prometheus, and most of a 90-day window showing "no data"
+            for them is completely expected — Prometheus only retains
+            30 days. The real, harder question was whether a "no
+            sample" day within that 30-day window could be told apart
+            from a genuine outage inside it, rather than just retention
+            running out. That distinction needs Prometheus's own
+            historical uptime to check against — and checking directly
+            against the real, running instance confirmed it doesn't
+            self-monitor at all. No self-scrape job, nothing to compare
+            against. Not a harder engineering problem to push through —
+            a genuinely missing precondition. Closed out honestly rather
+            than half-built: documented plainly as not currently
+            possible, instead of quietly shipping something that looked
+            like it worked but couldn't actually prove what it claimed.
+          </p>
+
+          <h2>First wrong guess: the direction of the block</h2>
+
+          <p>
+            Testing this for real meant making a monitoring source
+            genuinely unreachable on purpose — the safe way, a scoped
+            firewall rule rather than actually taking a real service
+            down. The first version got stuck on the wrong question
+            entirely: should the capstone's own outbound calls be
+            blocked, or should the services be blocked from reaching the
+            capstone? The real answer was simpler than the question made
+            it sound — every failure path this feature actually covers
+            starts with the capstone initiating a request out, never the
+            reverse, so only one direction was ever worth testing.
+            Confirmed, not assumed, before touching anything further.
+          </p>
+
+          <h2>Second wrong guess: what "no data recorded" actually meant</h2>
+
+          <p>
+            The real puzzle came after unblocking — a source had
+            genuinely been down for over half an hour, and nothing
+            showed up as unreachable in the history afterward. The
+            honest first move was checking the real proxy logs rather
+            than guessing further, and they told a clean, complete
+            story: the poll genuinely had failed, exactly once, right
+            in the middle of the blocked window. The write had
+            happened. What hadn't happened was a bug — the very next
+            successful poll, right after unblocking, wrote a real
+            reading for the same calendar day, and real data winning
+            over an unreachable one on the same day is the exact rule
+            built into this earlier today. The system did precisely
+            what it was supposed to do; the test just needed a moment
+            after the fact where nothing else overwrote the evidence
+            before checking it.
+          </p>
+
+          <p class="callout">
+            Proving that directly, rather than trusting the reasoning
+            alone, meant writing one real "unreachable" row straight
+            into the database and watching it show up — a genuine
+            reading sitting in a service's actual recent-readings list,
+            between two real operational ones, rendered correctly and
+            immediately deprioritized in the day's own rollup exactly
+            as designed. Recorded, displayed, and correctly outranked by
+            real data, all confirmed in one place.
+          </p>
+
+          <h2>Where this actually landed</h2>
+
+          <p>
+            A monitoring source going fully unreachable and a source
+            with nothing to report no longer look the same anywhere on
+            this page — not in the history bars, not on the live view,
+            not in a service's own detail log. The one piece that
+            genuinely isn't buildable right now is written down plainly
+            as exactly that, not quietly dropped. And two real,
+            different wrong guesses along the way both got corrected
+            the same way everything else in this project has been —
+            by checking the actual source instead of trusting the more
+            comfortable explanation.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-23-2026b.html" class="prose-link">← Session 44</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

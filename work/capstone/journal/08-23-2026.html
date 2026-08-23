@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 43 — Teaching the Poller to Remember What It Just Saw | Michael Rooney</title>
+    <meta
+      name="description"
+      content="A monitoring source going fully unreachable and a source with genuinely nothing to report have always looked identical on this status page. Closing that gap meant giving the poller a memory of its own last successful check, and teaching the history rollup a real, honest fallback."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 43 — Teaching the Poller to Remember What It Just Saw — Michael Rooney" />
+    <meta property="og:description" content="Closing the gap between a monitoring source going unreachable and a source with nothing to report — a poller-side cache of last-known service ids, and a real, honest fallback in the history rollup." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-23-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 43 — Teaching the Poller to Remember What It Just Saw — Michael Rooney" />
+    <meta name="twitter:description" content="A poller-side cache of last-known service ids, and a real, honest fallback in the history rollup — closing a real visibility gap." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-23-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 43 — Teaching the Poller to Remember What It Just Saw",
+      "description": "Closing the gap between a monitoring source going unreachable and a source with genuinely nothing to report — a poller-side cache of last-known service ids, and a real, honest fallback in the history rollup.",
+      "datePublished": "2026-08-23",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-23-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-23-2026">August 23, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 43 — Teaching the Poller to Remember What It Just Saw</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A real gap flagged a couple weeks back, finally closed: this
+            status page has never been able to tell "the monitored thing
+            is down" apart from "the monitoring itself couldn't check."
+            Both looked identical — a quiet grey day, or nothing at all.
+            The one blind spot a status page probably shouldn't have is
+            its own visibility.
+          </p>
+
+          <h2>The real wrinkle: no data to work with when it matters most</h2>
+
+          <p>
+            The obvious plan was: when a poll fails outright, write an
+            explicit "we couldn't check" reading instead of writing
+            nothing. The obvious plan broke immediately on inspection —
+            the poller only ever learns which specific services exist
+            from the very API response it's trying to poll. If that
+            call throws before it's ever parsed, there's no list of
+            service ids left to attach anything to. You can't record
+            "X was unreachable" if the failure itself is what stops you
+            from knowing X existed in the first place.
+          </p>
+
+          <p>
+            The fix: a small, in-memory cache of whichever ids were
+            last seen on a genuinely successful poll, updated only when
+            a check actually works. A failed poll now falls back on
+            that memory instead of a blank slate. A source that's never
+            once succeeded — a fresh deploy, or one down from the very
+            start — correctly still records nothing, since there's
+            genuinely no known list to work from yet. That's not a gap
+            in the fix; it's the honest limit of what "remembering the
+            last known state" can promise.
+          </p>
+
+          <h2>A fallback that has to lose to real data, every time</h2>
+
+          <p>
+            The harder design question lived in the history rollup
+            itself. A day that's genuinely unreachable and a day that's
+            genuinely quiet both need to end up looking different from
+            each other — but a day can have both an unreachable reading
+            <em>and</em> a real one, if the source came back partway
+            through. Real data has to win in that case, unconditionally.
+            The fix keeps two separate trackers while scanning a day's
+            readings instead of one — the existing "worst real severity"
+            logic, completely unchanged, plus a second, independent flag
+            for "was anything unreachable today at all." Only once both
+            are known does the day's final status get decided: real
+            severity first if it exists, the unreachable fallback second,
+            and only genuine silence falls all the way through to the
+            same "no data" result this page has always shown for that.
+          </p>
+
+          <p class="callout">
+            The clearest way to prove that ordering held was to test it
+            directly against its closest existing neighbor — a day with
+            an unreachable reading sitting right next to a real one,
+            same shape as the test already proving an "unknown" reading
+            can't hide a real outage. Same principle, a genuinely
+            different reason it has to hold.
+          </p>
+
+          <h2>Where this leaves it</h2>
+
+          <p>
+            The mechanism itself is done and tested — real in-memory
+            database tests, no mocking, same standard as everything
+            else in this file. What's left is making this actually
+            visible to a visitor: a real color and label in the uptime
+            bars, and the live page's own version of the same honesty,
+            for the moment a source fails mid-request rather than
+            during history collection.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-22-2026b.html" class="prose-link">← Session 42</a>
+          <a href="08-23-2026b.html" class="prose-link">Session 44 →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

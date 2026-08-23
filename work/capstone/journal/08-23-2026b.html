@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 44 — A Banner That Refuses to Overclaim | Michael Rooney</title>
+    <meta
+      name="description"
+      content="Giving the live page the same honesty the history side just got — a real signal for which data source actually failed, and a banner deliberately worded not to imply anything it can't actually prove."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 44 — A Banner That Refuses to Overclaim — Michael Rooney" />
+    <meta property="og:description" content="A real signal for which data source failed on the live page, and a banner deliberately worded not to imply anything it can't actually prove." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-23-2026b.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 44 — A Banner That Refuses to Overclaim — Michael Rooney" />
+    <meta name="twitter:description" content="A real signal for which data source failed on the live page, worded deliberately not to imply anything it can't prove." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-23-2026b.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 44 — A Banner That Refuses to Overclaim",
+      "description": "Giving the live page the same honesty the history side just got — a real signal for which data source actually failed, and a banner deliberately worded not to imply anything it can't prove.",
+      "datePublished": "2026-08-23",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-23-2026b.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-23-2026">August 23, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 44 — A Banner That Refuses to Overclaim</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The history-side fix from earlier today only covers half the
+            real problem. A source can also fail at the exact moment
+            someone's looking at the live page — and until now, that
+            failure just made the affected services quietly disappear
+            from view, with nothing anywhere explaining why.
+          </p>
+
+          <h2>Knowing which promise actually broke</h2>
+
+          <p>
+            The live page fetches four categories at once and merges
+            whatever comes back. If one of those four rejects, the
+            merge logic already knew to just skip it — what it never
+            knew was <em>which one</em>. A rejected promise on its own
+            carries no label. The only place that information exists at
+            all is the promise's own position in the list it was fired
+            from, so the fix is really just paying attention to that
+            position instead of throwing it away — mapping each index
+            back to the real category name it belongs to, in the exact
+            order the four requests were actually sent.
+          </p>
+
+          <p class="callout">
+            The real risk with a fix like this is a quiet off-by-one —
+            blaming the wrong neighbor for a failure that wasn't
+            actually theirs. The test that actually catches that isn't
+            the obvious one (reject something in the middle of the
+            list); it's rejecting the very <em>first</em> item
+            specifically, since a shifted index would point at whatever
+            sits next to it instead and still look like it passed.
+          </p>
+
+          <h2>Saying only what's actually true</h2>
+
+          <p>
+            The tempting version of this banner said something like
+            "showing the last known state" for the affected category.
+            That's not actually what happens here. Every fetch either
+            fully succeeds or the response just resolves with fewer
+            services in it — nothing ever throws all the way up — which
+            means a failed category's services don't linger as stale
+            data, they're just gone from this refresh entirely. Claiming
+            otherwise would be a small, comfortable lie dressed up as
+            reassurance. The final copy says the plainer, less flattering
+            true thing instead: services in that category aren't shown
+            this cycle, not confirmed down.
+          </p>
+
+          <h2>One banner, not two</h2>
+
+          <p>
+            Two Prometheus-backed categories can fail on their live
+            status and their 90-day history independently, and often
+            will fail together, since both ultimately depend on the same
+            upstream. Rather than stacking two near-identical warnings on
+            top of each other, both signals get merged into one
+            deduplicated list before the banner ever renders — a visitor
+            sees one honest sentence about what's actually wrong, not two
+            slightly different ones saying almost the same thing.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-23-2026.html" class="prose-link">← Session 43</a>
+          <a href="08-23-2026c.html" class="prose-link">Session 45 →</a>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
