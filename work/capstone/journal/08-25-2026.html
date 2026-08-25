@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Status Page Was Never the Point | Michael Rooney</title>
+    <meta
+      name="description"
+      content="A single page that scrapes three APIs and shows some colored dots doesn't need a CD pipeline with automated rollback, an auto-incident threshold system, or a firewall-blocked production outage test. None of that was required by the actual problem. A short reflection on why it happened anyway, before diving into the last two scope docs."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The Status Page Was Never the Point — Michael Rooney" />
+    <meta property="og:description" content="A single page that scrapes three APIs and shows colored dots doesn't need a CD pipeline, an auto-incident threshold system, or a firewall-blocked outage test. None of that was required. A reflection on why it happened anyway." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-25-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Status Page Was Never the Point — Michael Rooney" />
+    <meta name="twitter:description" content="A status page doesn't need a CD pipeline or a firewall-blocked outage test. None of that was required. A reflection on why it happened anyway." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-25-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The Status Page Was Never the Point",
+      "description": "A single page that scrapes three APIs and shows colored dots doesn't need a CD pipeline, an auto-incident threshold system, or a firewall-blocked production outage test. None of that was required by the actual problem. A reflection on why it happened anyway.",
+      "datePublished": "2026-08-25",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-25-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-25-2026">August 25, 2026</time>
+            <span class="tag tag-reflection">Reflection</span>
+          </div>
+          <h1>The Status Page Was Never the Point</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The actual problem this project set out to solve is small.
+            Scrape a few APIs, roll the results up into a status, show
+            it on a page. That's genuinely it — the whole brief, honestly
+            described. Nothing about that brief requires a CD pipeline
+            with automated rollback. Nothing about it requires an
+            auto-drafted incident system with its own threshold logic.
+            Nothing about it requires a full test-coverage audit across
+            ten files, or a real production test where a monitoring
+            source got deliberately blocked from reaching the site,
+            timed against a 15-minute poll interval, just to prove a
+            single status value renders correctly. A minimal, entirely
+            reasonable version of this project would have taught me
+            React components and how to call <code>fetch</code>.
+          </p>
+
+          <p>
+            That's not what happened, and sitting with why felt worth
+            writing down before starting the last real stretch of this
+            — two more code-review passes, then the two scope docs that
+            were always meant to come last.
+          </p>
+
+          <h2>What the overbuilt version actually taught</h2>
+
+          <p>
+            None of the real complexity in this project came from the
+            brief. It came from a question that kept showing up after
+            each piece already worked: what happens when this breaks.
+            That question is where the CD pipeline came from — not
+            because deploying manually was hard, but because a bad
+            deploy should recover itself. It's where the auto-incident
+            threshold logic came from — not because manually noting an
+            outage was hard, but because a real outage shouldn't depend
+            on someone happening to be watching. It's where an entire
+            session spent deliberately breaking a monitoring source on
+            purpose, then chasing down two wrong guesses about why the
+            result looked wrong, came from — not because the feature
+            needed proving on paper, but because the only way to
+            actually trust it was watching it survive something real.
+          </p>
+
+          <p class="callout">
+            A tutorial-sized version of this project would have taught
+            me how to build a status page. The version that kept asking
+            "what happens when this breaks" taught me how production
+            systems actually behave under stress, and — more honestly —
+            taught me to stop trusting my own first explanation for
+            anything and go check the real source instead. That habit
+            showed up everywhere by the end: real proxy logs over
+            guessing, a real database query over assuming, a real
+            firewall rule over a comfortable theory.
+          </p>
+
+          <h2>The actual list</h2>
+
+          <p>
+            Design structure and component boundaries. Real scope and
+            documentation discipline — writing a decision down before
+            building it, and correcting the doc when the real
+            implementation didn't match the plan. Backend work that
+            went well past a simple proxy — caching, persistent storage,
+            a real database schema that had to evolve without breaking
+            existing data. Ansible, treated as the actual right way to
+            manage infrastructure rather than a set of manual steps
+            typed once and forgotten. A real CI/CD pipeline, built and
+            tested in both directions — not just the deploy that
+            succeeds, but the one that's supposed to fail safely too.
+          </p>
+
+          <p>
+            None of that was required by "scrape some APIs, show a
+            status." All of it came from choosing the harder, more
+            realistic version of each piece instead of stopping at
+            demo-quality. That's the actual honest answer to why a
+            status page ended up with this many logged sessions behind
+            it — not a scope-management failure, a deliberate one, made
+            over and over, to keep building the version of each feature
+            that would actually hold up.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-23-2026c.html" class="prose-link">← Session 45</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

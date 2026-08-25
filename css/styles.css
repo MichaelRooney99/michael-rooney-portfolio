@@ -665,6 +665,7 @@ button:focus-visible {
 .tag-projects { border-color: #facc15; color: #facc15; }
 .tag-certs    { border-color: #c084fc; color: #c084fc; }
 .tag-business { border-color: #60a5fa; color: #60a5fa; }
+.tag-reflection { border-color: #f472b6; color: #f472b6; }
 
 /* ═════════════════════════════════════════
    JOURNAL — INDEX
