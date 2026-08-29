@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Six Tasks That Reported Changed When Nothing Had — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Idempotent doesn't mean a task does nothing the second time — it means running it once or a hundred times leaves the same end state. A real bootstrap playbook proved the difference the hard way: six tasks kept reporting changed on every rerun, because raw command and shell calls have no concept of already-true."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Six Tasks That Reported Changed When Nothing Had — Michael Rooney" />
+    <meta property="og:description" content="Idempotent doesn't mean a task does nothing twice — it means the end state is the same either way. A real bootstrap playbook made the difference concrete: six tasks reporting changed on every single run, and why." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-28-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Six Tasks That Reported Changed When Nothing Had — Michael Rooney" />
+    <meta name="twitter:description" content="Idempotent doesn't mean a task does nothing twice — it means the end state is the same either way. A real bug made the difference concrete." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-28-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Six Tasks That Reported Changed When Nothing Had",
+      "description": "Idempotent doesn't mean a task does nothing the second time — it means running it once or a hundred times leaves the same end state. A real bootstrap playbook proved the difference: six tasks kept reporting changed on every rerun.",
+      "datePublished": "2026-08-28",
+      "url": "https://michaelrooney.dev/journal/08-28-2026.html",
+      "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-28-2026">August 28, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Six Tasks That Reported Changed When Nothing Had</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Idempotent doesn't mean a task does nothing the second time.
+            It means running it once, or running it a hundred times,
+            leaves the system in the same end state either way. That
+            distinction sounds pedantic until a real playbook proves it
+            — which is exactly what happened while bootstrapping a fresh
+            LXC for an Omada SDN controller today. Six tasks kept
+            reporting <code>changed</code> on every single rerun, even
+            though nothing about the container actually needed to
+            change after the first pass.
+          </p>
+
+          <h2>What was actually happening</h2>
+
+          <p>
+            The bootstrap step creates an <code>ansible</code> user
+            inside a brand-new container, drops in an SSH key, and
+            grants passwordless sudo — all through <code>pct exec</code>,
+            since the container has no SSH access yet on a fresh
+            template. The first version of that bootstrap looked
+            reasonable:
+          </p>
+
+          <pre><code>- name: Create .ssh directory for ansible user
+  ansible.builtin.command:
+    cmd: "pct exec {{ vmid }} -- mkdir -p /home/ansible/.ssh"
+  changed_when: true</code></pre>
+
+          <p>
+            Run it once, the directory gets created — correct. Run the
+            exact same playbook again an hour later, after nothing on
+            the container has changed, and it still reports
+            <code>changed</code>. Not because <code>mkdir -p</code> did
+            anything destructive — it's a genuinely harmless command to
+            re-run — but because the task itself never checked whether
+            the directory already existed before deciding to report a
+            change. It just ran, every time, and said "changed" every
+            time, regardless of whether anything was actually different
+            afterward.
+          </p>
+
+          <h2>Why command and shell default to lying about this</h2>
+          
+          <p>
+            Ansible's declarative modules — <code>apt</code>,
+            <code>systemd</code>, <code>file</code> — check real state
+            before acting. Ask <code>apt</code> to ensure a package is
+            <code>present</code>, and it looks first: already installed,
+            report <code>ok</code>; missing, install it and report
+            <code>changed</code>. That's the whole idempotency guarantee
+            built into the module.
+          </p>
+
+          <p>
+            <code>command</code> and <code>shell</code> don't get that
+            for free. They have no concept of "already true" — they just
+            run whatever string you hand them and report success or
+            failure. Ansible's own default, absent any other guidance,
+            is to assume any successful <code>command</code>/
+            <code>shell</code> execution counts as a change. That default
+            exists because there's no general way to know whether an
+            arbitrary shell command changed anything — so it's a
+            reasonable default, but it's still a default that's wrong
+            unless the task tells Ansible otherwise.
+          </p>
+
+          <h2>The fix is always the same shape: check, then gate</h2>
+
+          <p>
+            The pattern that actually works is checking real state first
+            in its own task, then gating the mutating task behind that
+            check:
+          </p>
+
+          <pre><code>- name: Check if .ssh directory already exists
+  ansible.builtin.command:
+    cmd: "pct exec {{ vmid }} -- test -d /home/ansible/.ssh"
+  register: ssh_dir_check
+  changed_when: false
+  failed_when: false
+
+- name: Create .ssh directory for ansible user
+  ansible.builtin.command:
+    cmd: "pct exec {{ vmid }} -- mkdir -p /home/ansible/.ssh"
+  when: ssh_dir_check.rc != 0</code></pre>
+
+          <p>
+            Now the create task only runs — and only reports
+            <code>changed</code> — when the directory is actually
+            missing. Second run, the check finds it already exists, the
+            create task is skipped entirely, and the recap says exactly
+            what's true: nothing changed. Same shape applies to
+            comparing file <em>content</em>, not just existence —
+            catching the SSH key and sudoers file needed the check task
+            to <code>cat</code> the existing content and compare it
+            against what should be there, not just confirm the file was
+            present.
+          </p>
+
+          <p class="callout">
+            This wasn't the first time this exact bug shape turned up in
+            this project. A
+            <a href="../work/capstone/journal/08-10-2026b.html" class="prose-link">
+              real idempotency-verification pass in August</a>
+            found a Prometheus ACL task with the identical problem — a
+            bare <code>command</code> with no <code>when</code> guard,
+            reporting <code>changed: true</code> unconditionally on
+            every run. Same root cause, different playbook. Once you've
+            seen the shape once, it's worth checking for everywhere a
+            raw <code>command</code> or <code>shell</code> task shows up
+            without a guard.
+          </p>
+
+          <h2>Why a clean rerun is the actual point</h2>
+
+          <p>
+            The payoff isn't cosmetic. A genuinely idempotent playbook
+            can be re-run any time without thinking about current state
+            first — no mental tracking of "did I already run this on
+            Shasta." The playbook becomes a statement of what the system
+            <em>should</em> look like, and running it just confirms or
+            corrects toward that, safely, regardless of how many times
+            it's already run. That's also precisely what
+            <code>verify_idempotency.sh</code> exists to catch
+            automatically — run a playbook twice, fail loudly if the
+            second run reports anything other than
+            <code>changed=0</code> — rather than relying on someone
+            noticing a suspicious recap by eye.
+          </p>
+
+          <p>
+            The concept isn't specific to Ansible, either. It's the same
+            property that separates
+            <a href="https://developer.mozilla.org/en-US/docs/Glossary/Idempotent" class="prose-link">
+              HTTP's idempotent methods</a>
+            (<code>PUT</code>, <code>DELETE</code>) from the ones that
+            aren't (<code>POST</code>) — a repeated <code>PUT</code>
+            should leave a resource in the same state as a single one,
+            while a repeated <code>POST</code> might create the same
+            thing twice. Same underlying question either way: if this
+            runs again by accident, does the end state stay correct, or
+            does it quietly drift?
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-22-2026.html" class="prose-link">← Previous: 08-22-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+          <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
