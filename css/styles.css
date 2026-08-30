@@ -1002,6 +1002,33 @@ button:focus-visible {
 }
 
 /* ─────────────────────────────────────────
+   CASE STUDY — STATS STRIP
+───────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2rem;
+  margin: 2.5rem 0;
+}
+
+.stat-number {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  color: var(--accent);
+  line-height: 1;
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* ─────────────────────────────────────────
    PORTFOLIO SHOWCASE
 ───────────────────────────────────────── */
 .showcase-grid {
