@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 46 — Load to Render, Explained Out Loud — Michael Rooney</title>
+    <meta
+      name="description"
+      content="The first of two final repetition passes before Architecture Synthesis begins — tracing a single request end to end, hook to render, in the exact terms I'd use explaining it to Perry. One assumption about the Prometheus adapter bypassing the BFF didn't survive a second look, and three leftover comments got rewritten to match the rest of the codebase's standard."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 46 — Load to Render, Explained Out Loud — Michael Rooney" />
+    <meta property="og:description" content="Tracing a single request end to end — hook to render — in the exact terms I'd use explaining it to Perry, plus a wrong assumption caught and three comments cleaned up along the way." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-27-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 46 — Load to Render, Explained Out Loud — Michael Rooney" />
+    <meta name="twitter:description" content="Tracing a single request end to end — hook to render — in the exact terms I'd use explaining it to Perry, plus a wrong assumption caught and three comments cleaned up along the way." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-27-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 46 — Load to Render, Explained Out Loud",
+      "description": "The first of two final repetition passes before Architecture Synthesis begins — tracing a single request end to end, hook to render, in the exact terms I'd use explaining it to Perry. One assumption about the Prometheus adapter bypassing the BFF didn't survive a second look, and three leftover comments got rewritten to match the rest of the codebase's standard.",
+      "datePublished": "2026-08-27",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-27-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-27-2026">August 27, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 46 — Load to Render, Explained Out Loud</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            This is the first of two remaining code-review passes before
+            <code>24-Architecture Synthesis</code> starts — deliberately
+            planned as repetition for familiarity, not bug-hunting. The
+            angle this time: trace one real request end to end, from the
+            moment the page loads to the moment something renders, and
+            narrate the <em>why</em> at every hop the same way I'd have to
+            if Perry stopped me mid-sentence and asked "wait, why does it
+            do that." Three earlier passes each used a different technique
+            — a full front-to-back read, working backward from a live
+            outage, reading test names before implementation. This one
+            follows the data instead of the file tree.
+          </p>
+
+          <h2>The read path starts with a decision, not a fetch</h2>
+
+          <p>
+            <code>useServiceStatus</code> is the hook the whole app is
+            built around, and the first real decision in it isn't the
+            fetch itself — it's <a href="https://tanstack.com/query/latest/docs/framework/react/reference/useQuery" target="_blank" rel="noopener noreferrer">TanStack Query</a>
+            over a hand-rolled <code>useEffect</code>/<code>setInterval</code>.
+            The reason matters specifically for a status page: a plain
+            interval stops firing the moment a browser throttles a
+            backgrounded tab, which is exactly the moment someone would
+            still want to know their homelab went down.
+            <code>refetchIntervalInBackground</code> bypasses that. The
+            60-second poll and 55-second <code>staleTime</code> aren't
+            arbitrary either — leaving a 5-second gap means a component
+            remounting right at the boundary never double-fetches or
+            serves data that's technically stale.
+          </p>
+
+          <p>
+            From there, <code>services/index.ts</code> is the facade —
+            four adapters run through
+            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled" target="_blank" rel="noopener noreferrer"><code>Promise.allSettled</code></a>,
+            not <code>Promise.all</code>, because one dead source
+            shouldn't blank the whole page. The genuinely sharp detail
+            here: a rejected promise carries no indication of which
+            adapter actually failed, so a parallel array
+            (<code>SERVICE_ADAPTER_CATEGORIES</code>), same order, exists
+            purely to attribute a failure back to a name the unavailable-
+            categories banner can show.
+          </p>
+
+          <h2>An assumption that didn't survive a second look</h2>
+
+          <p>
+            Reading <code>prometheus.ts</code> in isolation, it looks like
+            it skips the proxy entirely — it defaults to
+            <code>http://10.10.10.105:9090</code> directly, with no
+            <code>PROXY_URL</code> anywhere in the file, while
+            <code>proxmox.ts</code> and <code>zabbix.ts</code> both call
+            through the proxy explicitly. That would have been a real
+            inconsistency worth flagging to Perry as a gap. It isn't one.
+            <code>VITE_PROMETHEUS_URL</code> gets baked to a same-origin
+            <code>/prometheus</code> path at build time, and nginx forwards
+            that straight into this same proxy's own allowlisted route —
+            see <a href="06-10-2026.html" class="prose-link">the session that first built the proxy layer</a>
+            for why that boundary exists at all. Same BFF, same trust
+            boundary, just reached through build-time environment
+            substitution instead of a hardcoded call. Worth having caught
+            that before saying the wrong thing out loud in an interview.
+          </p>
+
+          <h2>The proxy is the trust boundary, not just a relay</h2>
+
+          <p>
+            Every route the client actually calls — <code>/prometheus</code>,
+            <code>/proxmox</code>, <code>/zabbix</code> — is path- or
+            method-allowlisted, not just forwarded. That's the real answer
+            to "why does a BFF exist" if Perry asks it directly: it's not
+            only about hiding the Proxmox token and Zabbix bearer token
+            from the browser, it's the only place that can actually
+            restrict what those tokens are allowed to do once they leave
+            this server. Before the allowlists existed, any path or method
+            reached the real upstream API with the real credential
+            attached — a theoretical hole turned into a concrete one the
+            moment this became a public origin.
+          </p>
+
+          <h2>Two background loops, on purpose, not by accident</h2>
+
+          <p>
+            <code>poller.ts</code> runs every 15 minutes, records a
+            snapshot, and re-derives an incident-worthy streak straight
+            from the snapshots table rather than tracking it in memory —
+            so a proxy restart never silently loses where a service was
+            mid-streak. <code>nudge.ts</code> runs every 20 seconds and
+            does a cheap signature comparison across all three sources,
+            pushing a live update only when something actually changed.
+            The two intervals are deliberately different clocks: reusing
+            the 15-minute poll for nudges would make Proxmox API and
+            Zabbix updates <em>slower</em> than the 60-second client
+            polling the nudge channel exists to beat.
+          </p>
+
+          <h2>How an incident actually gets created</h2>
+
+          <p>
+            Two genuinely separate write paths land in the same
+            <code>drafted_incidents</code> table. Auto-drafted incidents
+            come from the poller's threshold check — two consecutive bad
+            readings, roughly 30 minutes of sustained outage — and carry a
+            hardcoded "Auto-detected" message. Manual incidents come from
+            the <code>/admin/incidents</code> route with a real title and
+            message an admin typed. They're not one function with a
+            <code>source</code> parameter because the auto path's canned
+            message text would be actively misleading attached to
+            something a person actually wrote. The dedup check that stops
+            a service from getting two open incidents filters explicitly
+            to <code>source = 'auto'</code> — without that filter, a
+            manual incident referencing the same service would look like
+            an already-open incident to the threshold checker and quietly
+            suppress a real auto-draft.
+          </p>
+
+          <p>
+            Retirement runs the same logic every poller tick: force-resolve
+            anything unresolved past 90 days, with an honest "Auto-closed"
+            note written first, then delete anything resolved past that
+            same window. Both keyed on <code>created_at</code>, one clock,
+            not two — which means a force-resolved incident becomes
+            eligible for deletion in that same pass, not some grace period
+            later. Deletion itself is gated separately: the delete route
+            returns a 409 unless status is already <code>resolved</code>,
+            enforcing a real lifecycle — investigating, resolved, retired
+            — rather than a shortcut straight from active to gone.
+          </p>
+
+          <h2>What actually reaches the screen</h2>
+
+          <p>
+            <code>App.tsx</code> groups services against a fixed category
+            order that mirrors how infrastructure actually gets checked in
+            practice — compute, then the API layer in front of it, then
+            power, then network — not alphabetical order. A category that
+            isn't in that list still renders, into a trailing "Other"
+            bucket, specifically so a new category showing up in live data
+            can never silently disappear just because the array wasn't
+            updated for it.
+          </p>
+
+          <p>
+            The command palette (<code>⌘K</code>, <code>Ctrl+K</code>, or
+            <code>/</code>, matching GitHub's own jump-to convention) is
+            hand-rolled rather than a library, consistent with every other
+            small UI primitive in this app. Selecting a service opens
+            <code>ServiceDetailModal</code>, which branches by category —
+            Proxmox Nodes and Power query Prometheus range endpoints
+            directly, Proxmox API and Zabbix hit the proxy's own
+            <code>/history/:serviceId/recent</code> route, which is just
+            the same table the poller writes to every 15 minutes, read
+            back out. Two different sources landing in one shape so the
+            chart component never has to know which one it's looking at —
+            the same normalization idea from the facade, one level deeper.
+            One detail worth being able to say plainly: syncing state to a
+            changed prop (the palette's active-index reset, the incident
+            card's forced-open state) happens <em>during render</em>, per
+            <a href="https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes" target="_blank" rel="noopener noreferrer">React's own guidance</a>
+            on that exact pattern — while the actual
+            <code>scrollIntoView</code> call stays in a
+            <code>useEffect</code>, since that's a real interaction with
+            something outside React, not a state update.
+          </p>
+
+          <h2>Three comments that didn't sound like the rest of the file</h2>
+
+          <p>
+            The trace also turned up something that wasn't architectural
+            at all — a few leftover comments in
+            <code>prometheus.ts</code> and one line in the proxy's
+            <code>/incidents</code> route that read like notes to myself
+            rather than documentation, out of step with how disciplined
+            every other comment in this codebase already is. Small fix,
+            but a real one: this code is meant to be read by a hiring
+            audience, and one file sounding noticeably more casual than
+            its neighbors is the kind of thing that stands out for the
+            wrong reason. All three got rewritten to explain their actual
+            reasoning in the same self-contained terms the rest of the
+            project already holds itself to.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            One full request, traced start to finish, with one wrong
+            assumption caught before it became a wrong answer in an
+            interview and three small honesty fixes along the way. Pass
+            two is next — the admin UI and the incident-authoring surface
+            are the areas this pass didn't touch — and then
+            <code>24-Architecture Synthesis</code> begins for real.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-23-2026c.html">← Session 45</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
