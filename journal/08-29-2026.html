@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ad-Blocking at the Router With Unbound's DNSBL Engine — Michael Rooney</title>
+    <meta
+      name="description"
+      content="OPNsense's newer Unbound blocklist engine lets one policy stack multiple DNSBL feeds — EasyList, EasyPrivacy, AdGuard, a threat-intel list, and a Hagezi tier — into a single network-wide ad and tracker block. The real work isn't picking a list, it's proving the block actually reaches every VLAN."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Ad-Blocking at the Router With Unbound's DNSBL Engine — Michael Rooney" />
+    <meta property="og:description" content="OPNsense's Unbound blocklist engine stacks multiple DNSBL feeds into one network-wide policy. Picking the lists is the easy part — proving the block actually reaches every VLAN is the real work." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-29-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ad-Blocking at the Router With Unbound's DNSBL Engine — Michael Rooney" />
+    <meta name="twitter:description" content="OPNsense's Unbound blocklist engine stacks multiple DNSBL feeds into one network-wide policy — and the real work is proving it reaches every VLAN." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-29-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Ad-Blocking at the Router With Unbound's DNSBL Engine",
+      "description": "OPNsense's newer Unbound blocklist engine lets one policy stack multiple DNSBL feeds into a single network-wide ad and tracker block. The real work isn't picking a list, it's proving the block actually reaches every VLAN.",
+      "datePublished": "2026-08-29",
+      "url": "https://michaelrooney.dev/journal/08-29-2026.html",
+      "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-29-2026">August 29, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Ad-Blocking at the Router With Unbound's DNSBL Engine</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            Blocking ads at the router instead of in the browser means
+            one policy covers every device on the network — phones,
+            smart-home gadgets, guest devices on VLAN 30 — without
+            installing an extension anywhere. OPNsense already runs
+            Unbound as the network's DNS resolver, and its newer
+            blocklist engine turns that resolver into a DNS-level ad
+            and tracker filter with a single policy, no separate
+            appliance required.
+          </p>
+
+          <h2>What actually changed in OPNsense's blocklist page</h2>
+
+          <p>
+            Older guides for this feature describe a checklist of
+            preset feeds under a single "enable blocklists" toggle.
+            The current UI (Services → Unbound DNS → Blocklists,
+            OPNsense 25.7.8+) is a proper table of policy entries
+            instead — each one its own row with a multi-select "Type
+            of DNSBL" field, an optional custom URL field, and its own
+            allowlist, blocklist, wildcard, and source-network scoping.
+            That last part matters: a policy can be scoped to specific
+            source nets, so a VLAN could in principle get a different
+            block policy than the main LAN, or none at all. For a first
+            pass, one policy with source net left blank covers
+            everything — LAN and <code>edge_Lab</code> (VLAN 20) alike.
+          </p>
+
+          <h2>What's actually in the stack</h2>
+
+          <p>
+            A single policy can combine multiple DNSBL sources —
+            Unbound dedupes overlap automatically, so stacking lists
+            doesn't double-count matches:
+          </p>
+
+          <ul>
+            <li><strong>EasyList</strong> — the base list most browser ad-blockers are built on; ad-serving domains specifically.</li>
+            <li><strong>EasyPrivacy</strong> — EasyList's companion, targeting tracking/analytics domains rather than ad servers.</li>
+            <li><strong>AdGuard List</strong> — a general-purpose ads/tracking list, similar tier to the StevenBlack hosts list.</li>
+            <li><strong>Abuse.ch – ThreatFox IOC database</strong> — malware/botnet command-and-control indicators. Not ad-related, but a reasonable inclusion since the mechanism is identical: block a domain at resolution time.</li>
+            <li><strong>Hagezi Multi NORMAL</strong> — a combined ads/tracking/security list, one tier up in aggressiveness from a single-purpose list like EasyList alone.</li>
+          </ul>
+
+          <p>
+            Five sources sounds redundant, but redundant coverage is
+            cheap here — the cost is a slightly longer initial build
+            when Unbound pulls and merges the feeds, not runtime
+            overhead per query.
+          </p>
+
+          <h2>Verifying it actually works, not just configured</h2>
+
+          <p>
+            Same principle that applies everywhere else in this
+            homelab: query the actual source, don't trust the UI
+            saying "Apply" succeeded. OPNsense ships a built-in
+            <strong>Tester</strong> tab next to Blocklists for exactly
+            this — enter a known ad domain, and it returns the matched
+            policy directly:
+          </p>
+
+          <pre><code>{
+  "status": "OK",
+  "action": "Block",
+  "address": "0.0.0.0",
+  "policy": {
+    "description": "Ad-Blocker",
+    "bl": "custom1"
+  }
+}</code></pre>
+
+          <p>
+            That confirms the list logic is correct, but it's a local
+            simulation inside Unbound — it doesn't prove a real client
+            is actually using this resolver. The second check has to
+            come from an actual device: <code>nslookup
+            ads.google.com</code> pointed at OPNsense's LAN IP, from a
+            machine on the network, confirming the same
+            <code>0.0.0.0</code> result outside the tester's sandbox.
+            Both checks passed here — tester and live client agreed.
+          </p>
+
+          <h2>The one hidden dependency: DHCP</h2>
+
+          <p>
+            None of this blocks anything for a client that isn't
+            actually querying Unbound. If any DHCP scope hands out a
+            different DNS server — a public resolver, or anything
+            other than OPNsense's own IP — devices on that scope skip
+            the filter entirely, silently, with no error to indicate
+            why ads are still loading. Worth a periodic check on each
+            VLAN's DHCP configuration, not just a one-time confirmation
+            at setup — the same reasoning that applies to
+            <a href="04-10-2026.html" class="prose-link">VLAN segmentation and firewall-enforced isolation</a>
+            generally: a policy is only as real as the traffic that
+            actually flows through it.
+          </p>
+
+          <h2>Triage first, disable never</h2>
+
+          <p>
+            With Hagezi's NORMAL tier in the stack, something eventually
+            breaks — a smart-home integration phoning home to a domain
+            that gets caught, or an app that depends on an analytics
+            endpoint to function rather than just to track. The fix in
+            that case is adding the specific domain to the policy's own
+            Allowlist Domains field, not disabling the blocklist
+            wholesale. Same instinct as the
+            <a href="https://docs.opnsense.org/manual/unbound.html" class="prose-link">Unbound blocklist documentation</a>
+            recommends — narrow the exception, keep the policy.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-28-2026.html" class="prose-link">← Previous: 08-28-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+          <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
