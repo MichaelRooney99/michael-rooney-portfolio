@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 48 — The One-Page Version of Everything — Michael Rooney</title>
+    <meta
+      name="description"
+      content="Building a real architecture document for the repo — one diagram covering the live application and the independent deploy pipeline, a request-lifecycle walkthrough, and a self-contained decisions index. The deploy pipeline's description was verified directly against the real webhook receiver and Ansible playbook files rather than reconstructed from memory."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 48 — The One-Page Version of Everything — Michael Rooney" />
+    <meta property="og:description" content="A real architecture document for the repo — one diagram, a request-lifecycle walkthrough, and a self-contained decisions index, with the deploy pipeline verified against the real scripts rather than memory." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-29-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 48 — The One-Page Version of Everything — Michael Rooney" />
+    <meta name="twitter:description" content="A real architecture document for the repo — one diagram, a request-lifecycle walkthrough, and a self-contained decisions index, with the deploy pipeline verified against the real scripts rather than memory." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-29-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 48 — The One-Page Version of Everything",
+      "description": "Building a real architecture document for the repo — one diagram covering the live application and the independent deploy pipeline, a request-lifecycle walkthrough, and a self-contained decisions index. The deploy pipeline's description was verified directly against the real webhook receiver and Ansible playbook files rather than reconstructed from memory.",
+      "datePublished": "2026-08-29",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-29-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-29-2026">August 29, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 48 — The One-Page Version of Everything</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            With <a href="08-28-2026.html" class="prose-link">both code-review passes</a>
+            done, this session had one real job: write the document that
+            answers "why is this built this way" without making anyone go dig
+            through the actual commit history to find out. The result is
+            a real <code>ARCHITECTURE.md</code> now living in the repo
+            itself, built around one diagram, a request-lifecycle
+            walkthrough, and a decisions index that explains itself
+            without pointing anywhere else.
+          </p>
+
+          <h2>Two flows, drawn separately, on purpose</h2>
+
+          <p>
+            The diagram splits cleanly into two halves that share almost
+            nothing at the edge: the live application, and the deploy
+            pipeline that ships changes to it. That's not a layout choice,
+            it's the actual shape of the infrastructure — two independent
+            Cloudflare tunnels, two different Access policy types. The
+            public tunnel is read-only from the internet's perspective;
+            the deploy tunnel is the only write-capable edge surface in
+            the whole system, and it's gated by a service-token policy
+            built for a machine, not an identity-based policy built for a
+            person logging in. Drawing them as one undifferentiated
+            "Cloudflare" box would have hidden the one distinction that
+            actually matters here. For anyone curious about the general
+            approach behind a diagram like this — one page, every real
+            component, nothing abstracted away — the
+            <a href="https://c4model.com/" class="prose-link" target="_blank" rel="noopener noreferrer">C4 model</a>
+            is a well-known reference point for that kind of
+            system-level view.
+          </p>
+
+          <h2>Verifying the deploy pipeline against the real scripts, not memory</h2>
+
+          <p>
+            The deploy pipeline hadn't come up directly in either review
+            pass, so writing about it accurately meant going back to the
+            actual source instead of reconstructing it from what a past
+            session's journal entry said about it. Pulling the real
+            webhook receiver script and the real Ansible playbook
+            confirmed a few specific details worth having exactly right:
+            the receiver runs a deploy in a background thread and returns
+            a <code>202</code> immediately, specifically because the
+            triggering HTTP client — GitHub Actions — would likely time
+            out holding a connection open for a full deploy's duration.
+            The playbook captures the current commit as its own first
+            step, before touching anything else, so the rollback target
+            always exists before there's anything to roll back from. And
+            the rollback path still fails the overall run even after a
+            successful rollback — a real, deliberate distinction: the
+            service recovering is not the same thing as the requested
+            deploy having succeeded.
+          </p>
+
+          <h2>A decisions index, not a decisions repeat</h2>
+
+          <p>
+            The temptation with a document like this is to re-explain
+            every decision from scratch. Instead, the index is a short
+            table — decision, one real sentence of reasoning — pulled
+            from judgment calls tracked throughout the project as they
+            actually got made, not reconstructed from memory at the end.
+            A few of them are worth naming here because they show the
+            same pattern repeating in different subsystems: duplicating a
+            small piece of status-derivation logic across three files
+            instead of building shared-package tooling for something that
+            small, a hybrid live-update signal that tells the client to
+            refetch early instead of pushing real state over the wire,
+            and staying on manual deploys for most of this project's life
+            before CD was ever justified. Same underlying instinct each
+            time — the cheaper option, and a real reason it isn't a
+            compromise.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            The diagram now also exists as a
+            <a href="../../../img/architecture-diagram.pdf" class="prose-link" target="_blank" rel="noopener noreferrer">PDF</a> for anyone who'd rather
+            open it directly than browse to GitHub. That closes out the
+            architecture documentation. One real deliverable left on this
+            project now — a portfolio case study, external-facing and
+            narrative rather than technical, which is a genuinely
+            different kind of writing than anything in this entry.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-28-2026.html">← Session 47</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>

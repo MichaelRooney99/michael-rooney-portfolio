@@ -96,7 +96,7 @@
           <p>
             <code>useServiceStatus</code> is the hook the whole app is
             built around, and the first real decision in it isn't the
-            fetch itself — it's <a href="https://tanstack.com/query/latest/docs/framework/react/reference/useQuery" target="_blank" rel="noopener noreferrer">TanStack Query</a>
+            fetch itself — it's <a href="https://tanstack.com/query/latest/docs/framework/react/reference/useQuery" class="prose-link" target="_blank" rel="noopener noreferrer">TanStack Query</a>
             over a hand-rolled <code>useEffect</code>/<code>setInterval</code>.
             The reason matters specifically for a status page: a plain
             interval stops firing the moment a browser throttles a
@@ -112,7 +112,7 @@
           <p>
             From there, <code>services/index.ts</code> is the facade —
             four adapters run through
-            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled" target="_blank" rel="noopener noreferrer"><code>Promise.allSettled</code></a>,
+            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled" class="prose-link" target="_blank" rel="noopener noreferrer"><code>Promise.allSettled</code></a>,
             not <code>Promise.all</code>, because one dead source
             shouldn't blank the whole page. The genuinely sharp detail
             here: a rejected promise carries no indication of which
@@ -236,7 +236,7 @@
             One detail worth being able to say plainly: syncing state to a
             changed prop (the palette's active-index reset, the incident
             card's forced-open state) happens <em>during render</em>, per
-            <a href="https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes" target="_blank" rel="noopener noreferrer">React's own guidance</a>
+            <a href="https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes" class="prose-link" target="_blank" rel="noopener noreferrer">React's own guidance</a>
             on that exact pattern — while the actual
             <code>scrollIntoView</code> call stays in a
             <code>useEffect</code>, since that's a real interaction with
