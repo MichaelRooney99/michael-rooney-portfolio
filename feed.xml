@@ -5,14 +5,35 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Sat, 29 Aug 2026 22:55:25 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 30 Aug 2026 02:13:49 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Session 48 — The One-Page Version of Everything</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-29-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-29-2026.html</guid>
+      <pubDate>Sat, 29 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A real architecture document for the repo — one diagram, a request-lifecycle walkthrough, and a self-contained decisions index, with the deploy pipeline verified against the real scripts rather than memory.]]></description>
+    </item>
     <item>
       <title>Six Tasks That Reported Changed When Nothing Had</title>
       <link>https://michaelrooney.dev/journal/08-28-2026.html</link>
       <guid isPermaLink="true">https://michaelrooney.dev/journal/08-28-2026.html</guid>
       <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Idempotent doesn't mean a task does nothing twice — it means the end state is the same either way. A real bootstrap playbook made the difference concrete: six tasks reporting changed on every single run, and why.]]></description>
+    </item>
+    <item>
+      <title>Session 47 — The One Place This App Ever Renders Free Text as HTML</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-28-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-28-2026.html</guid>
+      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Tracing the admin page pass one skipped — no login form by design, the origin field driving which buttons render, and a full explanation of the two escaping functions standing between admin-typed text and a stored XSS bug.]]></description>
+    </item>
+    <item>
+      <title>Session 46 — Load to Render, Explained Out Loud</title>
+      <link>https://michaelrooney.dev/work/capstone/journal/08-27-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/capstone/journal/08-27-2026.html</guid>
+      <pubDate>Thu, 27 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Tracing a single request end to end — hook to render — in the exact terms I'd use explaining it to Perry, plus a wrong assumption caught and three comments cleaned up along the way.]]></description>
     </item>
     <item>
       <title>The Status Page Was Never the Point</title>
