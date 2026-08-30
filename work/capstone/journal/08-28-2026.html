@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 47 — The One Place This App Ever Renders Free Text as HTML — Michael Rooney</title>
+    <meta
+      name="description"
+      content="The second and final review pass on this project — tracing the admin page pass one skipped entirely: no login form by design, the origin field driving which buttons even render, and the one real security detail worth explaining in full: why two small escaping functions are the only thing standing between admin-typed text and a stored XSS bug."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 47 — The One Place This App Ever Renders Free Text as HTML — Michael Rooney" />
+    <meta property="og:description" content="Tracing the admin page pass one skipped — no login form by design, the origin field driving which buttons render, and a full explanation of the two escaping functions standing between admin-typed text and a stored XSS bug." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/08-28-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 47 — The One Place This App Ever Renders Free Text as HTML — Michael Rooney" />
+    <meta name="twitter:description" content="Tracing the admin page pass one skipped — no login form by design, the origin field driving which buttons render, and a full explanation of the two escaping functions standing between admin-typed text and a stored XSS bug." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/08-28-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 47 — The One Place This App Ever Renders Free Text as HTML",
+      "description": "The second and final review pass on this project — tracing the admin page pass one skipped entirely: no login form by design, the origin field driving which buttons even render, and the one real security detail worth explaining in full: why two small escaping functions are the only thing standing between admin-typed text and a stored XSS bug.",
+      "datePublished": "2026-08-28",
+      "url": "https://michaelrooney.dev/work/capstone/journal/08-28-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-28-2026">August 28, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>Session 47 — The One Place This App Ever Renders Free Text as HTML</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            <a href="08-27-2026.html" class="prose-link">The last session</a>
+            traced a single request end to end and closed on an honest gap:
+            it never touched the admin page. This session closes that gap
+            and, with it, the second of the two planned repetition passes
+            for this project. The admin
+            surface turned out to be worth its own full session — it's not
+            a React route at all, and it's the one place in this entire
+            codebase where a person's free-typed text becomes rendered HTML.
+          </p>
+
+          <h2>Not a React route, and no login form — both on purpose</h2>
+
+          <p>
+            <code>client/public/admin/index.html</code> is a standalone
+            static page, served by nginx, completely outside the Vite/React
+            build. The reasoning is stated directly in the file's own header
+            comment: <code>App.tsx</code> has no router, and adding one for
+            exactly one admin screen would be a real new dependency for a
+            single page. There's no login form either, and that's not an
+            oversight — this page assumes Cloudflare Access is already
+            gating <code>/admin/*</code> at the edge. If the page loaded at
+            all, Access already decided the visitor belongs there. The
+            fetch calls underneath carry no credentials of their own. That
+            lines up exactly with the honest caveat already sitting in
+            <code>index.ts</code>'s own comment on these routes: zero
+            independent server-side verification today, with validating
+            the real Access JWT named explicitly as a deferred follow-up,
+            not a gap nobody noticed.
+          </p>
+
+          <h2>One field from last session is doing all the real work here</h2>
+
+          <p>
+            Every incident this page renders branches on <code>origin</code>
+            — the exact field <a href="08-27-2026.html" class="prose-link">traced last session</a>
+            as the thing <code>/incidents</code> stamps onto every entry at
+            read time. <code>'file'</code> gets exactly one button, Promote
+            to editable, and nothing else — a file-backed incident is
+            read-only here by design. Anything database-backed gets the
+            real controls: an update field, Resolve while active, Delete
+            once resolved. It's a small thing to say out loud, but a real
+            one: that field wasn't bookkeeping, it's the single piece of
+            data deciding which buttons a person even sees.
+          </p>
+
+          <h2>The delete button double-checks a guard it shouldn't need</h2>
+
+          <p>
+            Delete only ever renders once an incident's status is already
+            <code>resolved</code>, and the handler still checks for a
+            <code>409</code> response from the server anyway. <a href="08-21-2026b.html" class="prose-link">The session that built the promote flow</a>
+            established the same pattern for a different route — the
+            server enforces the real lifecycle, the client just tries not
+            to offer a button that would fail, and checks honestly for the
+            case where it's wrong rather than assuming its own guard is
+            airtight.
+          </p>
+
+          <h2>Why free text becomes HTML in exactly one place, and how that's handled</h2>
+
+          <p>
+            This is worth explaining in full, because it's the one genuine
+            security-relevant decision on this entire page. Every incident
+            in the list is built as a template-literal string and assigned
+            to <code>innerHTML</code> — not <code>textContent</code>,
+            because the markup includes real structure (buttons, a
+            collapsible update list, conditional action sets), not just
+            plain text. The values dropped into that template — an
+            incident's title, its status tag, its update messages — come
+            from an admin typing into a text field. Nowhere else in this
+            app does that happen. Service names, categories, and metrics
+            all come from infrastructure APIs; nothing about them is
+            free-typed by a person. This page is the one place a human's
+            own words become part of an HTML string another browser will
+            parse and execute.
+          </p>
+
+          <p>
+            Without protection, that's a textbook stored-XSS path — see
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML#security_considerations" target="_blank" rel="noopener noreferrer">MDN's own security note on <code>innerHTML</code></a>
+            for why. An incident titled something like
+            <code>&lt;img src=x onerror=alert(1)&gt;</code> would, on the
+            very next page load, execute as real script for whoever's
+            looking at the admin panel — not a hypothetical, exactly the
+            behavior <code>innerHTML</code> is documented to have.
+          </p>
+
+          <p>
+            The fix here is two small functions, <code>escapeHtml</code>
+            and <code>escapeAttr</code>, and every dynamic value in the
+            render function passes through one of them before it reaches
+            the template string. <code>escapeHtml</code> doesn't use a
+            regex at all — it creates a detached <code>&lt;div&gt;</code>,
+            assigns the raw string to its <code>textContent</code>, then
+            reads the same element's <code>innerHTML</code> back out. That
+            round trip is the actual escaping mechanism: setting
+            <code>textContent</code> stores the string as a plain text
+            node with no HTML interpretation, and reading
+            <code>innerHTML</code> forces the browser to re-serialize that
+            text node back into safe HTML, encoding <code>&amp;</code>,
+            <code>&lt;</code>, and <code>&gt;</code> as entities in the
+            process. It's the browser's own serializer doing the escaping,
+            not hand-written string replacement that could miss a case.
+          </p>
+
+          <p>
+            <code>escapeAttr</code> exists because that round trip alone
+            isn't enough everywhere. The browser only encodes the
+            characters that are actually dangerous inside HTML text
+            content — a bare double quote is harmless there and stays
+            untouched. But two values (<code>data-id</code> and
+            <code>data-title</code>) get written into double-quoted HTML
+            attributes, not text content, and an unescaped
+            <code>"</code> in that position closes the attribute early,
+            handing an attacker the ability to inject a new attribute —
+            an inline event handler, for instance — onto that same
+            element. <code>escapeAttr</code> is <code>escapeHtml</code>
+            plus one explicit <code>.replace(/"/g, '&amp;quot;')</code> on
+            top, specifically for that narrower, attribute-context risk.
+            Two functions, not one, because they're closing two genuinely
+            different holes.
+          </p>
+
+          <p>
+            Worth naming the contrast, too: none of this is necessary on
+            the public status page. <code>IncidentList.tsx</code> renders
+            the same title and update-message fields as plain JSX
+            expressions, and React escapes every JSX-interpolated value by
+            default unless something explicitly opts out with
+            <code>dangerouslySetInnerHTML</code>, which nothing in this
+            codebase does. The admin page needed hand-written escaping
+            specifically because it's plain JavaScript building raw HTML
+            strings — the exact tradeoff that comes with skipping a
+            framework for a single screen, made deliberately, and handled
+            correctly rather than just accepted as a risk.
+          </p>
+
+          <h2>Where this leaves things</h2>
+
+          <p>
+            Between this session and last, every real corner of the app
+            has now been walked out loud at least once — the live-data
+            read path, the two background loops, the incident write path
+            on both the auto and manual sides, and now the one screen
+            where a person's own text becomes part of the page. Both
+            repetition passes are done.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-27-2026.html">← Session 46</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
