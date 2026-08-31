@@ -2,22 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://michaelrooney.dev/index.html</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://michaelrooney.dev/journal.html</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://michaelrooney.dev/portfolio-showcase.html</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://michaelrooney.dev/work/capstone/capstone-index.html</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -26,13 +26,18 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://michaelrooney.dev/journal/08-30-2026.html</loc>
+    <loc>https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html</loc>
     <lastmod>2026-08-31</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://michaelrooney.dev/journal/08-30-2026.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://michaelrooney.dev/journal/08-29-2026.html</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <priority>0.6</priority>
   </url>
   <url>

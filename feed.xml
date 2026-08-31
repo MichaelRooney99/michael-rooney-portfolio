@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 31 Aug 2026 02:27:19 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 31 Aug 2026 22:00:57 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A Boolean That Was Secretly a String</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html</guid>
+      <pubDate>Mon, 31 Aug 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[An LXC instead of a VM for Rack Planner, a YAML conditional that lied about being a boolean, and a Debian 13 template with no sudo installed at all.]]></description>
+    </item>
     <item>
       <title>The VLAN That Existed on Exactly One Port</title>
       <link>https://michaelrooney.dev/journal/08-30-2026.html</link>

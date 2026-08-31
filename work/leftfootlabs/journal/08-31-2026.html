@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Boolean That Was Secretly a String — Michael Rooney</title>
+<meta name="description" content="Standing up an LXC for leftfootLabs' Rack Planner instead of a VM — a deliberate departure from the capstone's isolation reasoning — surfaced two real bugs: a YAML conditional that evaluated to a truthy string instead of a boolean, and a Debian 13 template that ships without sudo at all." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Boolean That Was Secretly a String — Michael Rooney" />
+<meta property="og:description" content="An LXC instead of a VM for Rack Planner, a YAML conditional that lied about being a boolean, and a Debian 13 template with no sudo installed at all." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Boolean That Was Secretly a String — Michael Rooney" />
+<meta name="twitter:description" content="An LXC instead of a VM for Rack Planner, a YAML conditional that lied about being a boolean, and a Debian 13 template with no sudo installed at all." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Boolean That Was Secretly a String",
+  "description": "Standing up an LXC for leftfootLabs' Rack Planner instead of a VM — a deliberate departure from the capstone's isolation reasoning — surfaced two real bugs: a YAML conditional that evaluated to a truthy string instead of a boolean, and a Debian 13 template that ships without sudo at all.",
+  "datePublished": "2026-08-31",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <a href="../../../journal.html" class="back-link reveal">← Back to Journal</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="08-31-2026">August 31, 2026</time>
+        <span class="tag tag-homelab">Homelab</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>A Boolean That Was Secretly a String</h1>
+    </header>
+    <div class="prose">
+      <p>
+        A YAML conditional can fail silently in a way that has nothing to
+        do with the logic it's expressing — the value it evaluates to can
+        simply be the wrong <em>type</em>, true-looking text instead of an
+        actual boolean, and Ansible will refuse to guess which one you
+        meant. That was one of two real bugs standing up an LXC for
+        leftfootLabs' Rack Planner tool today. The other was a fresh
+        Debian 13 container template that doesn't ship with
+        <code>sudo</code> installed at all — not misconfigured, just
+        genuinely absent.
+      </p>
+
+      <h2>Same reasoning, different answer</h2>
+      <p>
+        The capstone status page runs on a VM instead of the fleet's usual
+        privileged LXC for one specific reason:
+        <a href="https://michaelrooney.dev/journal/07-10-2026.html" class="prose-link" >it's internet-facing</a>,
+        and a privileged LXC shares the host kernel with Proxmox — a
+        container escape there is functionally a host compromise, no
+        hypervisor boundary in between. Rack Planner is equally
+        internet-facing, tunneled the same way to
+        <code>planner.leftfootlabs.com</code>. Worth being honest that
+        going LXC here is a real departure from that reasoning, not an
+        oversight of it — the mitigating factor is running it
+        <strong>unprivileged</strong> with only <code>nesting=1</code>
+        enabled, which gets Docker without the full host-kernel sharing a
+        privileged container would mean. Not equivalent to a VM's
+        isolation. A documented, accepted tradeoff instead of a silent
+        one — the product surface here is a static Compose stack with no
+        accounts yet, a meaningfully smaller blast radius than the
+        capstone's fleet-adjacent adapters even before the container
+        posture is considered at all.
+      </p>
+
+      <h2>A condition that was true no matter what</h2>
+      <p>
+        The LXC creation playbook needed the same
+        <a href="https://michaelrooney.dev/journal/08-28-2026.html" class="prose-link" >check-then-gate idempotency pattern</a>
+        used everywhere else in this repo — check current state first,
+        only act if it actually needs changing. One of those gates broke
+        on the very first real run:
+      </p>
+      <pre><code>[ERROR]: Task failed: Conditional result (True) was derived from
+value of type 'str' at '.../rack_planner_lxc_provision.yml:75:13'.
+Conditionals must have a boolean result.</code></pre>
+      <p>
+        The actual cause was almost invisible on a glance: a folded YAML
+        block scalar (<code>when: &gt;</code>) with a stray literal
+        double-quote character wrapping the whole condition. YAML's
+        <code>&gt;</code> folds newlines into spaces but doesn't interpret
+        quote characters specially — so instead of a Jinja boolean
+        expression, Ansible received one long quoted string. A non-empty
+        string is truthy, so the task ran every time regardless of what
+        the actual check found. The fix was deleting two characters. The
+        harder part was noticing the bug wasn't in the logic at all — it
+        was in what <em>type</em> the logic evaluated to. Caught it by
+        actually parsing the file with PyYAML and printing each
+        <code>when</code> clause's real Python value before trusting the
+        fix, rather than just eyeballing the diff a second time.
+      </p>
+
+      <h2>The directory that was never there</h2>
+      <p>
+        Past that, the ansible user got created inside the container fine
+        — and then granting it passwordless sudo failed outright:
+      </p>
+      <pre><code>bash: line 1: /etc/sudoers.d/ansible: No such file or directory</code></pre>
+      <p>
+        Not a permissions problem. The directory itself didn't exist,
+        because the minimal Debian 13 LXC template doesn't include the
+        <code>sudo</code> package by default — unlike whatever base image
+        the Ansible control node's own LXC was originally built from
+        months ago, where this was apparently never an issue worth
+        writing down. The fix was two extra tasks: check whether
+        <code>sudo</code>'s installed (<code>dpkg -s sudo</code>), and if
+        not, <code>apt-get update &amp;&amp; apt-get install -y sudo</code>
+        before ever touching <code>/etc/sudoers.d/</code>. Small, but a
+        real reminder that "matches an existing convention" is a claim
+        worth actually checking against the template in use, not
+        assuming forward from a different container built at a different
+        time.
+      </p>
+
+      <h2>Proving the tunnel, not just trusting the green output</h2>
+      <p>
+        Getting <a href="https://michaelrooney.dev/journal/08-08-2026.html" class="prose-link" >the Cloudflare tunnel</a>
+        talking took a token from a fresh Zero Trust connector, stored in
+        Ansible Vault as its own key — deliberately not reused from the
+        capstone's tunnel, since each connector needs its own. One real
+        gap caught on the way: the task that installs the token as a
+        systemd service didn't have <code>no_log: true</code> on it. That
+        meant if anything downstream had failed, the token itself could
+        have shown up in plaintext in the exact kind of error output this
+        post is built from. Vault protects a file at rest; it does
+        nothing for terminal output. Added the flag before trusting the
+        task with a real token a second time.
+      </p>
+      <p>
+        A green <code>systemctl status</code> only proves the service
+        started, not that it's actually talking to anything — the real
+        confirmation was <a href="https://one.dash.cloudflare.com" class="prose-link" rel="nofollow noopener">Cloudflare's own precheck log</a>,
+        DNS resolution, QUIC connectivity, and API reachability all
+        reporting <code>pass</code> against the real edge. Past that, a
+        deploy playbook (clone, write the env file, <code>docker compose
+        up -d --build</code>, health check, then a smoke test through
+        nginx rather than straight to the backend — proving the whole
+        request path, not just that one process is alive) brought the
+        actual app up. <code>planner.leftfootlabs.com</code> now serves
+        the real device library, seeded with leftfootLabs' own kit
+        dimensions pulled from verified Blender output, not placeholder
+        numbers.
+      </p>
+
+      <h2>What's still unverified</h2>
+      <p>
+        The deploy playbook's rollback path — the actual revert-and-
+        rebuild logic for a bad deploy — hasn't fired for real yet. Every
+        run so far has either hit the "nothing to roll back to" branch on
+        a first deploy or found nothing new to deploy at all. Same
+        principle as everywhere else in this project: a mechanism that
+        applies cleanly isn't the same claim as a mechanism that's been
+        proven to actually work when it matters. That's the next real
+        test, not the drag-and-place rack elevation UI still waiting
+        behind it.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="08-17-2026.html">← Fixing It Myself, Then Measuring Against a Real Part</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../js/main.js" defer></script>
+</body>
+</html>
