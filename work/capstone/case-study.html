@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Case Study: Homelab Status Page — Michael Rooney</title>
+    <meta name="description" content="How a Madison College internship capstone became a real, production-grade infrastructure status page — the architecture decision that mattered most, four real bugs that shaped it, and what's live today." />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Case Study: Homelab Status Page — Michael Rooney" />
+    <meta property="og:description" content="How a Madison College internship capstone became a real, production-grade infrastructure status page — the architecture decision that mattered most, four real bugs that shaped it, and what's live today." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/case-study.html" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Case Study: Homelab Status Page — Michael Rooney" />
+    <meta name="twitter:description" content="How a Madison College internship capstone became a real, production-grade infrastructure status page — the architecture decision that mattered most, four real bugs that shaped it, and what's live today." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="../../img/favicon/favicon.svg" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/case-study.html" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../index.html#about">About</a></li>
+          <li><a href="../../journal.html">Journal</a></li>
+          <li><a href="capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../../portfolio-showcase.html" class="back-link reveal">← Back to Work</a>
+
+      <section class="hero hero-load" aria-labelledby="case-study-heading">
+        <span class="hero-eyebrow">Madison College — Internship Capstone · Case Study</span>
+        <h1 id="case-study-heading">Homelab Status Page</h1>
+        <p>
+          Twenty-plus years leading operations. Now a live, production
+          infrastructure status page — a real proxy layer holding real
+          credentials, a database recording real history, and a deploy
+          pipeline that rolls itself back when something goes wrong. Not
+          a tutorial project. Real infrastructure, watching itself.
+        </p>
+        <div class="hero-buttons">
+          <a href="capstone-index.html" class="project-link magnetic">Read the Full Journal</a>
+          <a href="https://status.michaelrooney.dev" class="project-link magnetic" target="_blank" rel="noopener noreferrer">View Live Site ↗</a>
+        <img
+        src="https://status.michaelrooney.dev/badge.svg"
+        alt="Homelab Status"
+        />
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-label="Project stats">
+        <div class="stats-grid stagger">
+          <div class="stat">
+            <span class="stat-number">230+</span>
+            <span class="stat-label">Hours logged</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">48</span>
+            <span class="stat-label">Build sessions</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">5</span>
+            <span class="stat-label">Node Proxmox cluster</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">4</span>
+            <span class="stat-label">Live data sources</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">143</span>
+            <span class="stat-label">Automated tests</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="problem-heading">
+        <span class="section-label">The Problem</span>
+        <h2 id="problem-heading" class="reveal">A homelab that couldn't tell anyone how it was doing</h2>
+        <p class="reveal">
+          A five-node Proxmox cluster, four different monitoring tools,
+          and no single place that answered "is everything actually up?"
+          without opening three separate dashboards first. The internship
+          needed a capstone. The homelab needed exactly this. Building a
+          self-hosted status page — instead of reaching for an existing
+          product — meant every architectural decision was a real one,
+          not a config file.
+        </p>
+        <p class="reveal">
+          The scope was never just "make a dashboard." It was: pull live
+          data from Prometheus, the Proxmox API, Zabbix, and a UPS, normalize
+          four genuinely different data shapes into one consistent view,
+          and do it without ever exposing a single real credential to the
+          browser.
+        </p>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="decision-heading">
+        <span class="section-label">The Decision That Mattered Most</span>
+        <h2 id="decision-heading" class="reveal">A proxy that exists to say no</h2>
+        <p class="reveal">
+          Everything in a browser is public. An API token stored in a
+          React app is visible to anyone who opens DevTools. So a small
+          Express server sits between the client and every real data
+          source — it holds the actual Proxmox token and Zabbix
+          credentials, and the browser never sees any of them.
+        </p>
+        <p class="reveal">
+          The part that took real judgment wasn't building the proxy —
+          it was restricting it. Every route is allowlisted to the exact
+          path and method the app actually calls, not just forwarded
+          wholesale. Without that, a public request could reach anything
+          those credentials are allowed to touch, not just the read-only
+          status checks this app was ever meant to expose. That
+          distinction — a proxy that forwards everything versus a proxy
+          that only forwards what's actually needed — is the single
+          decision the rest of this project's security posture rests on.
+        </p>
+        <p class="reveal">
+          <a href="https://github.com/MichaelRooney99/homelab-status/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer" class="project-link magnetic">Read the full architecture doc ↗</a>
+        </p>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="moments-heading">
+        <span class="section-label">Four Moments That Mattered</span>
+        <h2 id="moments-heading" class="reveal">Not everything that looked done actually was</h2>
+        <div class="showcase-grid stagger">
+
+          <div class="showcase-card">
+            <span class="tag tag-homelab">Infrastructure</span>
+            <h3>A playbook that ran clean and broke anyway</h3>
+            <p>
+              A hardcoded power-supply value in an Ansible template
+              passed every run without complaint — right up until a UPS
+              client actually restarted and hit a fatal math error the
+              syntax check had no way to catch. The other nodes looked
+              fine purely because they hadn't restarted yet. Fixed fleet-wide
+              before it became a real outage, not after.
+            </p>
+          </div>
+
+          <div class="showcase-card">
+            <span class="tag tag-learning">Security</span>
+            <h3>Three open doors, found by looking for them on purpose</h3>
+            <p>
+              A dedicated security pass turned up proxy routes that
+              forwarded any path or method to the real upstream APIs,
+              real credentials attached, no restriction at all. Fixed
+              with real allowlists and confirmed with actual <code>403</code>
+              responses from the live site — not assumed correct because
+              the code looked right.
+            </p>
+          </div>
+
+          <div class="showcase-card">
+            <span class="tag tag-projects">Real-World Testing</span>
+            <h3>A live channel that went silent under real conditions</h3>
+            <p>
+              The live-update connection worked perfectly in every local
+              test, then went quiet in production — Cloudflare's own edge
+              was closing idle connections under two minutes, something no
+              local environment could ever reproduce. Caught by testing
+              against the real public tunnel, not the code in isolation.
+            </p>
+          </div>
+
+          <div class="showcase-card">
+            <span class="tag tag-reflection">Verification</span>
+            <h3>Working in dev, invisible in production</h3>
+            <p>
+              A new feature passed every local test and still showed
+              nothing on the live site. The client talks straight to the
+              server in development; production routes everything through
+              a reverse proxy, and one new endpoint never got its forward
+              rule added. "Runs locally" and "reachable through the real
+              public domain" turned out to be two different claims.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <div class="divider reveal"></div>
+
+      <section aria-labelledby="outcome-heading">
+        <span class="section-label">What's Live Today</span>
+        <h2 id="outcome-heading" class="reveal">A real product, not a demo</h2>
+        <p class="reveal">
+          The status page runs in production behind a Cloudflare Zero
+          Trust tunnel, with no inbound ports opened on the homelab
+          network at all. A separate, independently gated deploy pipeline
+          ships changes automatically — every push runs a real test
+          suite, and any deploy that fails a live smoke test rolls itself
+          back to the last known-good commit without anyone watching it
+          happen.
+        </p>
+        <blockquote>
+          The infrastructure watches itself, the deploy pipeline watches
+          the infrastructure, and the test suite watches the code that
+          watches all of it.
+        </blockquote>
+        <div class="hero-buttons">
+          <a href="https://status.michaelrooney.dev" class="project-link magnetic" target="_blank" rel="noopener noreferrer">View Live Site ↗</a>
+          <a href="https://github.com/MichaelRooney99/homelab-status" class="project-link magnetic" target="_blank" rel="noopener noreferrer">View the Repo ↗</a>
+          <a href="capstone-index.html" class="project-link magnetic">Read All 48 Sessions</a>
+        </div>
+      </section>
+
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../js/main.js" defer></script>
+  </body>
+</html>

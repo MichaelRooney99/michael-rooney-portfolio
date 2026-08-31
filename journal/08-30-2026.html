@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The VLAN That Existed on Exactly One Port — Michael Rooney</title>
+    <meta
+      name="description"
+      content="A guest Wi-Fi network associated fine but never got an IP. Every layer checked out clean — DHCP scope, Dnsmasq interface bind, AP config, switch trunk tagging — until an empty packet capture on the router side proved the traffic never left the switch at all. The VLAN existed. It just had nowhere to go."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="The VLAN That Existed on Exactly One Port — Michael Rooney" />
+    <meta property="og:description" content="A guest SSID associated fine but never got an IP. Every layer checked out clean until an empty packet capture proved the traffic never left the switch at all — because the VLAN only had one member port on the entire fabric." />
+    <meta property="og:url" content="https://michaelrooney.dev/journal/08-30-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The VLAN That Existed on Exactly One Port — Michael Rooney" />
+    <meta name="twitter:description" content="A guest SSID associated but never got an IP. An empty packet capture proved the traffic never left the switch — because the VLAN only had one member port on the whole fabric." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/journal/08-30-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "The VLAN That Existed on Exactly One Port",
+      "description": "A guest SSID associated fine but never got an IP. Every layer checked out clean until an empty packet capture on the router side proved the traffic never left the switch at all — because the VLAN only had one member port.",
+      "datePublished": "2026-08-30",
+      "url": "https://michaelrooney.dev/journal/08-30-2026.html",
+      "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../journal.html" class="active">Journal</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="08-30-2026">August 30, 2026</time>
+            <span class="tag tag-homelab">Homelab</span>
+            <span class="tag tag-learning">Learning</span>
+          </div>
+          <h1>The VLAN That Existed on Exactly One Port</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            A phone would associate to the new guest Wi-Fi network fine —
+            authentication succeeded instantly, no password needed, exactly
+            as designed — and then just sit there. No IP address, ever.
+            Every individual piece of the chain that should have produced
+            one checked out clean on inspection. The actual bug was one I'd
+            built myself, days earlier, and never noticed: a VLAN that had
+            been created but only ever connected to a single port on the
+            entire switch.
+          </p>
+
+          <h2>The setup, briefly</h2>
+
+          <p>
+            A new EAP610 access point, freshly adopted into a self-hosted
+            Omada controller, broadcasting two SSIDs — one for lab devices
+            on VLAN 20, one open/passwordless guest network on VLAN 30. The
+            lab SSID worked immediately. The guest SSID authenticated but
+            never completed a DHCP handshake, which on most phones just
+            shows up as a spinner that eventually gives up and says
+            something unhelpful like "Failed to obtain IP address."
+          </p>
+
+          <h2>Ruling things out, one real check at a time</h2>
+
+          <p>
+            The instinct with an isolated VLAN that "almost works" is to
+            suspect the newest thing you touched — in this case, Omada's
+            SSID configuration. That got checked first: VLAN tagged
+            correctly by ID, Guest Network toggle turned off (it assumes an
+            Omada-brand gateway is present to handle guest traffic, which
+            this network doesn't have), security set to Open. All correct.
+          </p>
+
+          <p>
+            Next was the router side — OPNsense already had a documented,
+            known gap where a VLAN interface was missing from Dnsmasq's
+            list of interfaces to actually serve DHCP on. A strong
+            candidate, and worth checking first precisely because it was
+            already a known issue rather than a new guess. Checked the
+            Dnsmasq General tab: the interface was there, correctly
+            included alongside the others. Ruled out.
+          </p>
+
+          <p>
+            Then the device itself — was the AP even running the config
+            it was supposed to be running? Pulled up the device's own
+            WLANs tab directly on the controller, which lists exactly what
+            SSIDs are live on that specific radio, not just what exists in
+            the controller's database. Both SSIDs, correct VLANs, enabled,
+            synced. Also clean.
+          </p>
+
+          <h2>The packet capture that actually settled it</h2>
+
+          <p>
+            At that point, three plausible layers had all checked out
+            individually correct, and the bug was still there. That's
+            exactly the situation where guessing at a fourth layer stops
+            being productive — the better move is querying the source
+            directly rather than continuing to reason about config screens.
+            OPNsense's own packet capture tool, filtered to the guest
+            VLAN's interface and to DHCP ports specifically, would show
+            definitively whether a request was even arriving at the router.
+          </p>
+
+          <p>
+            It ran for the full duration of a connection attempt. The
+            resulting capture file was 24 bytes — an empty pcap header,
+            zero packets. Not "no response." Nothing arrived at all.
+          </p>
+
+          <p class="callout">
+            That one empty capture eliminated the entire router side of the
+            problem in a single check. If nothing reaches OPNsense, OPNsense
+            can't be the bug — full stop, regardless of how many DHCP
+            settings get re-examined there. The problem had to be upstream:
+            the AP or the switch.
+          </p>
+
+          <h2>Finding the actual gap</h2>
+
+          <p>
+            With the AP's own config already confirmed correct, that left
+            the switch — specifically, the 802.1Q VLAN membership table,
+            not the per-port tag/untag settings that had already been
+            checked once. Pulling up VLAN 30's own definition and comparing
+            it side by side against VLAN 20's told the whole story
+            immediately: VLAN 20 listed six member ports, including the
+            trunk port running up to OPNsense. VLAN 30 listed exactly one —
+            the port the access point itself was plugged into.
+          </p>
+
+          <p>
+            The access point was doing everything right. It tagged guest
+            traffic as VLAN 30 and sent it out correctly. The switch
+            received that tagged frame on a port that was, in fact, a
+            member of VLAN 30 — so it accepted it. And then had nowhere to
+            forward it, because no other port on the switch was a member of
+            that VLAN. Not the uplink, not anything. The frame had a valid
+            entry point and no exit, so the switch silently dropped it.
+            That's why nothing ever reached OPNsense to be captured, logged,
+            or even rejected — from the router's perspective, VLAN 30
+            traffic simply didn't exist.
+          </p>
+
+          <p>
+            The fix was one checkbox: adding the trunk port as a tagged
+            member of VLAN 30, the same way it already was for VLAN 20.
+            The instant that was applied, the guest network worked exactly
+            as designed.
+          </p>
+
+          <h2>The actual lesson</h2>
+
+          <p>
+            Defining a VLAN and giving it a member port is not the same
+            claim as giving that VLAN a path anywhere. A VLAN's traffic can
+            only travel between the ports that are explicitly members of
+            it — every hop, not just the ports where end devices happen to
+            plug in. It's easy to remember that when building the first
+            VLAN, where the trunk-to-router membership feels like an
+            obviously required step you're actively deciding to add.
+            It's much easier to forget on the second one, where the mental
+            model has quietly shifted to "add the VLAN, assign the device's
+            port, done" — skipping the fact that the trunk membership isn't
+            automatic just because a previous VLAN already used that same
+            trunk port.
+          </p>
+
+          <p>
+            Worth connecting back to something from
+            <a href="04-10-2026.html" class="prose-link">the first time VLAN segmentation went into this lab</a>
+            — the trunk port carrying multiple tagged VLANs to the router
+            was the whole point of the design from day one. What broke
+            here wasn't a misunderstanding of that concept; it was a
+            configuration screen where adding a new VLAN doesn't
+            automatically add it to ports that already exist as trunks for
+            other VLANs. The
+            <a href="https://en.wikipedia.org/wiki/IEEE_802.1Q" class="prose-link">802.1Q standard</a>
+            itself doesn't have an opinion about that — it's purely a
+            per-switch, per-VLAN membership table, and every entry in it
+            has to be explicit.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-29-2026.html" class="prose-link">← Previous: 08-29-2026 Entry</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+          <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../js/main.js" defer></script>
+  </body>
+</html>
