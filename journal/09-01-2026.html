@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Failure That Wasn't About Rack Planner At All — Michael Rooney</title>
+<meta name="description" content="A new Ansible Lint CI workflow threw 17 violations, and fifteen of them turned out to be one missing vault password. Fixing it unmasked ten more real bugs across six files the pipeline had never actually been able to see — including a genuine ansible-lint parser quirk, isolated through direct testing rather than assumed." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Failure That Wasn't About Rack Planner At All — Michael Rooney" />
+<meta property="og:description" content="Fifteen of seventeen CI violations turned out to be one missing vault password — and fixing it unmasked ten more real bugs across six files, including a genuine ansible-lint parser quirk." />
+<meta property="og:url" content="https://michaelrooney.dev/journal/09-01-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Failure That Wasn't About Rack Planner At All — Michael Rooney" />
+<meta name="twitter:description" content="Fifteen of seventeen CI violations turned out to be one missing vault password — and fixing it unmasked ten more real bugs across six files, including a genuine ansible-lint parser quirk." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/journal/09-01-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Failure That Wasn't About Rack Planner At All",
+  "description": "A new Ansible Lint CI workflow threw 17 violations, and fifteen of them turned out to be one missing vault password. Fixing it unmasked ten more real bugs across six files the pipeline had never actually been able to see — including a genuine ansible-lint parser quirk, isolated through direct testing rather than assumed.",
+  "datePublished": "2026-09-01",
+  "url": "https://michaelrooney.dev/journal/09-01-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="../journal.html" class="active">Journal</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-01-2026">September 1, 2026</time>
+        <span class="tag tag-homelab">Homelab</span>
+      </div>
+      <h1>The Failure That Wasn't About Rack Planner At All</h1>
+    </header>
+    <div class="prose">
+      <p>
+        A new CI workflow's first real run threw 17 violations. The
+        instinct, coming off <a href="https://michaelrooney.dev/journal/08-31-2026.html">a session that had just added three new playbooks</a>,
+        was to assume the new stuff broke it. Fifteen of those violations
+        turned out to be the exact same failure, repeated once per
+        playbook in the repo — capstone's included — with nothing to do
+        with anything added for Rack Planner at all.
+      </p>
+
+      <h2>Two real fixes, buried in fifteen identical ones</h2>
+      <p>
+        The workflow was <code>ansible-lint</code>, added alongside the
+        CI/CD scope doc as the cheapest real piece of the deployment-
+        safety doc's Layer 1 — static analysis, no live host, supposedly
+        no credentials needed. Its first run produced a wall of output:
+        <code>internal-error</code> on <code>audit.yml</code>,
+        <code>capstone_provision.yml</code>, <code>node_exporter.yml</code>,
+        <code>zabbix_agent.yml</code>, every playbook in the repository —
+        alongside two genuine <code>yaml[line-length]</code> violations on
+        <code>inventory/group_vars/all/secrets.yml</code>, both Cloudflare
+        tunnel tokens running past the 160-character line limit by nature
+        of being long base64 JWTs. Those two were the real, fixable part
+        — a targeted <code>&#35; noqa: yaml[line-length]</code> on each
+        line, not a reflow, since folding a quoted YAML value across
+        lines inserts a space at the break and would have silently
+        corrupted the token.
+      </p>
+      <p>
+        The other fifteen were one root cause wearing fifteen costumes:
+        <code>The vault password file /home/runner/.vault_pass was not
+        found</code>. <code>ansible.cfg</code> sets
+        <code>vault_password_file&nbsp;=&nbsp;~/.vault_pass</code>
+        globally, and <code>inventory/group_vars/all/secrets.yml</code>
+        loads for every playbook automatically — it's under the
+        <code>all</code> group. The runner had no vault password, so
+        Ansible failed trying to decrypt a file it needed just to load
+        inventory, before <code>ansible-lint</code> ever got to look at
+        any playbook's actual content.
+      </p>
+
+      <h2>"Why would it fail if we're doing the same as capstone?"</h2>
+      <p>
+        That question was the actual turning point, not the fix itself.
+        The assumption going in was that something about the new
+        playbooks — the LXC bootstrap, the deploy rollback logic —
+        differed from capstone's established pattern in some way that
+        broke CI. Looking again at the full output instead of just the
+        Rack Planner lines in it: <code>capstone_provision.yml</code> and
+        <code>capstone_deploy.yml</code> show the identical failure.
+        Every playbook does. The likely explanation was that this
+        workflow had simply never successfully gotten past the vault-
+        loading step before — new workflow, first run that actually
+        exercised a playbook path touching vault-encrypted vars, and the
+        gap had been sitting there the whole time. Nothing about Rack
+        Planner triggered it; Rack Planner just happened to be what got
+        run against it first.
+      </p>
+
+      <h2>A credential is not automatically the thing you're avoiding</h2>
+      <p>
+        Fixing it meant reversing the workflow's own stated design goal
+        — its header comment said <em>"no credentials needed"</em> in so
+        many words. Two real paths existed: add the vault password as a
+        GitHub Actions secret and accept the workflow is no longer
+        literally credential-free, or restructure the lint job to avoid
+        vault decryption entirely and keep that property at the cost of
+        losing real syntax-check coverage.
+      </p>
+      <p>
+        The deciding question was what kind of credential the original
+        comment was actually protecting against. Almost certainly an
+        SSH key or a Proxmox API token — something that gives a
+        GitHub-hosted runner an actual path into the real network. A
+        vault password isn't that. It only unlocks values already
+        committed to the repo; there's no lateral step from "decrypted
+        the vault" to "touched Dega" from a sandboxed runner with no
+        route to the LAN at all. Different risk category, even though
+        both technically qualify as "a credential." Went with the
+        secret — same call already made for capstone's own CI months
+        back, just applied consistently to a second repo instead of
+        left as a one-off exception.
+      </p>
+
+      <h2>Comments that stopped being true</h2>
+      <p>
+        The old workflow file's comments described a capstone-only,
+        credential-free pipeline that no longer existed the moment the
+        fix landed — same kind of drift as
+        <a href="https://michaelrooney.dev/journal/08-31-2026.html">yesterday's stale doc gaps</a>,
+        just at the CI-config layer instead of a runbook. Rewrote the
+        header to state plainly that this workflow now covers every
+        playbook in the repo, not just capstone's, and that it requires
+        <code>ANSIBLE_VAULT_PASSWORD</code> for a documented, deliberate
+        reason rather than leaving a claim standing that a two-line diff
+        had already made false. Added <code>chmod 600</code> right after
+        writing the password to the runner's filesystem too — low real
+        risk on an ephemeral runner, but cheap insurance, and matching
+        the same instinct that added <code>no_log: true</code> to the
+        cloudflared token task a day earlier.
+      </p>
+
+      <h2>The fix unmasked what it had been hiding</h2>
+      <p>
+        Landing the vault secret was supposed to be the end of it. The
+        next CI run instead threw 10 fresh, genuine violations across
+        six files that had never appeared before —
+        <code>nut_master.yml</code>, <code>nut_slaves.yml</code>,
+        <code>omada_controller_provision.yml</code>,
+        <code>update.yml</code>, <code>zabbix_agent.yml</code>,
+        <code>zabbix_host_registration.yml</code>. None of it was new
+        breakage. Every one of those files had been sitting there,
+        unlinted, since before this workflow existed — the vault
+        failure hadn't just blocked CI, it had been quietly standing in
+        front of real content-level checks for the entire fleet the
+        whole time, on every single run. Fixing the root cause didn't
+        finish the job; it was what finally let the job start.
+      </p>
+
+      <h2>A linter bug, isolated the hard way</h2>
+      <p>
+        <code>node_exporter.yml</code> threw
+        <code>jinja[invalid]: 'in &lt;string&gt;' requires string as
+        left operand, not UndefinedMarker</code> on a version-comparison
+        check that had been running correctly in production for weeks.
+        The instinct to just silence it with a
+        <code>noqa</code> comment didn't sit right — better to know
+        whether it was a real bug or a linter limitation before deciding
+        how to handle it, same as always. Reproducing it locally meant
+        building out eight throwaway test playbooks, one variable at a
+        time: does a plain group_vars variable resolve on its own? Yes.
+        Does the exact same variable work fine as the <em>right</em>
+        operand of <code>in</code>? Also yes. Only when a group_vars-
+        sourced variable sits as the <em>left</em> operand of
+        <code>in</code>/<code>not in</code> does ansible-lint's static
+        type-checker lose track of it and report it as undefined —
+        confirmed by swapping the operand order on the identical
+        expression and watching the error disappear. A real, narrow bug
+        in the linter's own template validation, not the playbook.
+      </p>
+      <p>
+        The actual fix avoided the broken code path entirely rather than
+        suppressing it: <code>x not in y</code> and
+        <code>y.find(x) == -1</code> mean the same thing, and
+        <code>.find()</code> doesn't trip the bug. Same behavior, same
+        runtime result, just phrased in a way ansible-lint's parser can
+        actually follow.
+      </p>
+
+      <h2>The same bug, copied forward</h2>
+      <p>
+        <code>capstone_provision.yml</code> had the identical
+        <code>curl&nbsp;|&nbsp;sh</code> Docker-install pattern already
+        fixed in Rack Planner's own provisioning playbook two sessions
+        back — unsurprising once it clicked that Rack Planner's
+        playbooks were deliberately built by mirroring capstone's.
+        <code>omada_controller_provision.yml</code> — the file
+        <a href="https://michaelrooney.dev/journal/08-31-2026.html">Rack Planner's own LXC bootstrap had been mirrored from</a>
+        — carried eight identical <code>no-changed-when</code> gaps and
+        the same Docker-install issue, for the same reason: a pattern
+        gets copied forward, bugs included, until something forces a
+        real look at the original. <code>capstone_deploy.yml</code>'s
+        tunnel-status check had the same raw
+        <code>systemctl is-active</code> call already replaced with the
+        <code>systemd</code> module elsewhere — swapping it here meant
+        updating a downstream <code>.stdout</code> reference to
+        <code>.status.ActiveState</code> too, verified against
+        <code>ansible-doc</code> directly rather than assumed, since
+        that's a real behavior change riding along with a lint fix, not
+        just a rename.
+      </p>
+
+      <h2>A missing file wasn't a missing bug</h2>
+      <p>
+        One file stalled the pass outright:
+        <code>nut_slaves.yml</code> as mounted locally turned out to be
+        a three-line <code>group_vars</code> file, not the 107-line
+        playbook CI was actually complaining about — a straight
+        filename collision. Rather than guess at fixing a file that
+        might not even be the right one, that file got set aside and
+        flagged explicitly until the real playbook could be uploaded
+        under its own name. Once it was, the actual issue was exactly
+        what the error said: a genuinely missing trailing newline, one
+        line past the real end of a 106-line file. No mystery once the
+        right file was actually in hand — the only risk had been
+        editing blind.
+      </p>
+
+      <h2>Two package-latest calls that were deliberate, not sloppy</h2>
+      <p>
+        Not every violation deserved a fix that changed behavior.
+        <code>zabbix_agent.yml</code> installs
+        <code>zabbix-agent2</code> with <code>state: latest</code> on
+        purpose — the task exists specifically to track the Zabbix
+        <em>server's</em> version, not to pin to one, so pinning it to
+        satisfy <code>package-latest</code> would have quietly broken
+        what the task is actually for. Suppressed with a
+        <code>noqa</code> and a comment explaining why, same treatment
+        as a long repo URL two lines up that can't be safely reflowed
+        without risking a broken package source. A suppression with a
+        stated reason is a different thing than silence — the next
+        person reading either line knows exactly why the linter's
+        being overridden instead of wondering if it was missed.
+      </p>
+
+      <h2>Where the password actually lives now</h2>
+      <p>
+        One real question worth settling explicitly: whether the vault
+        password itself belongs inside <code>secrets.yml</code> for safe
+        keeping. It doesn't, and the reason is structural, not just
+        cautious — the vault password is what decrypts that file, so
+        storing it inside the file it decrypts is circular by
+        construction, and storing it there unencrypted would put a
+        master key in plaintext inside a git-tracked file, readable from
+        history forever even after a later commit removes it. It only
+        belongs in places genuinely outside the repo: <code>~/.vault_pass</code>
+        on the control node, the GitHub Actions secret, and now a copy
+        in Vaultwarden as durable backup — so losing the control node's
+        disk stops being an unrecoverable loss of every secret in the
+        vault, and becomes an inconvenience instead.
+      </p>
+
+      <h2>The last mile</h2>
+      <p>
+        CI passed clean after all of that, with exactly one leftover
+        note: <code>actions/checkout@v4</code> and
+        <code>actions/setup-python@v5</code> both still target Node.js
+        20 internally, which GitHub is deprecating on its runners.
+        Nothing broken yet — both actions were simply being force-run on
+        Node 24 in the meantime — but worth bumping to
+        <code>@v5</code>/<code>@v6</code> the next time this workflow
+        file was already open, rather than a special trip back in for a
+        warning with no real urgency behind it. Low-stakes, compared to
+        everything before it — which was itself the point of the whole
+        session: most of what looked urgent at each step turned out to
+        be either already broken somewhere upstream, or not actually
+        urgent at all once looked at directly instead of assumed.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="08-31-2026.html">← Previous: 08-31-2026 Entry</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../js/main.js" defer></script>
+</body>
+</html>
