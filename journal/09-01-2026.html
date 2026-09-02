@@ -65,7 +65,7 @@
     <div class="prose">
       <p>
         A new CI workflow's first real run threw 17 violations. The
-        instinct, coming off <a href="https://michaelrooney.dev/journal/08-31-2026.html">a session that had just added three new playbooks</a>,
+        instinct, coming off <a href="https://michaelrooney.dev/journal/08-31-2026.html" class="prose-link">a session that had just added three new playbooks</a>,
         was to assume the new stuff broke it. Fifteen of those violations
         turned out to be the exact same failure, repeated once per
         playbook in the repo — capstone's included — with nothing to do
@@ -151,7 +151,7 @@
         The old workflow file's comments described a capstone-only,
         credential-free pipeline that no longer existed the moment the
         fix landed — same kind of drift as
-        <a href="https://michaelrooney.dev/journal/08-31-2026.html">yesterday's stale doc gaps</a>,
+        <a href="https://michaelrooney.dev/journal/08-31-2026.html" class="prose-link">yesterday's stale doc gaps</a>,
         just at the CI-config layer instead of a runbook. Rewrote the
         header to state plainly that this workflow now covers every
         playbook in the repo, not just capstone's, and that it requires
@@ -219,7 +219,7 @@
         back — unsurprising once it clicked that Rack Planner's
         playbooks were deliberately built by mirroring capstone's.
         <code>omada_controller_provision.yml</code> — the file
-        <a href="https://michaelrooney.dev/journal/08-31-2026.html">Rack Planner's own LXC bootstrap had been mirrored from</a>
+        <a href="https://michaelrooney.dev/journal/08-31-2026.html" class="prose-link">Rack Planner's own LXC bootstrap had been mirrored from</a>
         — carried eight identical <code>no-changed-when</code> gaps and
         the same Docker-install issue, for the same reason: a pattern
         gets copied forward, bugs included, until something forces a
