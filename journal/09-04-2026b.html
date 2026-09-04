@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Build That Succeeded for the Wrong Reason — Michael Rooney</title>
+  <meta name="description" content="Wiring an Express API to a shared workspace package surfaced a real monorepo trap: a build that stays green even after a function gets renamed, because TypeScript checks a package's last-built dist output, not its current source. Plus a PowerShell curl gotcha and a floating-point rounding fix." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Michael Rooney" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Build That Succeeded for the Wrong Reason — Michael Rooney" />
+  <meta property="og:description" content="A build that stayed green after a function got renamed — because TypeScript checks a workspace package's last compiled output, not its current source. The exact gap real monorepo tooling exists to close." />
+  <meta property="og:url" content="https://michaelrooney.dev/journal/09-04-2026b.html" />
+  <meta property="og:site_name" content="Michael Rooney" />
+  <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Build That Succeeded for the Wrong Reason — Michael Rooney" />
+  <meta name="twitter:description" content="A build that stayed green after a function got renamed — because TypeScript checks a workspace package's last compiled output, not its current source." />
+  <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <link rel="canonical" href="https://michaelrooney.dev/journal/09-04-2026b.html" />
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Build That Succeeded for the Wrong Reason",
+    "description": "Wiring an Express API to a shared workspace package surfaced a real monorepo trap: a build that stays green even after a function gets renamed, because TypeScript checks a package's last-built dist output, not its current source. Plus a PowerShell curl gotcha and a floating-point rounding fix.",
+    "datePublished": "2026-09-04",
+    "url": "https://michaelrooney.dev/journal/09-04-2026b.html",
+    "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="../index.html" class="logo" aria-label="Home">MR</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="primary-nav">
+        <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../journal.html" class="active">Journal</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+    <article>
+      <header class="entry-header reveal">
+        <div class="entry-meta">
+          <time datetime="09-04-2026">September 4, 2026</time>
+          <span class="tag tag-projects">Projects</span>
+          <span class="tag tag-learning">Learning</span>
+        </div>
+        <h1>The Build That Succeeded for the Wrong Reason</h1>
+      </header>
+      <div class="prose">
+        <p>
+          A clean compile isn't the same claim as a correct one.
+          TypeScript checks a workspace package against whatever's actually
+          sitting on disk, not against the intent behind a change — and
+          <a href="https://michaelrooney.dev/journal/09-04-2026.html" class="prose-link">the shared package from the first half of this session</a>
+          made that gap concrete the moment I wired it to a real Express
+          API.
+        </p>
+
+        <h2>Wiring a real dependency between two packages</h2>
+        <p>
+          Adding the actual link — <code>npm install
+          @filament-calc/shared -w @filament-calc/api</code> — writes
+          something that looks completely ordinary into
+          <code>api</code>'s <code>package.json</code>: a plain semver
+          range, <code>"@filament-calc/shared": "^1.0.0"</code>, no
+          different in shape from <code>express</code>'s own entry. Nothing
+          in that field says "this one's local." npm workspaces resolves it
+          at install time — it scans <code>packages/*</code>, finds a
+          package by that name satisfying that range, and symlinks instead
+          of hitting the registry. Bump <code>shared</code> to
+          <code>2.0.0</code> without updating this range, and the next
+          clean install would genuinely try the registry instead. pnpm and
+          Yarn sidestep this with an explicit <code>workspace:*</code>
+          protocol; npm just doesn't have that syntax. Not a real risk on a
+          two-person project, but a documented, real footgun on larger
+          teams.
+        </p>
+
+        <h2>The bug that should have happened, and didn't</h2>
+        <p>
+          To actually see the build-order dependency, I renamed
+          <code>calculateCost</code> to <code>computeCost</code> in the
+          shared package's source — without rebuilding it — then checked
+          whether the API package's build noticed. VS Code flagged it
+          instantly, offering to auto-update the import. <code>tsc</code>
+          did not. Ran clean, no error, import untouched.
+        </p>
+        <p>
+          Both outcomes are correct, for different reasons. The editor's
+          language service watches a workspace package's live
+          <em>source</em> for open projects — genuinely useful, but an
+          editor convenience, not what happens at build or runtime. The
+          actual compiler resolves imports against whatever
+          <code>shared</code>'s own <code>package.json</code> points
+          <code>types</code> at — <code>dist/index.d.ts</code> — and that
+          file still said <code>calculateCost</code>, frozen at the last
+          time anyone ran <code>tsc</code> inside <code>shared</code>. The
+          real lesson: a workspace package's actual interface to the rest
+          of the repo is whatever's compiled into <code>dist/</code>, not
+          whatever the current source file says. This exact gap — forgetting
+          to rebuild a dependency before rebuilding what depends on it — is
+          the specific problem real monorepo tooling like Turborepo or Nx
+          solves, by building a dependency graph and forcing rebuild order
+          automatically instead of leaving it to memory.
+        </p>
+
+        <h2>Encoding the fix by hand</h2>
+        <p>
+          Two packages doesn't justify pulling in a build orchestrator yet,
+          so the fix here is a root-level script that hardcodes the correct
+          order: <code>"build": "npm run build:shared && npm run
+          build:api"</code>. The <code>&amp;&amp;</code> chain is the whole
+          mechanism — <code>shared</code> always rebuilds before
+          <code>api</code> does, so <code>api</code> can never compile
+          against a stale <code>dist/</code> again. It's the manual version
+          of exactly what a real dependency-graph tool automates, which
+          made it worth building by hand once before reaching for a tool
+          that hides the mechanism.
+        </p>
+
+        <h2>Two things that only look like Express problems</h2>
+        <p>
+          The actual route handler uses zod's <code>safeParse</code>
+          rather than <code>parse</code> — returning a
+          <code>{'{ success, data | error }'}</code> object instead of
+          throwing, which reads naturally when branching on routine
+          "the client sent bad data" cases inside an Express handler,
+          rather than wrapping every request in <code>try/catch</code>.
+          The bigger point is where that schema lives: because
+          <code>CalculationInputSchema</code> was defined once in
+          <code>shared</code> rather than duplicated per-package, the exact
+          same validation rules that reject a malformed request here will
+          later live-validate a form in the React client — while the
+          server-side check stays the actual security boundary regardless,
+          since anyone can hit this endpoint directly and skip the form
+          entirely.
+        </p>
+
+        <h2>Windows PowerShell isn't curl</h2>
+        <p>
+          Pasting a real curl command with <code>-X POST</code> and
+          <code>-H</code> flags into PowerShell fails outright —
+          PowerShell aliases <code>curl</code> to
+          <code>Invoke-WebRequest</code>, which parses flags completely
+          differently and throws a parameter-binding error on sight. The
+          PowerShell-native equivalent for hitting a JSON API is
+          <code>Invoke-RestMethod</code>, built from a hashtable piped
+          through <code>ConvertTo-Json</code> — and it's the better default
+          going forward for API testing on Windows regardless, since it
+          auto-parses a JSON response straight into a usable PowerShell
+          object instead of handing back a raw response blob.
+        </p>
+
+        <h2>Money math and floating point</h2>
+        <p>
+          The very first successful response came back as
+          <code>2.4320000000000004</code> instead of <code>2.43</code> —
+          not a bug in the arithmetic, but ordinary
+          <a href="https://0.30000000000000004.com/" class="prose-link">IEEE 754 double-precision float</a>
+          behavior: decimal fractions like <code>0.14</code> frequently
+          have no exact binary representation, the same category of
+          problem as <code>1/3</code> having no exact decimal one. For a
+          learning project the fix is a one-line rounding pass at the
+          return boundary rather than a bigger refactor into integer-cent
+          arithmetic — the point here was monorepo mechanics, not financial
+          precision engineering, and it's worth knowing which problem is
+          actually in scope before reaching for the heavier fix.
+        </p>
+
+        <h2>Where this leaves it</h2>
+        <p>
+          The backend loop is fully proven end to end now: a request hits
+          Express, validates through <code>shared</code>'s zod schema,
+          computes through <code>shared</code>'s <code>calculateCost</code>,
+          and comes back as clean two-decimal JSON — all three packages
+          genuinely depending on each other rather than just sitting in
+          adjacent folders. The React client side of the monorepo, and
+          whatever surprises workspace-linking a Vite frontend turns up,
+          is next.
+        </p>
+      </div>
+      <nav class="entry-nav" aria-label="Entry navigation">
+        <span></span>
+        <a href="09-04-2026.html">← Previous: 09-04-2026 Entry</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 Michael Rooney</span>
+    <span>
+      <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+      </a>
+    </span>
+    <span>Front-End Developer</span>
+  </footer>
+
+  <script src="../js/main.js" defer></script>
+</body>
+</html>

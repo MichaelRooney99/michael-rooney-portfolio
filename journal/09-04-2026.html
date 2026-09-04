@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Package That Only Exists as a Symlink — Michael Rooney</title>
+  <meta name="description" content="Scaffolding a three-package npm workspaces monorepo from scratch for a small filament cost calculator — why the shared package's name has to match its import path exactly, what npm workspaces actually resolves at install time, and why TypeScript deletes types on purpose before Node ever sees them." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Michael Rooney" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Package That Only Exists as a Symlink — Michael Rooney" />
+  <meta property="og:description" content="Why a shared package's name has to match its import path exactly, what npm workspaces actually resolves at install time, and why TypeScript deletes its own types before Node ever runs the code." />
+  <meta property="og:url" content="https://michaelrooney.dev/journal/09-04-2026.html" />
+  <meta property="og:site_name" content="Michael Rooney" />
+  <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Package That Only Exists as a Symlink — Michael Rooney" />
+  <meta name="twitter:description" content="Why a shared package's name has to match its import path exactly, what npm workspaces actually resolves at install time, and why TypeScript deletes its own types before Node ever runs the code." />
+  <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <link rel="canonical" href="https://michaelrooney.dev/journal/09-04-2026.html" />
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Package That Only Exists as a Symlink",
+    "description": "Scaffolding a three-package npm workspaces monorepo from scratch for a small filament cost calculator — why the shared package's name has to match its import path exactly, what npm workspaces actually resolves at install time, and why TypeScript deletes its own types on purpose before Node ever sees them.",
+    "datePublished": "2026-09-04",
+    "url": "https://michaelrooney.dev/journal/09-04-2026.html",
+    "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="../index.html" class="logo" aria-label="Home">MR</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="primary-nav">
+        <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../journal.html" class="active">Journal</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+    <article>
+      <header class="entry-header reveal">
+        <div class="entry-meta">
+          <time datetime="09-04-2026">September 4, 2026</time>
+          <span class="tag tag-projects">Projects</span>
+          <span class="tag tag-learning">Learning</span>
+        </div>
+        <h1>The Package That Only Exists as a Symlink</h1>
+      </header>
+      <div class="prose">
+        <p>
+          A monorepo doesn't need a dedicated build tool to become real — npm
+          workspaces alone is enough to make three separate packages resolve
+          into each other, share types, and fail in genuinely instructive
+          ways. I wanted hands-on monorepo experience outside of the capstone
+          and RPP, so I picked something small and low-stakes to build it
+          with: a filament cost calculator for leftfootLabs, split into a
+          shared calculation package, an Express API, and (eventually) a
+          React client.
+        </p>
+
+        <h2>Why a shared package instead of shared folders</h2>
+        <p>
+          The whole point of putting the cost math and its zod validation
+          schema in a dedicated <code>shared</code> package, rather than
+          just writing the calculation twice — once in the API, later again
+          in the client — is closing off silent drift before it can start.
+          Two copies of the same formula are two places a future edit can
+          land in only one of them. That's the same underlying problem
+          <a href="https://michaelrooney.dev/journal/08-07-2026b.html" class="prose-link">a duplicated-logic decision on the capstone</a>
+          came down to: duplication itself isn't the enemy, silent
+          divergence between copies is. A shared package makes divergence
+          structurally harder, not just something to remember to avoid.
+        </p>
+
+        <h2>A name that has to match exactly</h2>
+        <p>
+          <code>npm init -y</code> inside the shared package's folder
+          defaulted its name to plain <code>shared</code> — which is also a
+          real, existing package name on the public npm registry. That's
+          not just an aesthetic problem. A package's <code>name</code> field
+          is the literal string that ends up in an <code>import</code>
+          statement later, and <a href="https://docs.npmjs.com/cli/v10/using-npm/workspaces" class="prose-link">npm workspaces</a>
+          resolves that name locally instead of hitting the registry —
+          but only when the name is unambiguous. The standard fix is
+          scoping internal packages under your own namespace,
+          <code>@filament-calc/shared</code>, which costs nothing since
+          nothing here gets published, and makes it visually obvious in any
+          import line that a package is internal rather than a registry
+          dependency.
+        </p>
+
+        <h2>What actually happens on <code>npm install</code></h2>
+        <p>
+          Running installs from inside a single workspace still lands
+          everything in one <strong>root</strong> <code>node_modules</code>,
+          not a folder-local one. For real registry dependencies like
+          <code>zod</code> or <code>express</code>, that's just hoisting.
+          For internal packages, npm does something more specific: it
+          creates a symlink — <code>root/node_modules/@filament-calc/shared</code>
+          pointing at <code>packages/shared</code> — which is the actual
+          mechanism that lets <code>import { calculateCost } from
+          '@filament-calc/shared'</code> resolve at all later. One lockfile
+          at the root tracks the whole graph. The <code>-w</code> flag
+          (<code>npm install zod -w @filament-calc/api</code>) doesn't
+          change where anything physically lands — it only changes which
+          package's <code>package.json</code> records the dependency.
+        </p>
+
+        <h2>CommonJS vs. ESM isn't cosmetic</h2>
+        <p>
+          Every fresh <code>package.json</code> defaults to
+          <code>"type": "commonjs"</code> — Node's historical module system,
+          where <code>require()</code> loads synchronously and file
+          extensions are optional. The alternative, <code>"type":
+          "module"</code>, switches Node to real ECMAScript modules:
+          <code>import</code>/<code>export</code>, mandatory
+          <code>.js</code> extensions on relative imports, and no
+          <code>__dirname</code> global. The part worth being precise
+          about: writing <code>import</code>/<code>export</code> syntax in
+          a <code>.ts</code> file is a TypeScript language feature and has
+          nothing to do with this setting — TypeScript compiles that syntax
+          down to whichever target the <code>tsconfig.json</code>
+          <code>module</code> option specifies. The <code>"type"</code>
+          field in <code>package.json</code> is telling Node how to
+          interpret the <em>compiled output</em>, not the source. Get a
+          package's <code>"type"</code> out of sync with what its build
+          actually emits, and the failure shows up as a real, sometimes
+          cryptic <code>ERR_REQUIRE_ESM</code> at runtime — a genuinely
+          common monorepo footgun. All three packages here are set to
+          <code>"type": "module"</code>, targeting ESM output throughout.
+        </p>
+
+        <h2>A file that gets deleted on purpose</h2>
+        <p>
+          JavaScript has no runtime concept of types at all — there's no
+          <code>: number</code> syntax the engine understands. TypeScript's
+          types exist purely to catch mistakes while writing code; once
+          <code>tsc</code> finishes checking that everything lines up, the
+          types have done their job and get stripped from the compiled
+          <code>.js</code> entirely. This is called type erasure, and it's
+          why the shared package's build produces two separate files per
+          module: <code>dist/index.js</code> (plain JS, no type
+          annotations) and <code>dist/index.d.ts</code> — a
+          <a href="https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html" class="prose-link">declaration file</a>
+          that preserves the erased type information separately, entirely
+          for the benefit of whatever imports this package later. Every
+          <code>const</code> or <code>function</code> in a
+          <code>.d.ts</code> file gets prefixed with <code>declare</code> —
+          TypeScript's way of saying "this exists somewhere, trust me,
+          generate no code for it." <code>interface</code> and
+          <code>type</code> entries never get that prefix, since they were
+          never runtime constructs to begin with. This split is what makes
+          cross-package IntelliSense work at all: when the API package
+          later imports from <code>@filament-calc/shared</code>, the editor
+          reads <code>dist/index.d.ts</code> for full autocomplete and
+          type-checking, without ever parsing or executing the actual
+          compiled JS.
+        </p>
+
+        <p>
+          Shared package built, compiling clean, exporting a validated
+          <code>calculateCost</code> function with real types attached.
+          Next: wiring an Express API to actually depend on it — which is
+          where the build order turned out to matter a lot more than it
+          looked like it would.
+        </p>
+      </div>
+      <nav class="entry-nav" aria-label="Entry navigation">
+        <span></span>
+        <a href="09-01-2026.html">← Previous: 09-01-2026 Entry</a>
+        <a href="09-04-2026b.html">Next: 09-04-2026b Entry →</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 Michael Rooney</span>
+    <span>
+      <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+      </a>
+    </span>
+    <span>Front-End Developer</span>
+  </footer>
+
+  <script src="../js/main.js" defer></script>
+</body>
+</html>
