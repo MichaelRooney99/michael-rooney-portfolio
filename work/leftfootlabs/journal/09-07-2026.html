@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Stylesheet That Was Never Attached — Michael Rooney</title>
+<meta name="description" content="Wiring a Vite React client into leftfootLabs' filament cost calculator monorepo — a workspace-rescan gotcha, why Vite's tsconfig plays by different rules than a hand-written one, two real dependency deprecations, a workshop-themed design system, and a styling bug that turned out not to be a styling bug at all." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Stylesheet That Was Never Attached — Michael Rooney" />
+<meta property="og:description" content="A panel that rendered with zero visual difference from a plain form — not a CSS bug, but a missing import statement, found only after ruling out the actual stylesheet and class names first." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-07-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Stylesheet That Was Never Attached — Michael Rooney" />
+<meta name="twitter:description" content="A panel that rendered with zero visual difference from a plain form — not a CSS bug, but a missing import statement, found only after ruling out the actual stylesheet and class names first." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-07-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Stylesheet That Was Never Attached",
+  "description": "Wiring a Vite React client into leftfootLabs' filament cost calculator monorepo — a workspace-rescan gotcha, why Vite's tsconfig plays by different rules than a hand-written one, two real dependency deprecations, a workshop-themed design system, and a styling bug that turned out not to be a styling bug at all.",
+  "datePublished": "2026-09-07",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-07-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-07-2026">September 7, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>The Stylesheet That Was Never Attached</h1>
+    </header>
+
+    <div class="prose">
+
+      <p>
+        A styled panel that renders with zero visual difference from a
+        plain unstyled form isn't necessarily a CSS bug — sometimes the
+        CSS was never asked to run at all. That was the actual ending of
+        this session, but it came after a genuinely useful stretch of
+        real monorepo work first: wiring a React client into a small
+        npm workspaces project — three packages, a shared calculation
+        package, an Express API, and now a real frontend — built as the
+        first piece of a filament cost calculator meant to eventually
+        live inside leftfootlabs.com itself, not just as a learning
+        exercise.
+      </p>
+
+      <h2>A workspace npm didn't know existed yet</h2>
+      <p>
+        Scaffolding the client with <code>npm create vite@latest client
+        -- --template react-ts</code> generates its own
+        <code>package.json</code> — but linking it to the shared package
+        right afterward failed outright: <code>No workspaces found:
+        --workspace=@filament-calc/client</code>. Not a typo. The
+        <code>workspaces</code> field in the root <code>package.json</code>
+        is a glob, and npm only rescans it at install time — its cached
+        view of what packages exist was still whatever it was before
+        Vite created the client's own manifest. One plain
+        <code>npm install</code> from root, run once, was enough to make
+        npm rediscover the new package before the link command would
+        resolve.
+      </p>
+
+      <h2>A tsconfig with a genuinely different job</h2>
+      <p>
+        Vite's scaffolded <code>tsconfig.app.json</code> looks nothing
+        like the hand-written ones behind the shared package and the
+        Express API, and none of the differences are arbitrary.
+        <code>moduleResolution: "bundler"</code> mimics how Vite and
+        esbuild actually resolve imports rather than how Node does it
+        directly. More significant is <code>noEmit: true</code> —
+        <code>tsc</code> never writes a file here at all. Vite does the
+        real transpiling; <code>tsc</code> only runs separately, purely
+        to fail loudly on a type error before anything gets bundled. A
+        genuinely different division of labor than the other two
+        packages, where <code>tsc</code> itself produces the real,
+        shippable output.
+      </p>
+
+      <h2>One import line, two different rules</h2>
+      <p>
+        The scaffold also turns on <code>verbatimModuleSyntax</code>,
+        which requires type-only imports to be marked explicitly.
+        Importing both a real zod schema object and a TypeScript type
+        derived from it, from the same package, needs a visibly
+        different treatment for each: <code>import { type
+        CalculationInput, CalculationInputSchema } from
+        '@filament-calc/shared'</code>. Miss the modifier on the
+        type-only half and it's a real compile error — the flag exists
+        specifically to catch importing something as a value that will
+        never actually exist in the compiled JavaScript, since
+        TypeScript types get erased entirely once the compiler's done
+        checking them.
+      </p>
+      <p>
+        Two smaller, real deprecations turned up in the same stretch,
+        both worth a permanent mental note: <code>React.FormEvent</code>
+        as a bare type is deprecated in favor of the more specific
+        <code>React.SyntheticEvent&lt;HTMLFormElement&gt;</code>, and zod
+        v4 deprecated the <code>.flatten()</code> method on a
+        <code>ZodError</code> in favor of a top-level
+        <code>z.flattenError()</code> function — same output, different
+        calling convention. Neither breaks anything today; both are
+        worth fixing the moment they're noticed rather than let pile up.
+      </p>
+
+      <h2>Designing for a brand that doesn't exist yet</h2>
+      <p>
+        Since this calculator is meant to eventually sit inside
+        leftfootLabs proper, it got its own visual identity instead of
+        borrowing the main portfolio's palette. The subject matter did
+        most of the real work here: this is functionally a slicer's own
+        cost-estimate panel, so the direction leaned straight into that —
+        a workshop-dark palette (deep charcoal, hazard-tape amber, a
+        PETG-spool teal), a monospace face reserved specifically for the
+        actual numeric readouts rather than used as a decorative label
+        font, and a spec-sheet layout with a dashed receipt-stub divider
+        separating the inputs from the results.
+      </p>
+      <p>
+        A couple of the actual CSS mechanisms are worth naming.
+        <code>font-variant-numeric: tabular-nums</code> is what makes a
+        column of dollar amounts genuinely line up — monospace alone
+        doesn't guarantee every digit occupies identical width by
+        default. <code>color-mix(in srgb, ...)</code> produced the
+        button's hover state directly in CSS, with no second hex value
+        to hand-pick and let drift out of sync with the base color
+        later. And <code>:focus-visible</code> instead of plain
+        <code>:focus</code> keeps the accent outline scoped to keyboard
+        navigation specifically, not a mouse click.
+      </p>
+
+      <h2>The bug that wasn't a CSS bug</h2>
+      <p>
+        The panel came back rendering as plain, completely unstyled
+        browser defaults after the stylesheet and every JSX
+        <code>className</code> were supposedly in place — genuinely
+        confusing for a moment, since neither the CSS file nor the class
+        names looked wrong on inspection. The actual cause sat upstream
+        of both: <code>App.tsx</code> had been rebuilt from a completely
+        empty file earlier in the project, and Vite's original scaffold
+        line, <code>import './App.css'</code>, never made it back in
+        through any of the rewrites since. The stylesheet existed, the
+        classes were correctly attached to the right elements — nothing
+        was ever loading the file that made either of those things
+        matter. One missing import line, and everything else was already
+        correct and just waiting to be connected.
+      </p>
+
+      <h2>Where it stands</h2>
+      <p>
+        A fully working, fully styled three-package monorepo exists now
+        end to end — a validated form, a shared calculation package, an
+        Express API, and a visual identity distinct from the main
+        portfolio's own. The next real step isn't more monorepo
+        mechanics; it's actually embedding this into the Rack Planner
+        or leftfootlabs.com directly, which is a genuinely different
+        kind of problem than building it standalone in the first place.
+      </p>
+
+    </div>
+
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="08-31-2026.html">← A Boolean That Was Secretly a String</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>
