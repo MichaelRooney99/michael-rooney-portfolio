@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sensor That Lied About What It Was — Michael Rooney</title>
+  <meta name="description" content="A first ESP32 build — driver issues, a bad USB cable, and a BME280 that turned out, on direct inspection of its own chip ID register, to actually be a cheaper BMP280 with no humidity sensor at all. Wired into the existing Prometheus stack as a real scrape target once the truth was sorted out." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Michael Rooney" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Sensor That Lied About What It Was — Michael Rooney" />
+  <meta property="og:description" content="A first ESP32 build hit driver issues, a bad USB cable, and a BME280 that turned out — confirmed by reading its own chip ID register directly — to actually be a mislabeled BMP280 with no humidity sensor." />
+  <meta property="og:url" content="https://michaelrooney.dev/journal/09-08-2026.html" />
+  <meta property="og:site_name" content="Michael Rooney" />
+  <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Sensor That Lied About What It Was — Michael Rooney" />
+  <meta name="twitter:description" content="A first ESP32 build hit driver issues, a bad cable, and a BME280 that turned out to actually be a mislabeled BMP280 — confirmed by reading its own chip ID register directly." />
+  <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <link rel="canonical" href="https://michaelrooney.dev/journal/09-08-2026.html" />
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Sensor That Lied About What It Was",
+    "description": "A first ESP32 build — driver issues, a bad USB cable, and a BME280 that turned out, on direct inspection of its own chip ID register, to actually be a cheaper BMP280 with no humidity sensor at all.",
+    "datePublished": "2026-09-08",
+    "url": "https://michaelrooney.dev/journal/09-08-2026.html",
+    "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="../index.html" class="logo" aria-label="Home">MR</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="primary-nav">
+        <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../journal.html" class="active">Journal</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+    <article>
+      <header class="entry-header reveal">
+        <div class="entry-meta">
+          <time datetime="09-08-2026">September 8, 2026</time>
+          <span class="tag tag-homelab">Homelab</span>
+          <span class="tag tag-learning">Learning</span>
+        </div>
+        <h1>The Sensor That Lied About What It Was</h1>
+      </header>
+
+      <div class="prose">
+
+        <p>
+          First real hardware project in the lab, after months of
+          everything being virtual machines, containers, and config
+          files: an ESP32 and a temperature/humidity breakout board,
+          meant to report rack conditions into the same Prometheus stack
+          already tracking everything else. It ended up being a good
+          crash course in a different kind of debugging — one where the
+          bug can be a wrong cable, not a wrong line of code.
+        </p>
+
+        <h2>Tooling problems before any code ran at all</h2>
+
+        <p>
+          Never having touched an ESP32 before, step one was just getting
+          the Arduino IDE talking to the board at all. Two separate
+          failures stacked on top of each other: the board's CP2102
+          USB-to-serial chip needed its own driver installed before
+          Windows would even show a COM port, and — separately — the USB
+          cable that shipped in the bundle turned out to be charge-only,
+          no data lines at all. Neither failure looked like the other.
+          Both looked identical from the outside: nothing shows up, no
+          error message, just silence. Swap the cable, install the
+          driver, and a board that had shown zero signs of life for
+          twenty minutes uploaded cleanly on the first real attempt.
+        </p>
+
+        <h2>A sensor that answered, but wasn't what it claimed</h2>
+
+        <p>
+          Wiring was straightforward once the board itself worked — four
+          wires, I2C, done. Except the sketch kept reporting "BME280 not
+          found," despite everything being connected correctly by every
+          check available: continuity, correct pins, 3.3V confirmed
+          instead of 5V. An I2C bus scanner confirmed a device really was
+          responding at the expected address. So something was
+          responding. The library just refused to recognize it.
+        </p>
+
+        <p>
+          That gap — hardware present, library rejecting it anyway — is
+          exactly the kind of situation where the fix is reading the
+          actual source instead of trusting an abstraction on top of it.
+          The Adafruit BME280 library checks a chip ID register during
+          initialization and silently fails if it doesn't match. Bypassing
+          the library entirely and reading that register directly over
+          raw I2C settled it in one shot: chip ID <code>0x58</code>. A
+          genuine BME280 reports <code>0x60</code>. <code>0x58</code> is
+          <a href="https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/bmp280/" class="prose-link">Bosch's BMP280</a>
+          — same footprint, same default I2C address, no humidity sensor
+          at all. The board was never lying about being on the bus. It
+          was mislabeled at the listing level, and the address alone
+          couldn't have told the difference — only the chip's own
+          identification register could.
+        </p>
+
+        <p class="callout">
+          The address a device answers at and the device's actual
+          identity are two different questions. An address confirms
+          something is there. It says nothing about what that something
+          actually is.
+        </p>
+
+        <h2>Fixing the code around what the hardware actually is</h2>
+
+        <p>
+          Once the real chip was known, the fix was small: swap to the
+          BMP280 library, drop the humidity metric from the
+          Prometheus-format output entirely rather than reporting a fake
+          or constant value for a sensor that isn't physically present.
+          One near-miss along the way — writing
+          <code>bmp.begin(0x58)</code> before catching that <code>0x58</code>
+          is the chip ID, not the I2C address, which is still
+          <code>0x76</code>. Two different numbers, easy to conflate right
+          after just having spent ten minutes staring at one of them on a
+          screen.
+        </p>
+
+        <h2>Fitting it into infrastructure that already existed</h2>
+
+        <p>
+          The rest was familiar ground:
+          <a href="08-30-2026.html" class="prose-link">the same VLAN and Wi-Fi work from the AP bring-up a week earlier</a>
+          made a decision easy here too — this first sensor lives on the
+          flat main LAN rather than an isolated VLAN, on purpose, while
+          still learning the board's basic behavior. Segmentation is the
+          right long-term shape, once the hardware itself isn't a
+          variable anymore. Getting the sensor into Prometheus was a
+          two-line addition to an already-running scrape config — same
+          shape as every <code>node_exporter</code> target already there,
+          the ESP32 just serving its own tiny <code>/metrics</code>
+          endpoint in the same plain-text format Prometheus already reads
+          everywhere else.
+        </p>
+
+        <p>
+          None of today's actual problems were exotic. A bad cable. A
+          missing driver. A component that wasn't quite what its own
+          listing said. What made each one solvable in reasonable time
+          was the same habit that already runs through everything else in
+          this lab: when something that should obviously work doesn't,
+          go check the actual source directly — the chip's own register,
+          the device manager's own port list — rather than re-reading the
+          same code or the same wiring diagram a fourth time hoping to
+          spot something new in it.
+        </p>
+
+      </div>
+
+      <nav class="entry-nav" aria-label="Entry navigation">
+        <span></span>
+        <a href="09-04-2026b.html" class="prose-link">← Previous: 09-04-2026b Entry</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 Michael Rooney</span>
+    <span>
+      <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+      </a>
+    </span>
+    <span>Front-End Developer</span>
+  </footer>
+
+  <script src="../js/main.js" defer></script>
+</body>
+</html>
