@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Discharge Test That Turned Into a Real Shutdown — Michael Rooney</title>
+<meta name="description" content="Building a real UPS runtime estimator for the Rack Planner meant collecting real discharge data at three load levels — and one level ran past its planned stop point into an actual fleet-wide forced shutdown, which ended up answering a question that had been sitting unresolved for months." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Discharge Test That Turned Into a Real Shutdown — Michael Rooney" />
+<meta property="og:description" content="Real UPS discharge data at three load levels — including one level that ran past its stop point into a real, fleet-wide forced shutdown, and what that accident actually proved." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Discharge Test That Turned Into a Real Shutdown — Michael Rooney" />
+<meta name="twitter:description" content="Real UPS discharge data at three load levels — including one level that ran past its stop point into a real, fleet-wide forced shutdown, and what that accident actually proved." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Discharge Test That Turned Into a Real Shutdown",
+  "description": "Building a real UPS runtime estimator for the Rack Planner meant collecting real discharge data at three load levels — and one level ran past its planned stop point into an actual fleet-wide forced shutdown, which ended up answering a question that had been sitting unresolved for months.",
+  "datePublished": "2026-09-08",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <a href="../../../journal.html" class="back-link reveal">← Back to Journal</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-08-2026">September 8, 2026</time>
+        <span class="tag tag-homelab">Homelab</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>The Discharge Test That Turned Into a Real Shutdown</h1>
+    </header>
+    <div class="prose">
+      <p>
+        A UPS runtime estimator built from a spec sheet is a guess
+        wearing a number. The Rack Planner's power-budget feature is
+        meant to tell someone whether their layout will actually stay
+        up long enough to matter during an outage, and that only means
+        something if the underlying runtime curve came from a real
+        battery under real load — not a linear estimate extrapolated
+        from a nameplate rating. So building it honestly meant
+        measuring it directly: three load levels, a real UPS, a real
+        six-node cluster actually running on battery, on purpose.
+      </p>
+
+      <h2>Three levels, one variable at a time</h2>
+      <p>
+        The fleet's six mini PCs are the only load actually available —
+        there's no separate dummy load to plug in for testing. Getting
+        three genuinely different draw levels meant inducing them
+        directly, with CPU stress across a deliberately chosen subset
+        of nodes for each level, then physically cutting mains power to
+        the UPS so the whole load actually ran on battery, not just
+        theoretically. Level one, at the fleet's natural idle draw,
+        went exactly as planned: a clean multi-minute discharge, a
+        deliberate stop well above the low-battery threshold, a full
+        recharge, done.
+      </p>
+
+      <h2>Where the plan broke</h2>
+      <p>
+        Level two dropped roughly twice as fast as level one — more
+        load, shorter runtime, which is exactly what should happen.
+        What didn't survive contact with that faster rate was the
+        monitoring approach: watching the discharge through pasted
+        log output and reacting after a round of back-and-forth has
+        real latency built into it, and a fast-dropping battery doesn't
+        leave room for that latency. The stop threshold got crossed
+        several readings before anyone caught it. The UPS declared a
+        real low-battery condition and broadcast a real forced-shutdown
+        signal. All six nodes actually halted.
+      </p>
+
+      <h2>What an unplanned outage actually proved</h2>
+      <p>
+        Watching six machines go dark on purpose was not the plan for
+        the evening. What came back afterward was more useful than
+        expected, though: every node that was configured to restore
+        power automatically after an outage actually did — a real,
+        if accidental, answer to a question that had been sitting open
+        for a while. It also explained something that hadn't made
+        sense before: a past attempt at testing this exact shutdown
+        chain hadn't triggered when it seemed like it should have.
+        Checking the actual configuration afterward turned up why — a
+        documented shutdown threshold that had never actually been
+        pushed to the UPS itself. The real, live threshold and the
+        one every runbook described were two different numbers, and
+        had been for a while.
+      </p>
+
+      <h2>Doing it right the second time</h2>
+      <p>
+        Level three carried the heaviest load of the three — meaning
+        it would drop faster than level two, not slower, right after
+        level two had just demonstrated exactly how much that matters.
+        The fix wasn't a different threshold. It was watching the
+        discharge live, in real time, and acting on it directly instead
+        of relaying it through a round trip first. It worked. The plug
+        went back in seconds after the threshold was crossed, well
+        clear of an actual shutdown, and the fleet never lost power a
+        second time.
+      </p>
+
+      <p>
+        Three real load levels, three real curves, and one real
+        confirmation that the shutdown chain works — gathered in that
+        order specifically because the second one didn't go as planned.
+        A deliberate, controlled test of that same shutdown chain is
+        still on the list, run properly rather than by accident. The
+        actual runtime estimator gets built from this data next,
+        the same way the Rack Planner's
+        <a href="https://michaelrooney.dev/work/leftfootlabs/journal/08-17-2026.html" class="prose-link">kit dimensions</a>
+        got built from a real measured part instead of a spec sheet
+        first.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-08-2026.html">← Previous: A Comment That Described a Fix That Never Shipped</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

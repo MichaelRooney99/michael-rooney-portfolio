@@ -5,8 +5,29 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 08 Sep 2026 22:22:10 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 09 Sep 2026 00:26:58 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Discharge Test That Turned Into a Real Shutdown</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026b.html</guid>
+      <pubDate>Tue, 08 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Real UPS discharge data at three load levels — including one level that ran past its stop point into a real, fleet-wide forced shutdown, and what that accident actually proved.]]></description>
+    </item>
+    <item>
+      <title>The Sensor That Lied About What It Was</title>
+      <link>https://michaelrooney.dev/journal/09-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/09-08-2026.html</guid>
+      <pubDate>Tue, 08 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A first ESP32 build hit driver issues, a bad USB cable, and a BME280 that turned out — confirmed by reading its own chip ID register directly — to actually be a mislabeled BMP280 with no humidity sensor.]]></description>
+    </item>
+    <item>
+      <title>A Comment That Described a Fix That Never Shipped</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026.html</guid>
+      <pubDate>Tue, 08 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A type mismatch turned out to be a symptom of a route shipping raw database rows — and a comment describing a fix that would have broken the Docker build if it had ever actually been built.]]></description>
+    </item>
     <item>
       <title>The Stylesheet That Was Never Attached</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-07-2026.html</link>

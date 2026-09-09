@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Comment That Described a Fix That Never Shipped — Michael Rooney</title>
+<meta name="description" content="Fixing a type mismatch between the Rack Planner's frontend and backend surfaced the real bug underneath it — a route shipping raw database rows straight to the client — plus a header comment describing a fix that was never actually built, and wouldn't have worked as written." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Comment That Described a Fix That Never Shipped — Michael Rooney" />
+<meta property="og:description" content="A type mismatch turned out to be a symptom of a route shipping raw database rows — and a comment describing a fix that would have broken the Docker build if it had ever actually been built." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Comment That Described a Fix That Never Shipped — Michael Rooney" />
+<meta name="twitter:description" content="A type mismatch turned out to be a symptom of a route shipping raw database rows — and a comment describing a fix that would have broken the Docker build if it had ever actually been built." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Comment That Described a Fix That Never Shipped",
+  "description": "Fixing a type mismatch between the Rack Planner's frontend and backend surfaced the real bug underneath it — a route shipping raw database rows straight to the client — plus a header comment describing a fix that was never actually built, and wouldn't have worked as written.",
+  "datePublished": "2026-09-08",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <a href="../../../journal.html" class="back-link reveal">← Back to Journal</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-08-2026">September 8, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>A Comment That Described a Fix That Never Shipped</h1>
+    </header>
+    <div class="prose">
+      <p>
+        A type mismatch between the Rack Planner's frontend and backend
+        looked, at first glance, like exactly what it appeared to be:
+        the shared <code>Device</code> type was camelCase
+        (<code>uHeight</code>, <code>isKitItem</code>), and the
+        frontend had quietly declared its own separate snake_case
+        version (<code>u_height</code>, <code>is_kit_item</code>)
+        instead of using it. The actual root cause was smaller and more
+        specific than "the types don't match" — the device API route
+        was shipping raw SQLite rows straight to the client with no
+        mapping step at all. The type mismatch wasn't the bug. It was
+        the visible symptom of a route that skipped a step entirely.
+      </p>
+
+      <h2>What the fix actually needed</h2>
+      <p>
+        A single <code>rowToDevice</code> mapping, used by both the
+        device route and the layout-validation logic, replaced two
+        separate places that had each been quietly doing (or, in the
+        route's case, <em>not</em> doing) their own version of the same
+        conversion. The route now returns the shared camelCase shape
+        directly; the frontend's separate type declaration stays, but
+        now actually matches the real wire format instead of describing
+        the raw database row shape it was never supposed to see.
+      </p>
+
+      <h2>The comment that was worth reading twice</h2>
+      <p>
+        The shared types file had a header comment claiming the
+        frontend imported it directly, via a workspace reference,
+        instead of hand-declaring its own copy. That was never actually
+        true. Checking why revealed something more interesting than a
+        stale comment: a real cross-package import here would have
+        required the frontend's Docker build to see backend source at
+        image-build time — and each service's build context is scoped
+        to its own folder. The comment wasn't describing an
+        unfinished feature. It was describing an approach that
+        wouldn't have worked as written, on infrastructure that
+        already existed before the comment was ever added. Fixing the
+        actual bug meant correcting the comment to describe what was
+        real, not chasing what it originally promised.
+      </p>
+
+      <h2>A test that only proved half of it</h2>
+      <p>
+        The first test written against this fix checked the
+        data-access layer directly — real assertions against a real
+        throwaway database, not mocks. It was a genuine improvement:
+        this codebase had no backend tests at all before it. But on
+        review, it only proved the mapping function returned the right
+        shape. It didn't prove the route actually used that mapping
+        correctly, end to end. Closing that gap meant extracting the
+        Express app itself into its own module — separated from the
+        startup script that also seeds the database and binds a real
+        port — specifically so a real HTTP request could be sent
+        through the actual app in a test, with nothing mocked.
+      </p>
+
+      <h2>The bug that only showed up on the second machine</h2>
+      <p>
+        Every one of these tests passed cleanly the first time. They
+        also passed cleanly a second time, on a different machine,
+        with one exception: both test files failed their cleanup step
+        with a permission error — on Windows only. SQLite keeps its
+        file handle open until something closes it explicitly; deleting
+        an open file works without complaint on Linux, and is refused
+        outright on Windows. The actual test assertions had been
+        correct the entire time. The fix was one line —
+        <code>db.close()</code>, called before attempting to delete the
+        file — but it only exists because the same code ran on two
+        real operating systems instead of one.
+      </p>
+
+      <p>
+        The Rack Planner shares its stack deliberately with the
+        <a href="https://michaelrooney.dev/journal.html" class="prose-link">capstone status page</a>
+        — same reasoning discussed in
+        <a href="https://michaelrooney.dev/work/leftfootlabs/journal/08-31-2026.html" class="prose-link">the last entry</a>
+        about why this project runs on its own isolated VM instead of a
+        shared LXC. Repetition across two real projects keeps surfacing
+        real, small lessons like this one instead of one clean success
+        story — which has turned out to be more useful than a clean
+        story would have been.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="08-31-2026.html">← Previous: A Boolean That Was Secretly a String</a>
+      <a href="09-08-2026b.html">Next: The Discharge Test That Turned Into a Real Shutdown →</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>S
