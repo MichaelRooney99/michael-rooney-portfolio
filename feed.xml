@@ -5,8 +5,29 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 09 Sep 2026 18:11:18 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 09 Sep 2026 20:24:56 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Query That Counted Four Devices as One</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026b.html</guid>
+      <pubDate>Wed, 09 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A real end-to-end test of a power-budget endpoint surfaced a SQL query that silently undercounted repeated devices — plus a typo and a gitignore pattern that both taught their own small lessons.]]></description>
+    </item>
+    <item>
+      <title>The Playbook That Passed by Failing First</title>
+      <link>https://michaelrooney.dev/journal/09-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/09-09-2026.html</guid>
+      <pubDate>Wed, 09 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Three NUT docs disagreed with reality and with each other. Re-running the real Ansible playbooks instead of hand-patching markdown surfaced a genuine race condition — a verification check that ran before the driver had actually finished starting.]]></description>
+    </item>
+    <item>
+      <title>The Estimate That Stops Where the Data Does</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026.html</guid>
+      <pubDate>Wed, 09 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Turning three real UPS discharge logs into a runtime estimator meant deciding what to do at the edges — including a curve that only ever reached 68% charge. The honest answer was refusing to guess past it.]]></description>
+    </item>
     <item>
       <title>The Discharge Test That Turned Into a Real Shutdown</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-08-2026b.html</link>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Estimate That Stops Where the Data Does — Michael Rooney</title>
+<meta name="description" content="Turning three real UPS discharge logs into an actual runtime estimator meant deciding what to do at the edges — where one curve only ever reached 68% charge before being stopped on purpose. The honest answer was refusing to guess past it, not smoothing over the gap." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Estimate That Stops Where the Data Does — Michael Rooney" />
+<meta property="og:description" content="Turning three real UPS discharge logs into a runtime estimator meant deciding what to do at the edges — including a curve that only ever reached 68% charge. The honest answer was refusing to guess past it." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Estimate That Stops Where the Data Does — Michael Rooney" />
+<meta name="twitter:description" content="A runtime estimator built from three real discharge curves — and the decision to refuse extrapolating past what any of them actually measured." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Estimate That Stops Where the Data Does",
+  "description": "Turning three real UPS discharge logs into an actual runtime estimator meant deciding what to do at the edges — where one curve only ever reached 68% charge before being stopped on purpose. The honest answer was refusing to guess past it, not smoothing over the gap.",
+  "datePublished": "2026-09-09",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-09-2026">September 9, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>The Estimate That Stops Where the Data Does</h1>
+    </header>
+    <div class="prose">
+      <p>
+        Three real discharge curves existed after the previous
+        session's testing — logged numbers, not projections. Turning
+        that into an actual runtime estimator the Rack Planner could
+        return from an API meant making a real decision at the edges of
+        the data, not just plotting the three curves and calling it
+        done.
+      </p>
+
+      <h2>Anchoring at the moment the battery actually starts draining</h2>
+      <p>
+        Each curve's timeline starts at zero the moment its log first
+        showed the UPS genuinely running on battery, not at the last
+        reading while still on line power. That distinction actually
+        mattered: one level's logs showed the reported runtime estimate
+        swinging wildly for several readings while still fully on
+        mains, as the induced load ramped up before the plug ever came
+        out. Anchoring at the real transition point keeps every curve
+        measuring the same thing — time actually spent draining — instead
+        of quietly including a stretch of pre-discharge noise in one
+        curve and not the others.
+      </p>
+
+      <h2>Labeling what wasn't actually measured</h2>
+      <p>
+        One of the three load levels never had its exact load percentage
+        directly confirmed the way the other two did — it was inferred
+        from how its runtime estimate compared to the baseline level,
+        not read off the UPS directly. Rather than quietly presenting
+        all three curves with equal confidence, that one gets a real
+        flag in the data itself: an explicit field marking it as
+        inferred, not measured, carried through in a comment rather than
+        smoothed over. A future session correcting it only has to change
+        one flag, not rediscover which number was shaky in the first
+        place.
+      </p>
+
+      <h2>The decision that mattered most: refusing to extrapolate past the floor</h2>
+      <p>
+        The heaviest load level was deliberately stopped early — live-watched,
+        reconnected well before any real risk — which means its curve
+        only actually covers a drop from full charge down to 68%. A
+        naive estimator would happily project that partial slope out to
+        a full depletion estimate. That number would be fiction wearing
+        the shape of data: 150 real seconds of observation stretched
+        into a guess about behavior that was never actually watched.
+      </p>
+
+      <p class="callout">
+        The estimator's actual rule: report the real, interpolated time
+        to reach the lowest charge percentage genuinely observed at a
+        given load — and say plainly what that floor is — instead of
+        projecting further just because a smooth curve makes that look
+        easy. An honest "I don't know past this point" is worth more
+        than a confident number built on a fraction of the real range.
+      </p>
+
+      <h2>Interpolating between two real curves instead of one</h2>
+      <p>
+        For a load that falls between two tested levels, the estimator
+        blends both real curves — proportionally by how close the
+        requested load sits to each one — rather than just rounding to
+        the nearest tested level. The one wrinkle: two curves reached
+        different floors (one only measured down to 68%, another all
+        the way to 27%), so a blended estimate can only honestly compare
+        them down to whichever floor is higher. Comparing past that
+        would mean inventing data for the curve that never actually
+        went that low.
+      </p>
+
+      <p>
+        Every exact match to a tested level reproduces its real logged
+        number precisely — checked directly, not just trusted because
+        the logic reads correctly. The interpolated cases got the same
+        treatment: traced by hand against the raw log entries for two
+        different in-between loads, and both matched the code's output
+        exactly. Loads outside the tested range get an explicit
+        <code>extrapolated-by-load</code> flag rather than being treated
+        the same as a real interpolation between two measured points —
+        a materially weaker guarantee, and the API says so.
+      </p>
+
+      <p>
+        Getting the estimate itself right turned out to be the easy
+        part. Wiring it into the actual running API surfaced two real
+        problems that had nothing to do with any of this — worth its
+        own entry rather than folding in here.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-08-2026b.html">← Previous: The Discharge Test That Turned Into a Real Shutdown</a>
+      <a href="09-09-2026b.html">Next: The Query That Counted Four Devices as One →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

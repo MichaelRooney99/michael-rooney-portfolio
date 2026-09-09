@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Query That Counted Four Devices as One — Michael Rooney</title>
+<meta name="description" content="Wiring a runtime estimator into a real API endpoint surfaced a genuine pre-existing bug in a SQL query, a self-inflicted typo that broke a router in an instructive way, and a .gitignore pattern silently swallowing an entire source directory — none of them in the estimator itself." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Query That Counted Four Devices as One — Michael Rooney" />
+<meta property="og:description" content="A real end-to-end test of a power-budget endpoint surfaced a SQL query that silently undercounted repeated devices — plus a typo and a gitignore pattern that both taught their own small lessons." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Query That Counted Four Devices as One — Michael Rooney" />
+<meta name="twitter:description" content="A real end-to-end test surfaced a SQL query silently undercounting repeated devices — plus a typo and a gitignore pattern that each taught their own small lesson." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Query That Counted Four Devices as One",
+  "description": "Wiring a runtime estimator into a real API endpoint surfaced a genuine pre-existing bug in a SQL query, a self-inflicted typo that broke a router in an instructive way, and a .gitignore pattern silently swallowing an entire source directory — none of them in the estimator itself.",
+  "datePublished": "2026-09-09",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-09-2026">September 9, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>The Query That Counted Four Devices as One</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026.html" class="prose-link">The runtime estimator itself</a>
+        checked out clean the moment it went live — every exact-match
+        case reproduced the real logged numbers precisely, on the first
+        real end-to-end test. Every actual problem that turned up
+        afterward was in the plumbing around it, not the estimator's own
+        logic.
+      </p>
+
+      <h2>A bug that predates tonight, found by the first real test to exercise it</h2>
+      <p>
+        Testing the power-budget endpoint against a layout with four of
+        the same device placed in it returned the wattage and count for
+        exactly one — as if the other three didn't exist. The query
+        behind it looked for devices matching a list of IDs pulled from
+        the layout, but that list had the same ID repeated four times.
+        SQL's matching clause treats a repeated value in that list as
+        redundant, not as four separate things to find — it returns one
+        row per unique match, regardless of how many times a value shows
+        up asking for it. Four placements of one device type had always
+        collapsed down to one, silently, since before tonight touched
+        any of this code.
+      </p>
+
+      <p class="callout">
+        Nothing about that bug depended on the wattage estimate being
+        new. It was sitting there the whole time, waiting for a test
+        that actually placed the same device more than once — which
+        apparently nothing had, until tonight's end-to-end check did
+        exactly that by accident of picking a realistic test layout.
+      </p>
+
+      <p>
+        The fix separates the two questions the original query
+        conflated: which unique devices exist, versus how many times
+        each one was actually placed. Look up every unique device's
+        wattage once, then sum across every real placement in the
+        layout — not across however many distinct IDs happened to
+        appear. Four identical devices now correctly report four times
+        the wattage, and the device count reflects total placements
+        instead of unique types.
+      </p>
+
+      <h2>A missing chunk that broke the right thing loudly</h2>
+      <p>
+        Hand-keying the updated route file into the real repo skipped
+        an entire section without anyone noticing at the time — including
+        the line exporting the router itself. The failure that produced
+        was about as clear as a missing-export bug gets:
+        <code>Router.use() requires a middleware function but got
+        undefined</code>, pointing at the exact line trying to mount it.
+        A working router sitting right next to the broken one in the
+        same file made the diagnosis fast — one import resolved fine,
+        the other came back <code>undefined</code>, which narrows the
+        search to "what's different about this one file" immediately,
+        rather than a vague failure with no obvious starting point.
+      </p>
+
+      <h2>A file that existed on disk and nowhere else</h2>
+      <p>
+        A new source directory for the estimator's real discharge data
+        never showed up in <code>git status</code> at all — not
+        modified, not untracked, nothing, despite genuinely existing on
+        disk with real content in it. The repo's <code>.gitignore</code>
+        had a bare <code>data/</code> pattern meant to keep the actual
+        SQLite database files out of version control. Without a leading
+        slash to anchor it to the repository root, that pattern matches
+        a folder named <code>data</code> anywhere in the tree — including
+        a same-named source directory nested three levels deeper that
+        had nothing to do with database storage at all. Anchoring the
+        pattern to the specific path it was actually meant to cover
+        fixed it without changing what it was supposed to ignore in the
+        first place.
+      </p>
+
+      <h2>What actually needed catching, in the end</h2>
+      <p>
+        Three real issues, and the estimator's own interpolation logic
+        wasn't one of them. That's not a coincidence so much as what
+        actually testing a feature for real tends to surface — the
+        core logic gets attention up front, gets checked carefully,
+        and turns out fine. The bugs waiting underneath are almost
+        always in the parts nobody was specifically watching: a query
+        written before this feature existed, a paste that skipped a
+        line, a config pattern written for a different purpose entirely.
+        None of them were exotic. All three were only findable by
+        actually running the real thing end to end and checking what
+        came back, rather than reading the code a second time and
+        trusting it looked right.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-09-2026.html">← Previous: The Estimate That Stops Where the Data Does</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

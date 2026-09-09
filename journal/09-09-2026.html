@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Playbook That Passed by Failing First — Michael Rooney</title>
+  <meta name="description" content="Following up on an accidental UPS shutdown surfaced three NUT-related docs that disagreed with reality, and with each other — including one file with two different copies of the same config embedded side by side. Fixing it by re-running the real Ansible playbooks instead of hand-editing markdown found a genuine race condition in the playbook itself." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Michael Rooney" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Playbook That Passed by Failing First — Michael Rooney" />
+  <meta property="og:description" content="Three NUT docs disagreed with reality and with each other. Re-running the real Ansible playbooks instead of hand-patching markdown surfaced a genuine race condition — a verification check that ran before the driver had actually finished starting." />
+  <meta property="og:url" content="https://michaelrooney.dev/journal/09-09-2026.html" />
+  <meta property="og:site_name" content="Michael Rooney" />
+  <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Playbook That Passed by Failing First — Michael Rooney" />
+  <meta name="twitter:description" content="Three NUT docs disagreed with reality and each other. Re-running the real Ansible playbooks surfaced a genuine race condition instead — a check that ran before the driver had finished starting." />
+  <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <link rel="canonical" href="https://michaelrooney.dev/journal/09-09-2026.html" />
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Playbook That Passed by Failing First",
+    "description": "Following up on an accidental UPS shutdown surfaced three NUT-related docs that disagreed with reality, and with each other — including one file with two different copies of the same config embedded side by side. Fixing it by re-running the real Ansible playbooks instead of hand-editing markdown found a genuine race condition in the playbook itself.",
+    "datePublished": "2026-09-09",
+    "url": "https://michaelrooney.dev/journal/09-09-2026.html",
+    "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="../index.html" class="logo" aria-label="Home">MR</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="primary-nav">
+        <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../journal.html" class="active">Journal</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+    <article>
+      <header class="entry-header reveal">
+        <div class="entry-meta">
+          <time datetime="09-09-2026">September 9, 2026</time>
+          <span class="tag tag-homelab">Homelab</span>
+          <span class="tag tag-learning">Learning</span>
+        </div>
+        <h1>The Playbook That Passed by Failing First</h1>
+      </header>
+
+      <div class="prose">
+
+        <p>
+          An accidental UPS forced-shutdown a day earlier left a real
+          question sitting open: the documented shutdown threshold and
+          the one actually configured on the UPS didn't match. Chasing
+          that down properly meant checking three separate docs against
+          each other and against reality — and it turned into a much
+          better lesson about documentation drift than the mismatch
+          itself.
+        </p>
+
+        <h2>A file that disagreed with itself</h2>
+
+        <p>
+          The first doc checked cleanly resolved the headline question:
+          the real firmware threshold is 10% battery, not the 20% every
+          runbook described. Easy fix — correct the docs, leave the UPS
+          alone. What wasn't expected was finding the exact same
+          five-node slave list stated as four nodes in one section of a
+          file, and correctly as five in a completely different section
+          of that <em>same</em> file. Nobody had edited the second
+          section when a sixth node was added to the monitoring fleet
+          months earlier. The file didn't just disagree with reality —
+          it disagreed with itself.
+        </p>
+
+        <h2>Two copies, quietly diverging</h2>
+
+        <p>
+          A separate reference doc had something stranger: two full
+          copies of the same slave config, embedded side by side under
+          two different headings, each claiming to be the current
+          version. One had a setting that would crash the monitoring
+          service if actually deployed; the other didn't. Neither copy
+          matched what was really running on the fleet, either — the
+          live config on a real node was missing several lines both
+          documented copies agreed on. Three different versions of one
+          config, and not one of them was the ground truth.
+        </p>
+
+        <p class="callout">
+          Reconciling three disagreeing copies of a config by carefully
+          reading each one is exactly the wrong instinct. The actual
+          fix was ignoring all three and going straight to the thing
+          that's supposed to be authoritative in the first place: the
+          real Ansible playbook already sitting in the repo, and a live
+          check of what a real node was actually running.
+        </p>
+
+        <h2>The playbook that failed on the first real run</h2>
+
+        <p>
+          Pulling the real <code>nut_master.yml</code> and
+          <code>nut_slaves.yml</code> files and running them fresh
+          against the whole fleet was meant to be the boring, correct
+          fix — bring every node's live config back in line with the
+          one file that should define it, no more hand-reconciling
+          markdown. The first run against the master node failed
+          instead, with <code>Error: Driver not connected</code>,
+          immediately after a real config change had just been applied.
+        </p>
+
+        <p>
+          That's a genuinely alarming message on a project built around
+          verifying a UPS shutdown chain — worth treating carefully, not
+          waving off as a fluke. Checking the actual driver process
+          directly (<code>systemctl status</code> on the real service,
+          not trusting the failure message alone) told a much less
+          scary story: the driver had, in fact, started successfully —
+          four seconds <em>after</em> the playbook's own check had
+          already given up and failed. The port the check was waiting on
+          opened before the USB driver behind it had actually finished
+          attaching to the physical UPS. The playbook was watching the
+          wrong signal.
+        </p>
+
+        <h2>Confirming it, then fixing it properly</h2>
+
+        <p>
+          Re-running the exact same playbook a few seconds later, with
+          nothing else touched, passed clean — zero config changes,
+          verification check green on the first try. That's the
+          confirmation that mattered: not "it works now," but "the
+          failure was real, transient, and specifically the four-second
+          gap, not a fluke that happened to go away." The actual fix
+          was small — a retry loop on the verification task instead of
+          a single immediate check — so a normal startup delay stops
+          producing a false alarm on every future run, for whoever
+          touches this playbook next.
+        </p>
+
+        <h2>Confirming the fleet, not just the fix</h2>
+
+        <p>
+          Re-running <code>nut_slaves.yml</code> against all five slave
+          nodes afterward closed out the original question properly: a
+          node on its own isolated VLAN, which had only ever appeared
+          in one of the three disagreeing docs, connected across that
+          VLAN boundary and confirmed the UPS status cleanly. Real
+          confirmation, not an assumption carried forward from whichever
+          doc happened to be right by accident.
+        </p>
+
+        <p>
+          The actual lesson isn't about NUT specifically. Three
+          documents drifting out of sync with reality, and with each
+          other, is what happens by default to hand-maintained config
+          documentation over enough months — not a mistake anyone made
+          on purpose, just the ordinary cost of a doc and a live system
+          existing separately. The real fix was never going to be
+          reading the docs more carefully. It was treating the actual
+          playbook and the actual running config as the only two things
+          worth trusting, and letting everything else get corrected to
+          match them.
+        </p>
+
+      </div>
+
+      <nav class="entry-nav" aria-label="Entry navigation">
+        <span></span>
+        <a href="09-08-2026.html" class="prose-link">← Previous: 09-08-2026 Entry</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 Michael Rooney</span>
+    <span>
+      <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+      </a>
+    </span>
+    <span>Front-End Developer</span>
+  </footer>
+
+  <script src="../js/main.js" defer></script>
+</body>
+</html>
