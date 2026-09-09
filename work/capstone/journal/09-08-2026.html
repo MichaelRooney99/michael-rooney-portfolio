@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 49 — A Fifth Adapter, Slotted Into the Middle | Michael Rooney</title>
+    <meta
+      name="description"
+      content="A real ESP32 rack-temperature sensor, already scraped by Prometheus for the homelab, folded into the status page as a fifth service adapter — following an existing pattern closely enough that the real risk wasn't building it, it was making sure a test actually caught the seam where it got inserted."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Michael Rooney" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Session 49 — A Fifth Adapter, Slotted Into the Middle — Michael Rooney" />
+    <meta property="og:description" content="A real ESP32 rack-temperature sensor folded into the status page as a fifth service adapter, following an existing pattern closely enough that the real risk was the insertion point, not the feature itself." />
+    <meta property="og:url" content="https://michaelrooney.dev/work/capstone/journal/09-08-2026.html" />
+    <meta property="og:site_name" content="Michael Rooney" />
+    <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Session 49 — A Fifth Adapter, Slotted Into the Middle — Michael Rooney" />
+    <meta name="twitter:description" content="A real ESP32 rack-temperature sensor folded into the status page as a fifth service adapter, following an existing pattern closely." />
+    <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+    <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+    <link rel="canonical" href="https://michaelrooney.dev/work/capstone/journal/09-08-2026.html" />
+    <link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+    <link rel="stylesheet" href="../../../css/styles.css" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Session 49 — A Fifth Adapter, Slotted Into the Middle",
+      "description": "A real ESP32 rack-temperature sensor, already scraped by Prometheus, folded into the status page as a fifth service adapter — following an existing pattern closely enough that the real risk was the insertion point, not the feature.",
+      "datePublished": "2026-09-08",
+      "url": "https://michaelrooney.dev/work/capstone/journal/09-08-2026.html",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Rooney",
+        "url": "https://michaelrooney.dev"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul id="primary-nav">
+          <li><a href="../../../portfolio-showcase.html">Work</a></li>
+          <li><a href="../../../index.html#about">About</a></li>
+          <li><a href="../../../journal.html">Journal</a></li>
+          <li><a href="../capstone-index.html" class="active">Capstone</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <a href="../capstone-index.html" class="back-link reveal">← Back to Capstone Journal</a>
+
+      <article>
+        <header class="entry-header reveal">
+          <div class="entry-meta">
+            <time datetime="09-08-2026">September 8, 2026</time>
+            <span class="tag tag-projects">Projects</span>
+          </div>
+          <h1>Session 49 — A Fifth Adapter, Slotted Into the Middle</h1>
+        </header>
+
+        <div class="prose">
+
+          <p>
+            The two review passes and the architecture write-up closed
+            out everything this project actually required — the internship
+            hours cleared, the documentation done, a real case study
+            written. This session isn't part of any of that. New hardware
+            showed up in the rack, and it happened to expose exactly the
+            kind of thing this status page already knows how to show.
+            Worth doing, and worth writing up, capstone requirement or not.
+          </p>
+
+          <p>
+            A real ESP32, wired to a temperature and pressure sensor,
+            has been sitting in the rack reporting to Prometheus for a
+            little while now — a homelab addition, built for its own
+            reasons. Folding it into the status page turned out to be
+            less about building something new and more about following a
+            shape that already existed twice.
+          </p>
+
+          <h2>The same shape, a third time</h2>
+
+          <p>
+            The UPS integration already established the pattern: one
+            fixed service, a liveness check driving operational or
+            outage, everything else riding along as display metadata
+            rather than feeding the status itself. The rack sensor is
+            structurally identical — a reachability check, temperature
+            and pressure shown alongside it, neither one able to
+            degrade the status on its own. That last part was a real,
+            deliberate choice rather than an assumption: visibility into
+            the reading was the actual goal here, not building a second
+            threshold system for what counts as "too hot," which would
+            have been a meaningfully bigger decision than the one this
+            session actually needed to make.
+          </p>
+
+          <h2>The real risk wasn't the new code — it was where it landed</h2>
+
+          <p>
+            The trickier part of this session had nothing to do with
+            the sensor itself. The live page already merges four
+            adapters and tracks which one failed by its position in the
+            list, since a rejected fetch carries no label of its own.
+            Adding a fifth adapter in the middle of that list — not
+            appended at the end, genuinely spliced between two existing
+            ones — is exactly the situation an off-by-one error hides
+            in. A test that only ever rejected the first or last item
+            in the list would never have caught a shift happening
+            somewhere in the middle.
+          </p>
+
+          <p class="callout">
+            The fix was writing a test aimed specifically at that
+            insertion point — rejecting the new adapter on its own and
+            confirming both that it gets blamed correctly, and that its
+            two neighbors on either side still report clean. Passing
+            the existing tests wasn't enough proof on its own; the
+            existing tests were written before this adapter existed; a
+            genuinely new scenario needed a genuinely new check.
+          </p>
+
+          <h2>Naming a gap instead of quietly living with it</h2>
+
+          <p>
+            The file this new function lives in has never had any test
+            coverage at all for its two existing functions — a real,
+            pre-existing gap that an earlier full audit of every test
+            file in this project never actually caught, since it was
+            scoped to a fixed list of files rather than a fresh
+            enumeration of everything that exists. Worth being honest
+            about rather than quietly working around: the new function
+            got real tests today, matching the standard everything else
+            in this project holds to. The two older functions sitting
+            right next to it didn't, and that's a genuine, separate gap
+            still sitting there, not something this session pretended
+            to close.
+          </p>
+
+        </div>
+
+        <nav class="entry-nav" aria-label="Entry navigation">
+          <span></span>
+          <a href="08-29-2026.html">← Session 48</a>
+          <span></span>
+        </nav>
+      </article>
+    </main>
+
+    <footer role="contentinfo">
+      <span>© 2026 Michael Rooney</span>
+      <span>
+        <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark"/>
+        </a>
+      </span>
+      <span>Front-End Developer</span>
+    </footer>
+
+    <script src="../../../js/main.js" defer></script>
+  </body>
+</html>
