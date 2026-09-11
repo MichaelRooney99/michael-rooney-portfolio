@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 09 Sep 2026 20:24:56 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 00:02:39 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Kit Wasn't the Thing That Needed Checking</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026.html</guid>
+      <pubDate>Thu, 10 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A kit-compatibility check turned into a real rack-shelf-device model once actual hardware brackets got measured against it — and caught a self-inflicted rule violation along the way.]]></description>
+    </item>
     <item>
       <title>The Query That Counted Four Devices as One</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-09-2026b.html</link>

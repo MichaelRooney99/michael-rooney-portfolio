@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Kit Wasn't the Thing That Needed Checking — Michael Rooney</title>
+<meta name="description" content="A kit-compatibility validation feature turned into a three-tier rack-shelf-device data model once real hardware brackets got measured against it, splitting one plan into four independently buildable pieces — and catching a genuine self-inflicted rule violation along the way." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Kit Wasn't the Thing That Needed Checking — Michael Rooney" />
+<meta property="og:description" content="A kit-compatibility check turned into a real rack-shelf-device model once actual hardware brackets got measured against it — and caught a self-inflicted rule violation along the way." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Kit Wasn't the Thing That Needed Checking — Michael Rooney" />
+<meta name="twitter:description" content="A kit-compatibility check turned into a real rack-shelf-device model once actual hardware brackets got measured against it — and caught a self-inflicted rule violation along the way." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Kit Wasn't the Thing That Needed Checking",
+  "description": "A kit-compatibility validation feature turned into a three-tier rack-shelf-device data model once real hardware brackets got measured against it, splitting one plan into four independently buildable pieces — and catching a genuine self-inflicted rule violation along the way.",
+  "datePublished": "2026-09-10",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-10-2026">September 10, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>The Kit Wasn't the Thing That Needed Checking</h1>
+    </header>
+    <div class="prose">
+      <p>
+        A validation feature meant to check whether a device fits a
+        specific rack kit turned out to be checking the wrong entity
+        entirely. The kit isn't something anyone places inside a layout —
+        it's just how many rack units are available. What actually needs
+        checking is the thing in between the rack and the device: the
+        shelf.
+      </p>
+
+      <h2>The kit wasn't the thing that needed checking</h2>
+      <p>
+        The original plan validated layouts against "the kit" as a single
+        monolithic item, which never had a clean answer for what a kit
+        placed inside its own layout would even mean. The real hierarchy
+        is rack → shelf → device, not rack → device: a frame only defines
+        rail width and total rack-unit count, a shelf is the physical
+        part that actually clips into those rails, and a device sits on a
+        shelf rather than mounting to the rack directly. Reattaching both
+        the universal fit check and the depth/weight capacity check to
+        the shelf — instead of to an ambiguous kit reference — also
+        answers a real product question:
+        <a href="09-09-2026.html" class="prose-link">the runtime estimator work</a>
+        already proved real measured data beats an assumed number, and
+        shelves are the part of this business a homelabber keeps buying
+        long after a frame purchase, kit-owner or not.
+      </p>
+
+      <h2>What six real brackets confirmed</h2>
+      <p>
+        Photos and real slicer measurements of six independently designed
+        10-inch rack brackets — a Dell OptiPlex Micro mount, a TP-Link
+        switch bracket, and a two-piece GMKtec mini PC mount among them —
+        converged tightly on a 252–254mm width across every source, with
+        zero convergence on depth. That's exactly the signature of a real
+        rack standard: width is the constraint that makes something
+        "10-inch rack compliant," depth is a property of whatever shelf
+        you're looking at. The two-piece GMKtec design also surfaced a
+        real distinction worth keeping straight going forward — an
+        internal tray that holds a device isn't the same thing as the
+        rack-facing faceplate it mounts behind, and only the faceplate's
+        width is what actually gets checked against the standard.
+      </p>
+
+      <p class="callout">
+        One of the six sources' own measurements turned out to be an
+        artifact, not real data — several slicer screenshots reported
+        identical width and depth values, a strong tell of a
+        diagonal-rotation bounding box from auto-arrange packing rather
+        than the part's true dimensions. Worth catching before it became
+        a permanently wrong seed row.
+      </p>
+
+      <h2>One plan, four independently buildable pieces</h2>
+      <p>
+        The full shelf model was too much to build in one sitting, so it
+        split along its real dependency lines instead of an arbitrary
+        line count: a foundation layer (new schema, types, and real seed
+        data, purely additive), one unavoidably atomic restructuring step
+        (reshaping how a layout represents what's placed where — the one
+        piece that can't be split further without leaving the app broken
+        in between), and two genuinely independent validation checks that
+        can be built in either order once the restructuring lands. That
+        last pair is the more interesting split — a rack-width check and
+        a shelf-capacity check don't depend on each other at all, so
+        treating them as one combined "kit compatibility" feature was
+        never necessary in the first place.
+      </p>
+
+      <h2>The rule broken while writing the code that enforces it</h2>
+      <p>
+        Every comment explaining a real decision — why a lookup table
+        instead of a hardcoded constant, why a particular tolerance
+        value, why certain data got flagged as unmeasured instead of
+        guessed — is supposed to carry its own reasoning, not point back
+        at internal planning documents that won't exist in the same form
+        a year from now. Six comments across four files did exactly that
+        anyway, citing internal scope-doc filenames as shorthand instead
+        of writing the actual reason out. Some were harmless once removed
+        — the real explanation was already sitting right next to the
+        reference and didn't need it. Others left a comment pointing at
+        an explanation that no longer existed anywhere nearby, which
+        needed the actual reasoning written in for the first time, not
+        just a citation deleted.
+      </p>
+
+      <h2>What actually shipped</h2>
+      <p>
+        Two new database tables, a rewritten type module, a new
+        data-access layer, six real non-leftfootLabs shelves seeded with
+        real measured dimensions, and seven new tests — all verified
+        against a real running database, not just a green test suite: a
+        fresh seed inspected directly, and a simulated pre-existing
+        database confirmed to actually drop the table it was supposed to
+        retire rather than silently leaving it behind. Twenty-three of
+        twenty-three tests passing, the same real-verification standard
+        that
+        <a href="09-09-2026b.html" class="prose-link">caught a repeated-device wattage bug</a>
+        the session before this one.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-09-2026b.html">← Previous: The Query That Counted Four Devices as One</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>
