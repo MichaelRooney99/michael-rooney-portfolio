@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Shelf That Already Sat Exactly at the Line — Michael Rooney</title>
+<meta name="description" content="Two independent fit checks — a universal rack-width standard and a per-shelf depth/weight capacity limit — landed in the same pass, verified in part by a real seeded shelf that happened to sit exactly at the tolerance boundary without anyone arranging it that way." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Shelf That Already Sat Exactly at the Line — Michael Rooney" />
+<meta property="og:description" content="A universal rack-width check and a per-shelf capacity check landed together, verified in part by a real seeded shelf that happened to sit exactly at the tolerance boundary." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Shelf That Already Sat Exactly at the Line — Michael Rooney" />
+<meta name="twitter:description" content="A universal rack-width check and a per-shelf capacity check landed together, verified in part by a real seeded shelf that happened to sit exactly at the tolerance boundary." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Shelf That Already Sat Exactly at the Line",
+  "description": "Two independent fit checks — a universal rack-width standard and a per-shelf depth/weight capacity limit — landed in the same pass, verified in part by a real seeded shelf that happened to sit exactly at the tolerance boundary without anyone arranging it that way.",
+  "datePublished": "2026-09-11",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-11-2026">September 11, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>A Shelf That Already Sat Exactly at the Line</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-10-2026b.html" class="prose-link">The shelf restructuring from the day before</a>
+        left two checks still to build on top of it: does a shelf
+        actually clip into a standard 10-inch rack, and does whatever's
+        placed on it fit that shelf's real depth and weight limits.
+        Neither depends on the other, so both landed in the same pass —
+        and one of them got a genuinely useful assist from data that was
+        already sitting in the seed file.
+      </p>
+
+      <h2>A boundary test that didn't need inventing</h2>
+      <p>
+        Testing a tolerance check properly means testing the exact
+        boundary, not just comfortably inside or clearly outside it — a
+        shelf measured at precisely the standard width plus its
+        tolerance should still pass, not fail on a technicality. Rather
+        than fabricate a shelf at exactly that number, one of the six
+        real shelves seeded a session earlier turned out to already sit
+        there: measured at 252mm against a 254mm ±2mm standard, a delta
+        of exactly 2mm. Real measured hardware landing precisely on the
+        boundary that mattered, without anyone arranging it that way, is
+        a small thing, but it's the kind of small thing that's worth
+        noticing instead of walking past.
+      </p>
+
+      <h2>A running total, not a per-device number</h2>
+      <p>
+        The capacity check splits depth and weight on purpose, and
+        they're genuinely different kinds of check. Depth is a per-device
+        question — does this one thing fit, independent of whatever else
+        is on the shelf. Weight is a running total across everything on
+        that shelf, since a weight limit is a property of the shelf
+        itself, not of any single item on it. The real test for that
+        distinction is two devices that are each individually fine but
+        combine to exceed the limit together — and specifically checking
+        that only the device which actually tips the total over gets
+        flagged, not the first one that happened to be placed.
+      </p>
+
+      <p class="callout">
+        A shelf with an unmeasured weight capacity skips the weight check
+        entirely, rather than failing closed or guessing a number to
+        compare against. A missing number isn't the same thing as zero,
+        and treating it as either extreme would be worse than just being
+        honest that the capacity isn't known yet.
+      </p>
+
+      <h2>Checked against real shelves, not just fixtures</h2>
+      <p>
+        The last real check wasn't a unit test at all: taking all six
+        real seeded shelves — the ones with genuinely independent origins
+        this whole shelf model exists to support — and placing every one
+        of them into a single ten-unit layout, then running the actual
+        validation function against that real data end to end. Clean
+        pass, zero errors, across collision, height, and width checks at
+        once. A green test suite proves the logic is correct in
+        isolation; running it against the real seeded catalog is what
+        confirms it's correct <em>for the thing it's actually for</em>.
+      </p>
+
+      <p>
+        Forty-three of forty-three tests passing closes out the full
+        arc that started with reframing a kit-compatibility feature into
+        a real shelf model two days earlier — foundation, restructuring,
+        and both independent checks, each verified against something
+        real rather than assumed correct from a clean diff.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-10-2026b.html">← Previous: A Column That Still Said Devices</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

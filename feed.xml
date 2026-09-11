@@ -5,8 +5,15 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 11 Sep 2026 01:24:22 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 16:41:49 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A Shelf That Already Sat Exactly at the Line</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026.html</guid>
+      <pubDate>Fri, 11 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A universal rack-width check and a per-shelf capacity check landed together, verified in part by a real seeded shelf that happened to sit exactly at the tolerance boundary.]]></description>
+    </item>
     <item>
       <title>A Column That Still Said Devices</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026b.html</link>
