@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>What Local Green Couldn't Catch — Michael Rooney</title>
+<meta name="description" content="The first real frontend surface — a hardware catalog and click-to-place rack builder — replaced a placeholder list, then a real deploy caught something a clean local test suite couldn't: a wrong import path that only broke inside the actual Docker build." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="What Local Green Couldn't Catch — Michael Rooney" />
+<meta property="og:description" content="A real frontend catalog and click-to-place rack builder shipped, then a real deploy caught a wrong import path a clean local test suite had missed entirely." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="What Local Green Couldn't Catch — Michael Rooney" />
+<meta name="twitter:description" content="A real frontend catalog and click-to-place rack builder shipped, then a real deploy caught a wrong import path a clean local test suite had missed entirely." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "What Local Green Couldn't Catch",
+  "description": "The first real frontend surface — a hardware catalog and click-to-place rack builder — replaced a placeholder list, then a real deploy caught something a clean local test suite couldn't: a wrong import path that only broke inside the actual Docker build.",
+  "datePublished": "2026-09-11",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-11-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-11-2026">September 11, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>What Local Green Couldn't Catch</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-11-2026.html" class="prose-link">The backend validation work from earlier today</a>
+        set up the actual frontend to finally start: a real hardware
+        catalog replacing the placeholder list, and the first genuinely
+        interactive piece — clicking a shelf, then clicking an open slot
+        in a rack elevation to place it. A real deploy at the end of the
+        day found something none of the local checks along the way ever
+        could.
+      </p>
+
+      <h2>A gap that had never been tested through a route</h2>
+      <p>
+        The shelf data layer from two days earlier had real tests, but
+        every one of them called its functions directly — nothing had
+        ever fetched a shelf over an actual HTTP request. That's a real,
+        invisible gap until something outside the backend itself needs
+        it: the frontend was the first real consumer, and there was
+        simply no endpoint yet to serve shelves, or the rack-width
+        standard, over the wire at all. Small, necessary, and easy to
+        miss precisely because everything backend-only had passed the
+        whole time.
+      </p>
+
+      <h2>A design pass without a mirror</h2>
+      <p>
+        Building the actual catalog view meant a real design pass — a
+        deliberate palette and type system suited to a hardware
+        datasheet, not a default template. What that pass couldn't
+        include was an actual look in the mirror: the environment this
+        gets built in has no way to render a real screenshot to check
+        the result against, since pulling in a real browser to do that
+        hit a network wall. The honest move was saying so directly
+        rather than claiming a confidence the process didn't actually
+        earn, and asking for a real look once it's running locally.
+      </p>
+
+      <p class="callout">
+        Confirmed clean locally afterward — but that confirmation
+        belongs to whoever's actually looking at the screen, not to
+        whichever process wrote the CSS.
+      </p>
+
+      <h2>A mistake caught in the test, not the code</h2>
+      <p>
+        Writing a real test for "does this shelf fit in the remaining
+        rack space" included an assertion that a 2-unit shelf placed
+        four units up in a 5-unit rack should fail. It doesn't — that
+        placement spans units four and five exactly, which fits. The
+        test was wrong, not the function it was testing. Catching that
+        distinction is the actual point of writing the test in the first
+        place: it forces a concrete, checkable claim about what
+        "exceeds the rack" really means, and in this case the checking
+        caught the person who wrote the check.
+      </p>
+
+      <h2>The dead branch that almost shipped</h2>
+      <p>
+        A first attempt at tracking which rack positions were already
+        occupied got abandoned mid-write in favor of a simpler approach
+        built directly into the rendering loop — but the abandoned
+        version's empty shell of a function was still sitting in the
+        file, doing nothing, when the real logic went in right below it.
+        Caught on a second look before it went out, not after.
+      </p>
+
+      <h2>What local green couldn't catch</h2>
+      <p>
+        Everything above passed a real type-check and a real test suite,
+        repeatedly, all day. The actual production deploy still failed —
+        a genuinely broken import path, one file pointing at the wrong
+        <code>index.ts</code> among the three this project now has,
+        which happened to resolve to a real module that just didn't
+        export what was needed. Local checks never saw it because the
+        version actually committed didn't quite match the version
+        actually tested moments before. The deploy pipeline's own
+        rollback caught it immediately, reverted to the last known-good
+        commit automatically, and still marked the run as a real
+        failure even though service was never actually down — exactly
+        the distinction that safety net exists to make. A rollback
+        restoring service is not the same thing as the deploy
+        succeeding, and conflating the two is exactly the failure mode
+        an automated rollback is supposed to prevent.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-11-2026.html">← Previous: A Shelf That Already Sat Exactly at the Line</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>
