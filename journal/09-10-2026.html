@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Flag That Only Checks — Michael Rooney</title>
+  <meta name="description" content="TypeScript's --noEmit flag runs the type-checker without writing any compiled output, which matters specifically when something else — tsx, ts-node, a bundler — is what actually runs the code, and a plain tsc build would just leave a pile of unused .js files behind." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Michael Rooney" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Flag That Only Checks — Michael Rooney" />
+  <meta property="og:description" content="Why tsc --noEmit exists: it separates type-checking from compiling, which matters once something else — tsx here — is what actually runs the code." />
+  <meta property="og:url" content="https://michaelrooney.dev/journal/09-10-2026.html" />
+  <meta property="og:site_name" content="Michael Rooney" />
+  <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Flag That Only Checks — Michael Rooney" />
+  <meta name="twitter:description" content="Why tsc --noEmit exists: it separates type-checking from compiling, which matters once something else is what actually runs the code." />
+  <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+  <link rel="canonical" href="https://michaelrooney.dev/journal/09-10-2026.html" />
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Flag That Only Checks",
+    "description": "TypeScript's --noEmit flag runs the type-checker without writing any compiled output, which matters specifically when something else — tsx, ts-node, a bundler — is what actually runs the code, and a plain tsc build would just leave a pile of unused .js files behind.",
+    "datePublished": "2026-09-10",
+    "url": "https://michaelrooney.dev/journal/09-10-2026.html",
+    "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="../index.html" class="logo" aria-label="Home">MR</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="primary-nav">
+        <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../journal.html" class="active">Journal</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+    <article>
+      <header class="entry-header reveal">
+        <div class="entry-meta">
+          <time datetime="09-10-2026">September 10, 2026</time>
+          <span class="tag tag-learning">Learning</span>
+          <span class="tag tag-projects">Projects</span>
+        </div>
+        <h1>The Flag That Only Checks</h1>
+      </header>
+
+      <div class="prose">
+
+        <p>
+          <code>tsc --noEmit</code> runs TypeScript's type-checker without
+          writing any output files. That's the entire flag. The reason
+          it's worth a second look is what it implies about what
+          <code>tsc</code> does <em>without</em> it — and why a project
+          would want type-checking and "actually building the code" to be
+          two separate steps in the first place.
+        </p>
+
+        <h2>Two jobs bundled into one command</h2>
+
+        <p>
+          Running plain <code>tsc</code> does two things at the same
+          time: it walks the whole project checking that every type
+          actually lines up, and it compiles every <code>.ts</code> file
+          into a real <code>.js</code> file somewhere on disk, wherever
+          <code>tsconfig.json</code> says to put it. Most of the time
+          that's exactly what you want — check it, then produce the
+          thing that actually runs.
+        </p>
+
+        <p>
+          That stops being true the moment something else in the project
+          is responsible for actually running the TypeScript. A backend
+          built around <code>tsx</code> (or <code>ts-node</code>, or a
+          bundler doing its own transpilation) never touches
+          <code>tsc</code>'s compiled output at all — <code>tsx</code>
+          reads the <code>.ts</code> files directly and handles turning
+          them into something Node can execute, on the fly, every time
+          the dev server or a script runs. In that setup, a plain
+          <code>tsc</code> build still happily writes a full second copy
+          of the project as compiled <code>.js</code>, next to the real
+          source, that nothing ever reads.
+        </p>
+
+        <h2>What the flag actually buys</h2>
+
+        <p>
+          <code>--noEmit</code> keeps the half that's actually useful —
+          walk the project, check every type, report every error — and
+          drops the half that would just be clutter. It's the same
+          underlying type-checking pass either way; the flag only
+          decides whether that pass also tries to write files as a side
+          effect.
+        </p>
+
+        <p class="callout">
+          It's also a genuinely different check than a passing test
+          suite. <code>tsc --noEmit</code> answers "does every type
+          actually line up" — nothing about whether the logic behind
+          those types is correct. A test suite answers the opposite
+          question: does the behavior actually work, regardless of
+          whether the types are airtight. Neither one substitutes for
+          the other; a clean type-check and a green test suite are two
+          separate real signals, not one signal said twice.
+        </p>
+
+        <h2>Where this actually shows up</h2>
+
+        <p>
+          On the Rack Planner backend specifically, this is why
+          <code>tsc --noEmit</code> runs after every real change, before
+          the actual test suite: a fast, side-effect-free way to catch a
+          hand-keying mistake or a type mismatch immediately, without
+          waiting on the slower step of actually exercising the code's
+          behavior. Two checks, run in that order, because they're
+          answering two different questions.
+        </p>
+
+      </div>
+
+      <nav class="entry-nav" aria-label="Entry navigation">
+        <span></span>
+        <a href="09-09-2026.html" class="prose-link">← Previous: 09-09-2026 Entry</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 Michael Rooney</span>
+    <span>
+      <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+      </a>
+    </span>
+    <span>Front-End Developer</span>
+  </footer>
+
+  <script src="../js/main.js" defer></script>
+</body>
+</html>

@@ -5,8 +5,22 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 11 Sep 2026 00:02:39 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 01:24:22 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A Column That Still Said Devices</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026b.html</guid>
+      <pubDate>Thu, 10 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A breaking data-model change surfaced two real gaps: tests that were assumed to exist and didn't, and a column name that quietly stopped matching what it stored.]]></description>
+    </item>
+    <item>
+      <title>The Flag That Only Checks</title>
+      <link>https://michaelrooney.dev/journal/09-10-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/journal/09-10-2026.html</guid>
+      <pubDate>Thu, 10 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Why tsc --noEmit exists: it separates type-checking from compiling, which matters once something else — tsx here — is what actually runs the code.]]></description>
+    </item>
     <item>
       <title>The Kit Wasn't the Thing That Needed Checking</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026.html</link>

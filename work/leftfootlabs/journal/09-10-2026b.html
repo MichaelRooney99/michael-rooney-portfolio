@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Column That Still Said Devices — Michael Rooney</title>
+<meta name="description" content="Reshaping how a layout represents what's placed where surfaced two real gaps at once: a test suite that was assumed to exist and didn't, and a database column whose name quietly stopped matching what it actually stored." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Column That Still Said Devices — Michael Rooney" />
+<meta property="og:description" content="A breaking data-model change surfaced two real gaps: tests that were assumed to exist and didn't, and a column name that quietly stopped matching what it stored." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Column That Still Said Devices — Michael Rooney" />
+<meta name="twitter:description" content="A breaking data-model change surfaced two real gaps: tests that were assumed to exist and didn't, and a column name that quietly stopped matching what it stored." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Column That Still Said Devices",
+  "description": "Reshaping how a layout represents what's placed where surfaced two real gaps at once: a test suite that was assumed to exist and didn't, and a database column whose name quietly stopped matching what it actually stored.",
+  "datePublished": "2026-09-10",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-10-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-10-2026">September 10, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>A Column That Still Said Devices</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-10-2026.html" class="prose-link">Splitting the shelf model into smaller pieces</a>
+        left one piece that couldn't be split any further: the layout
+        itself had to stop representing devices as sitting directly in
+        the rack and start representing them as sitting on a shelf,
+        which sits in the rack. Every place that shape lives — the
+        stored data, the collision check, the routes serving it — had to
+        change in the same pass, or the app would sit broken in between.
+        Two real things surfaced doing that, neither of them the actual
+        restructuring work itself.
+      </p>
+
+      <h2>A test suite that was assumed to exist, and didn't</h2>
+      <p>
+        The plan for this step called for porting the existing
+        collision-and-height tests up to operate on shelves instead of
+        bare devices. There weren't any tests to port. The validation
+        logic and the layout routes had real working code behind them,
+        just never a dedicated test file — reasonable enough for
+        something built once and left alone, but "port the tests" turned
+        out to mean "write them for the first time," a bigger lift than
+        the plan assumed going in. Twelve new tests came out of it: six
+        for the collision and height checks in isolation, six real HTTP
+        requests through the actual server for the routes and the power
+        calculation.
+      </p>
+
+      <h2>A column that still said devices</h2>
+      <p>
+        The stored column holding a layout's contents was named for what
+        it used to hold, not what it holds now — a small, honest
+        mismatch that's easy to leave alone since it doesn't break
+        anything by itself. Renaming it properly meant doing it as a real
+        migration, not a drop-and-recreate: checking whether an existing
+        database already has the old column name, and only then renaming
+        it in place. Confirmed by building a throwaway database with the
+        old shape and a real row already sitting in it, running the
+        migration against that instead of a clean one, and checking the
+        row was still there afterward under the new name — the actual
+        risk with any rename isn't whether it works on a fresh database,
+        it's whether it works on one that already has something in it.
+      </p>
+
+      <p class="callout">
+        Neither of these was in the plan going in. Both were worth an
+        extra pass rather than shipping around — a comment lying about
+        what a column holds is a small thing until it's the reason
+        someone spends twenty minutes confused about their own schema
+        later.
+      </p>
+
+      <h2>Three files, one name</h2>
+      <p>
+        This project now has three separate files named
+        <code>index.ts</code> — one for the server itself, one for the
+        database layer, one for the shared types. Asking for "the
+        correct index.ts" without more context is a genuinely ambiguous
+        question, and it produced exactly the mix-up you'd expect: a
+        request for the database file's contents, delivered against the
+        wrong one, caught by the same real-machine verification habit
+        that's been the whole point of this project's process — run it,
+        don't just read it and assume it's right.
+      </p>
+
+      <h2>What actually shipped</h2>
+      <p>
+        The full restructure, twelve new tests, and both discoveries
+        above resolved before calling it done: 35 of 35 tests passing,
+        a clean type-check, and the column rename specifically verified
+        against a simulated pre-existing database with real data in it,
+        not just a fresh one that would pass regardless. Same standard
+        as
+        <a href="09-09-2026b.html" class="prose-link">the wattage bug from the session before this one</a>
+        — a green test suite is necessary, not sufficient, for calling
+        something actually done.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-10-2026.html">← Previous: The Kit Wasn't the Thing That Needed Checking</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>
