@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Proving a Copy Is Really a Copy — Michael Rooney</title>
+<meta name="description" content="A client-side rewrite of the server's own validation logic is only as good as its fidelity to the original — proven here by running both versions against the exact same real data in one script and diffing the output, not by trusting that two files which look alike behave alike." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Proving a Copy Is Really a Copy — Michael Rooney" />
+<meta property="og:description" content="A client-side port of the server's validation logic gets proven, not assumed: same real data, both functions, one diff, byte-identical output." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Proving a Copy Is Really a Copy — Michael Rooney" />
+<meta name="twitter:description" content="A client-side port of the server's validation logic gets proven, not assumed: same real data, both functions, one diff, byte-identical output." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Proving a Copy Is Really a Copy",
+  "description": "A client-side rewrite of the server's own validation logic is only as good as its fidelity to the original — proven here by running both versions against the exact same real data in one script and diffing the output, not by trusting that two files which look alike behave alike.",
+  "datePublished": "2026-09-12",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-12-2026">September 12, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>Proving a Copy Is Really a Copy</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-11-2026b.html" class="prose-link">The rack builder could already place shelves and devices</a>,
+        but it couldn't yet tell you if what you'd built actually worked
+        — that check only existed on the server, run once at save time.
+        Real-time feedback while building means the same rules need to
+        run in the browser too, which raises an obvious risk: a second
+        copy of the same logic is only useful if it's actually the same
+        logic, not a close approximation that quietly drifts.
+      </p>
+
+      <h2>A port, not a reinvention</h2>
+      <p>
+        Rather than write new client-side rules from scratch, the
+        server's own validation function got transcribed line for line —
+        same checks, same order, same error messages, reading from
+        already-fetched data instead of a database. The value of that
+        approach is entirely in how strictly "line for line" gets held
+        to. A looser rewrite that captured "the general idea" of the
+        server's rules would have been faster to write and much easier
+        to get subtly wrong in a way nobody would notice until a real
+        layout disagreed with itself between the browser and the save
+        button.
+      </p>
+
+      <h2>Trusting it meant testing it against itself</h2>
+      <p>
+        Both versions passing their own test suites doesn't actually
+        prove they agree with each other — it only proves each one is
+        internally consistent with its own assumptions. The real test
+        was running the actual server function and the new browser
+        version against the exact same real seeded data, in the same
+        script, with one scenario deliberately built to provoke a
+        collision, a width failure, and a depth failure all at once.
+        Comparing the two outputs directly, not just eyeballing that
+        they looked similar, is what actually closes the gap between
+        "this looks like a faithful port" and "this is a faithful port."
+      </p>
+
+      <p class="callout">
+        The first attempt at that comparison used a live server process
+        and a separate script inserting test data — and got two different,
+        real answers, because the two processes had opened two different
+        database files without either one erroring. Not a validation bug
+        at all, just a reminder that a real cross-check is only as
+        trustworthy as its own setup; the fix was collapsing everything
+        into one script reading from one database, removing the ambiguity
+        instead of debugging around it.
+      </p>
+
+      <h2>What actually shipped</h2>
+      <p>
+        The rack builder now shows real validation feedback as shelves
+        and devices get placed, backed by a function proven — not
+        assumed — to match the server's real behavior byte for byte on
+        identical input. The server still gets the final say once Save
+        &amp; Share exists; this is the part that lets someone catch a
+        real problem before ever reaching for that button.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-11-2026b.html">← Previous: What Local Green Couldn't Catch</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>
