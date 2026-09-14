@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Drag Event Needs No Package — Michael Rooney</title>
+<meta name="description" content="Real horizontal placement shipped using the browser's own native drag-and-drop events, not a library — the third time in this project a dependency got weighed and skipped in favor of what the platform already provides, alongside an honest accounting of what that choice costs." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Drag Event Needs No Package — Michael Rooney" />
+<meta property="og:description" content="Real horizontal placement shipped using the browser's own native drag-and-drop, not a library — the third time a dependency got weighed and skipped in this project." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Drag Event Needs No Package — Michael Rooney" />
+<meta name="twitter:description" content="Real horizontal placement shipped using the browser's own native drag-and-drop, not a library." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Drag Event Needs No Package",
+  "description": "Real horizontal placement shipped using the browser's own native drag-and-drop events, not a library — the third time in this project a dependency got weighed and skipped in favor of what the platform already provides, alongside an honest accounting of what that choice costs.",
+  "datePublished": "2026-09-15",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-15-2026">September 15, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>A Drag Event Needs No Package</h1>
+    </header>
+    <div class="prose">
+      <p>
+        Placing a device or keystone at a specific point on a shelf's
+        face needed a real interaction the rest of the builder didn't
+        have yet — dragging, not clicking, since a continuous position
+        genuinely suits a drag gesture better than picking a spot off a
+        list. The browser already has a real API for exactly this. No
+        library got added to provide it.
+      </p>
+
+      <h2>The third time, not the first</h2>
+      <p>
+        This project has now made the same real call three times: a
+        drag-and-drop library was named as a plausible option for the
+        main rack elevation, then deliberately left unbuilt until the
+        simpler click-based interaction proved itself first. A CAD
+        library got evaluated for generating a faceplate and the
+        heavier, more powerful option lost specifically because the
+        real problem was smaller than it could handle. Here, the
+        browser's own drag events already do everything a real
+        implementation needs — reading what's being dragged, computing
+        a real drop position, running a mechanical overlap check before
+        accepting it — without a dependency to install, version, or
+        carry into the production bundle.
+      </p>
+
+      <h2>What that choice actually costs</h2>
+      <p>
+        Native drag-and-drop has a real, known limitation: no keyboard
+        path. Swapping the picker items from real buttons to draggable
+        elements lost genuine keyboard operability that focus and a
+        tab index alone don't restore. That's a real accessibility gap,
+        not a hypothetical one, and it's now written down as its own
+        scoped, honestly low-priority item — worth fixing once the rest
+        of the tool is functional enough that it's the most logical
+        remaining improvement, and worth admitting might cost more to
+        build well than it delivers, rather than promising it as a
+        confident near-term fix it may not actually be.
+      </p>
+
+      <p class="callout">
+        Choosing not to add a dependency is still a real decision with
+        real tradeoffs — the honest version of "we didn't need a
+        library" includes saying plainly what going without one gave up.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-14-2026d.html">← Previous: A Screenshot Isn't a Measurement</a>
+      <a href="09-15-2026b.html">Next: The Choice That Stopped Being a Choice →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

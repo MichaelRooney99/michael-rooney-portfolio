@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Missing Width Doesn't Cost You Everything — Michael Rooney</title>
+<meta name="description" content="Real fit validation for a shelf's face shipped with a genuinely careful answer to an open question: an item's own unmeasured width doesn't disable every check about it, only the specific checks that actually need that number — proven identical between server and browser on real provoking data." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Missing Width Doesn't Cost You Everything — Michael Rooney" />
+<meta property="og:description" content="An item's own unmeasured width doesn't disable every check about it — only the checks that actually need that number, proven identical between server and browser." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026c.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Missing Width Doesn't Cost You Everything — Michael Rooney" />
+<meta name="twitter:description" content="An item's own unmeasured width doesn't disable every check about it — only the checks that actually need that number." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026c.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Missing Width Doesn't Cost You Everything",
+  "description": "Real fit validation for a shelf's face shipped with a genuinely careful answer to an open question: an item's own unmeasured width doesn't disable every check about it, only the specific checks that actually need that number — proven identical between server and browser on real provoking data.",
+  "datePublished": "2026-09-15",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026c.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-15-2026">September 15, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>A Missing Width Doesn't Cost You Everything</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-15-2026b.html" class="prose-link">The standardized-shelf simplification</a>
+        cleared the way for the actual physical fit check a shelf's face
+        needs: does everything placed on it fit, with real breathing
+        room between neighbors and from the shelf's own edges. One real
+        question had been left open on purpose rather than guessed at
+        going in — what happens when an item's own width isn't measured,
+        which today is every real device in the catalog.
+      </p>
+
+      <h2>A decision made at the level of the check, not the item</h2>
+      <p>
+        The easy version of this would have picked one of two extremes:
+        block anything with an unmeasured width from being validated at
+        all, or ignore the whole question and let it through. Neither
+        was actually right. Whether a device's left edge sits far enough
+        from the shelf's own edge only depends on where it's positioned
+        — not how wide it is — so that check stays real and meaningful
+        even when the width itself is a genuine unknown. Only the checks
+        that actually need the width — does it run past the far edge,
+        is it too close to its neighbor — get skipped for that specific
+        item, not the item as a whole.
+      </p>
+
+      <h2>Proof, not just agreement</h2>
+      <p>
+        The same real discipline from when this validation logic first
+        got duplicated between the server and the browser applied again
+        here: a single scenario, run through both real implementations
+        against identical data, deliberately provoking three different
+        real failure kinds at once — a device too close to the edge, two
+        items crowded together, and a third device that plain doesn't
+        fit at all. Comparing the two outputs directly confirmed they
+        agree byte for byte, not just that they were written to look
+        alike.
+      </p>
+
+      <p class="callout">
+        A rule can be strict about what it checks without being strict
+        about when it's allowed to check anything at all. Those are two
+        different kinds of caution, and conflating them would have made
+        the feature stricter than the real data could actually support.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-15-2026b.html">← Previous: The Choice That Stopped Being a Choice</a>
+      <a href="09-15-2026d.html">Next: The Bug That Explained Itself →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

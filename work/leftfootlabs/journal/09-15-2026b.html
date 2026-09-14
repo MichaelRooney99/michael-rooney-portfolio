@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Choice That Stopped Being a Choice — Michael Rooney</title>
+<meta name="description" content="Every real 10-inch shelf converges on almost the same width, which meant choosing among seven named products to start a build was never actually a meaningful decision — the builder now offers the one real shelf that already matches the standard, and a real backend flag says so instead of a name hardcoded in the interface." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Choice That Stopped Being a Choice — Michael Rooney" />
+<meta property="og:description" content="Every real 10-inch shelf converges on the same width, so choosing among named products to start a build was never a meaningful decision — a real backend flag now says which one the builder offers." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Choice That Stopped Being a Choice — Michael Rooney" />
+<meta name="twitter:description" content="Every real 10-inch shelf converges on the same width, so a real backend flag now says which one the builder offers instead of making someone choose." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — homelab and software development portfolio" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Choice That Stopped Being a Choice",
+  "description": "Every real 10-inch shelf converges on almost the same width, which meant choosing among seven named products to start a build was never actually a meaningful decision — the builder now offers the one real shelf that already matches the standard, and a real backend flag says so instead of a name hardcoded in the interface.",
+  "datePublished": "2026-09-15",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-15-2026">September 15, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>The Choice That Stopped Being a Choice</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-15-2026.html" class="prose-link">The drag-and-drop placement work</a>
+        exposed something the shelf picker had been quietly doing wrong
+        all along: offering seven named real shelf products to choose
+        from, as if which one you picked actually changed anything about
+        what gets built. It doesn't. Every one of them measures within
+        a couple millimeters of the same real width — the whole reason
+        that number counts as a standard in the first place.
+      </p>
+
+      <h2>A real fact hiding in plain sight</h2>
+      <p>
+        This wasn't a new discovery so much as a fact that had been
+        sitting in the catalog's own evidence since the shelf model was
+        first built, never applied to how the builder actually worked.
+        Once it got named directly, the fix was obvious: stop asking
+        someone to choose among products that don't meaningfully differ
+        for the purpose of starting a layout, and use the one real shelf
+        that already happens to measure exactly the standard width and
+        height, rather than manufacturing a new abstract entry with
+        invented dimensions to represent an idea that already had a real
+        example sitting in the data.
+      </p>
+
+      <h2>A flag instead of a name</h2>
+      <p>
+        The tempting shortcut would have been a hardcoded id string in
+        the interface saying which shelf counts as "the" one. That's
+        exactly the kind of fragile, silently-driftable fact this
+        project has avoided everywhere else — the rack-width standard
+        itself is fetched from the server, not hardcoded twice, for the
+        same reason. A real boolean column on the shelf itself, checked
+        against a database with a real row already sitting in it from
+        before the column existed, closes the same category of gap a
+        very similar backfill mistake had already been caught and fixed
+        once before.
+      </p>
+
+      <p class="callout">
+        The catalog didn't shrink. Seven real shelves are still there to
+        browse. What changed is which question the builder actually
+        needs an answer to before letting someone start.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-15-2026.html">← Previous: A Drag Event Needs No Package</a>
+      <a href="09-15-2026c.html">Next: A Missing Width Doesn't Cost You Everything →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

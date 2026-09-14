@@ -5,8 +5,71 @@
     <link>https://michaelrooney.dev/journal.html</link>
     <description>Homelabbing, certifications, front-end development, and the process of transitioning into tech — documented as it happens.</description>
     <language>en-us</language>
-    <lastBuildDate>Sat, 12 Sep 2026 23:00:20 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 14 Sep 2026 21:23:52 GMT</lastBuildDate>
     <atom:link href="https://michaelrooney.dev/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Bug That Explained Itself</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026d.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026d.html</guid>
+      <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Actually using the finished placement feature surfaced two real gaps — including a removal bug whose cause was obvious once found, deliberately written down rather than fixed immediately.]]></description>
+    </item>
+    <item>
+      <title>A Missing Width Doesn't Cost You Everything</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026c.html</guid>
+      <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[An item's own unmeasured width doesn't disable every check about it — only the checks that actually need that number, proven identical between server and browser.]]></description>
+    </item>
+    <item>
+      <title>The Choice That Stopped Being a Choice</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026b.html</guid>
+      <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Every real 10-inch shelf converges on the same width, so choosing among named products to start a build was never a meaningful decision — a real backend flag now says which one the builder offers.]]></description>
+    </item>
+    <item>
+      <title>A Drag Event Needs No Package</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026.html</guid>
+      <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Real horizontal placement shipped using the browser's own native drag-and-drop, not a library — the third time a dependency got weighed and skipped in this project.]]></description>
+    </item>
+    <item>
+      <title>A Screenshot Isn't a Measurement</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026d.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026d.html</guid>
+      <pubDate>Mon, 14 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Real STL files got their real dimensions pulled directly from the mesh geometry, not read off a screenshot — confirming the same numbers while earning the confidence rather than assuming it.]]></description>
+    </item>
+    <item>
+      <title>The Route Not Forgotten</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026c.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026c.html</guid>
+      <pubDate>Mon, 14 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A new database table's HTTP route got written in the same pass as its data layer this time — a direct, deliberate fix for a gap found days earlier.]]></description>
+    </item>
+    <item>
+      <title>Just the Faceplate</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026b.html</guid>
+      <pubDate>Mon, 14 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A standardized shelf and a customized faceplate — a real simplification backed by choosing a CAD library sized to the actual problem, not the biggest name available.]]></description>
+    </item>
+    <item>
+      <title>The Word That Meant Two Different Things</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026.html</guid>
+      <pubDate>Mon, 14 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Three project docs checked against what actually shipped surfaced a stale framing, an overturned rollback claim, and a genuine unreconciled conflict between two prior decisions.]]></description>
+    </item>
+    <item>
+      <title>The Save Button That Doesn't Block You</title>
+      <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026b.html</link>
+      <guid isPermaLink="true">https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026b.html</guid>
+      <pubDate>Sat, 12 Sep 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Save & Share closes the rack-elevation arc: the save button isn't gated on client validation, and a shared layout is read-only because the API never had an update endpoint.]]></description>
+    </item>
     <item>
       <title>Proving a Copy Is Really a Copy</title>
       <link>https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026.html</link>
