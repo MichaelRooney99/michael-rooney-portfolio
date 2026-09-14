@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Route Not Forgotten — Michael Rooney</title>
+<meta name="description" content="Adding a new database table came with a real chance to apply a lesson from days earlier: the route that exposes it over HTTP got written in the same pass as the data layer this time, not discovered missing later." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Route Not Forgotten — Michael Rooney" />
+<meta property="og:description" content="A new database table's HTTP route got written in the same pass as its data layer this time — a direct, deliberate fix for a gap found days earlier." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026c.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Route Not Forgotten — Michael Rooney" />
+<meta name="twitter:description" content="A new database table's HTTP route got written in the same pass as its data layer this time — a direct fix for a gap found days earlier." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026c.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Route Not Forgotten",
+  "description": "Adding a new database table came with a real chance to apply a lesson from days earlier: the route that exposes it over HTTP got written in the same pass as the data layer this time, not discovered missing later.",
+  "datePublished": "2026-09-14",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026c.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-14-2026">September 14, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>The Route Not Forgotten</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-14-2026b.html" class="prose-link">Narrowing the faceplate feature down to something real and buildable</a>
+        meant an actual first piece of it could get built: the schema
+        and data layer underneath it — real device and shelf width
+        fields, a new table for keystone jacks, a real spacing constant.
+        The interesting part wasn't the schema itself. It was a small
+        decision made specifically because of something that went wrong
+        a few days earlier.
+      </p>
+
+      <h2>A gap that had a name this time</h2>
+      <p>
+        The shelf data layer, built days before this, shipped with real
+        tests and real working logic — and no route exposing it over
+        HTTP at all, a gap that stayed invisible until the frontend
+        became the first thing that actually needed it. This time, the
+        route for the new keystone table got written in the same pass
+        as the table itself, not added later once something else needed
+        it. The comment in the code says so directly: added now, not
+        discovered missing later, because that was the whole point of
+        having found the gap the first time.
+      </p>
+
+      <h2>Every new column, checked against a real existing database</h2>
+      <p>
+        Three real migration guards went in alongside the new columns —
+        one for each new field, checking whether an existing local
+        database already has the table from before the field existed,
+        and adding it in place if not. That pattern already existed in
+        this project; what's worth noting is that it got applied
+        automatically this time, without needing to be reminded, because
+        skipping it once already caused a real, confusing mismatch
+        between what a column was named and what it actually held.
+      </p>
+
+      <p class="callout">
+        Verified against more than a fresh database, too: a simulated
+        pre-existing one, with a real row already sitting in it from
+        before the new column existed, confirmed the value actually
+        gets backfilled rather than left blank. A migration that only
+        works on a database that's never seen production data isn't
+        actually a real migration yet.
+      </p>
+
+      <h2>What actually shipped</h2>
+      <p>
+        Real device and shelf width fields, a new keystone table and its
+        route, a real 8mm spacing constant — all additive, all verified
+        against a fresh seed and a simulated existing database both,
+        fifty-four tests passing where forty-seven did the session
+        before. Small in scope, but the kind of small that comes from
+        actually remembering the last mistake instead of just moving
+        past it.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-14-2026b.html">← Previous: Just the Faceplate</a>
+      <a href="09-14-2026d.html">Next: A Screenshot Isn't a Measurement →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

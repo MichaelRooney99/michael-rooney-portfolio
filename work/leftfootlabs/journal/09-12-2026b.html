@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Save Button That Doesn't Block You — Michael Rooney</title>
+<meta name="description" content="Save & Share closes out the rack-elevation arc, and two decisions made when the work was first scoped finally paid off in real code: the save button isn't gated on the live pre-check, and a saved layout's share link is read-only because the API never had an update endpoint to begin with." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Save Button That Doesn't Block You — Michael Rooney" />
+<meta property="og:description" content="Save & Share closes the rack-elevation arc: the save button isn't gated on client validation, and a shared layout is read-only because the API never had an update endpoint." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Save Button That Doesn't Block You — Michael Rooney" />
+<meta name="twitter:description" content="Save & Share closes the rack-elevation arc: the save button isn't gated on client validation, and a shared layout is read-only because the API never had an update endpoint." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Save Button That Doesn't Block You",
+  "description": "Save & Share closes out the rack-elevation arc, and two decisions made when the work was first scoped finally paid off in real code: the save button isn't gated on the live pre-check, and a saved layout's share link is read-only because the API never had an update endpoint to begin with.",
+  "datePublished": "2026-09-12",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-12-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-12-2026">September 12, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>The Save Button That Doesn't Block You</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-12-2026.html" class="prose-link">Real-time validation went in earlier today</a>,
+        which meant the last real piece of the rack-elevation work was
+        actually saving and sharing a build. Two calls made back when
+        this whole arc first got scoped — before a single line of the
+        elevation UI existed — turned out to shape the final feature
+        directly, rather than staying abstract decisions on a page.
+      </p>
+
+      <h2>Why the save button doesn't block you</h2>
+      <p>
+        The live validation panel can be sitting there showing real
+        issues, and the Save &amp; Share button still works anyway — it's
+        never disabled based on what the client-side check thinks. That
+        was the actual content of an early call that real-time feedback
+        would be client-side UX and the server would stay the final
+        authority at save time, not a compromise made because gating the
+        button would have been harder to build. Clicking save with
+        visible issues still showing sends the request anyway, and
+        whatever comes back — success, or a real rejection with the
+        server's own reasons — is the actual answer, not a guess enforced
+        a layer too early.
+      </p>
+
+      <h2>An API with no update endpoint decided the share view for you</h2>
+      <p>
+        A saved layout's share link opens a genuinely read-only view, not
+        a second copy of the interactive builder pointed at existing
+        data. That wasn't a separate design call so much as a
+        consequence already sitting in the API: it has a way to create a
+        layout and a way to read one back, and nothing in between. Making
+        the share view editable would have implied saving changes over
+        the original, which nothing on the backend actually supports —
+        so read-only isn't a restriction added on top, it's just what
+        honestly matches what the API can actually do.
+      </p>
+
+      <h2>Proving the round trip, not just the pieces</h2>
+      <p>
+        Each function involved — the save call, the fetch call, the error
+        handling — had already passed its own tests. The thing worth
+        actually checking was whether they agree with the real server
+        end to end: a real save against the live backend, a real fetch of
+        that exact layout back, and a real rejected save with two shelves
+        deliberately placed on top of each other, all checked directly
+        against what the code assumes those responses look like rather
+        than trusted from reading the route handlers. All three matched.
+      </p>
+
+      <p class="callout">
+        A clean type-check and a green test suite say the pieces are each
+        internally sound. Only running the real request against the real
+        server says the pieces actually fit together the way the code
+        assumes they do.
+      </p>
+
+      <h2>What actually shipped</h2>
+      <p>
+        Shelves, devices, real-time validation, and now save and share —
+        the full rack-elevation arc, backend and frontend both, each
+        piece verified against something real before moving to the next
+        one rather than assumed correct from a passing build.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-12-2026.html">← Previous: Proving a Copy Is Really a Copy</a>
+      <a href="09-14-2026.html">Next: The Word That Meant Two Different Things →</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

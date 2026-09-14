@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Word That Meant Two Different Things — Michael Rooney</title>
+<meta name="description" content="Three real project docs got checked against what had actually shipped, not just re-read — surfacing a stale kit-vs-shelf framing, a rollback claim a real incident had already overturned, and a genuine conflict between two decisions that never got reconciled." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="The Word That Meant Two Different Things — Michael Rooney" />
+<meta property="og:description" content="Three project docs checked against what actually shipped surfaced a stale framing, an overturned rollback claim, and a genuine unreconciled conflict between two prior decisions." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Word That Meant Two Different Things — Michael Rooney" />
+<meta name="twitter:description" content="Three project docs checked against what actually shipped surfaced a stale framing, an overturned rollback claim, and a genuine unreconciled conflict between two prior decisions." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Word That Meant Two Different Things",
+  "description": "Three real project docs got checked against what had actually shipped, not just re-read — surfacing a stale kit-vs-shelf framing, a rollback claim a real incident had already overturned, and a genuine conflict between two decisions that never got reconciled.",
+  "datePublished": "2026-09-14",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-14-2026">September 14, 2026</time>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>The Word That Meant Two Different Things</h1>
+    </header>
+    <div class="prose">
+      <p>
+        Three project docs — the overview, the leftfootLabs product doc,
+        and the deployment doc — hadn't been touched since well before
+        the shelf model existed. Checking them meant something more
+        specific than a re-read: comparing every real claim against
+        what had actually shipped, line by line, rather than trusting
+        that "mostly still true" was good enough.
+      </p>
+
+      <h2>A framing that was flatly wrong, not just outdated</h2>
+      <p>
+        The overview doc still described devices placed directly into
+        rack units and validated against "a leftfootLabs kit
+        specifically." Neither is true anymore. Devices sit on shelves,
+        the kit itself was never placeable at all, and the
+        kit-compatibility table that framing depended on got built,
+        then dropped, in favor of capacity numbers living on the shelf
+        itself. The product doc had the same problem from the other
+        direction — it described kits as the thing that would appear in
+        the planner as placeable, purchasable items, when the real
+        placeable, purchasable unit turned out to be the shelf.
+      </p>
+
+      <h2>A claim a real incident had already overturned</h2>
+      <p>
+        The deployment doc's own gotchas list said the rollback path
+        was unproven and needed a deliberately broken test deploy before
+        it could be trusted. That's no longer true, and hadn't been for
+        a few days — a real, unplanned deploy failure had already fired
+        the rollback for real, correctly, arguably more convincingly
+        than a staged test would have. The doc just hadn't caught up to
+        its own project's history yet.
+      </p>
+
+      <h2>A conflict surfaced, not resolved</h2>
+      <p>
+        The overview doc defines a single meaning for "v1": accounts,
+        nothing else, with an explicit reason for holding community
+        submissions until after accounts exist — avoiding moderation
+        problems before there's even a login system to attach them to.
+        Four new scope docs written in the same pass got labeled "v1"
+        too, and one of them recommends building community submissions
+        without waiting for accounts at all. That's a real reversal of
+        a documented decision, and it happened by scoping one thing
+        without weighing it against something already written down.
+        Fixing that quietly would have been worse than leaving it
+        flagged — a decision this genuinely fifty-fifty deserves an
+        actual answer, not a guess dressed up as an update.
+      </p>
+
+      <p class="callout">
+        Updating a doc isn't just correcting stale facts. Sometimes the
+        most useful thing an update can do is refuse to paper over a
+        real disagreement between two things that were both written in
+        good faith at different times.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-12-2026b.html">← Previous: The Save Button That Doesn't Block You</a>
+      <a href="09-14-2026b.html">Next: Just the Faceplate →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

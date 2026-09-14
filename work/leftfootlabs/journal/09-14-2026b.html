@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Just the Faceplate — Michael Rooney</title>
+<meta name="description" content="A real product conversation cut a much bigger idea down to something smaller and more buildable: a standardized shelf and a customized faceplate, backed by real research choosing a CAD library sized to the actual problem instead of the biggest name available." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Just the Faceplate — Michael Rooney" />
+<meta property="og:description" content="A standardized shelf and a customized faceplate — a real simplification backed by choosing a CAD library sized to the actual problem, not the biggest name available." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026b.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Just the Faceplate — Michael Rooney" />
+<meta name="twitter:description" content="A standardized shelf and a customized faceplate — a real simplification backed by choosing a CAD library sized to the actual problem." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026b.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Just the Faceplate",
+  "description": "A real product conversation cut a much bigger idea down to something smaller and more buildable: a standardized shelf and a customized faceplate, backed by real research choosing a CAD library sized to the actual problem instead of the biggest name available.",
+  "datePublished": "2026-09-14",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026b.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-14-2026">September 14, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+        <span class="tag tag-business">Business</span>
+      </div>
+      <h1>Just the Faceplate</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-14-2026.html" class="prose-link">Reconciling the project docs</a>
+        happened the same day the actual next feature got scoped for
+        real, and the two turned out to sharpen each other. The starting
+        idea was broad: let someone customize a shelf around whatever
+        devices they place on it. What it turned into, after a real
+        back-and-forth about what's actually being sold, was much
+        narrower and much more buildable — a standardized shelf, and a
+        single customized part: the faceplate.
+      </p>
+
+      <h2>The part that doesn't need generating at all</h2>
+      <p>
+        A 10-inch rack shelf's outer dimensions are already standardized
+        enough that generating one dynamically would be solving a
+        problem that doesn't exist — the shelf can be a fixed, generic
+        visual every time. The only real geometry this ever needs to
+        produce is the thin insert with cutouts for whatever's actually
+        placed. That's a meaningfully smaller problem than "generate an
+        entire shelf," and it fell out of a real product conversation
+        about what's genuinely being sold, not an engineering
+        simplification imposed on the idea from outside.
+      </p>
+
+      <h2>Choosing a tool sized to the actual problem</h2>
+      <p>
+        Generating that faceplate for real — as a downloadable file, not
+        a picture of one — meant picking a real geometry library, and
+        the obvious-sounding choices turned out to be the wrong fit.
+        Tools built around a full CAD kernel are designed for organic,
+        filleted, curved mechanical parts. A faceplate is a flat plate
+        with rectangular holes cut in it. A lighter mesh-based library
+        whose core operation is exactly "cut a shape out of a plate"
+        fits the real problem directly, instead of bringing a much
+        heavier tool to a job that never needed it.
+      </p>
+
+      <h2>A measurement that didn't need taking</h2>
+      <p>
+        Fitting a keystone jack into a faceplate needs a real width and
+        height, and the instinct was to treat that as another real-world
+        measurement waiting to happen. It isn't — keystone jacks are
+        built to a single, tightly standardized real dimension precisely
+        so any connector type snaps into the same cutout regardless of
+        manufacturer. Multiple independent sources converged on the same
+        number within normal tolerance, the same kind of convergence
+        this project already trusted once before for the rack-width
+        standard itself. Worth checking rather than assuming, and this
+        time checking meant confirming a real fact already existed
+        rather than going and creating one.
+      </p>
+
+      <p class="callout">
+        Not every open question is a research gap. Some of them are
+        settled facts nobody's looked up yet.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-14-2026.html">← Previous: The Word That Meant Two Different Things</a>
+      <a href="09-14-2026c.html">Next: The Route Not Forgotten →</a>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>

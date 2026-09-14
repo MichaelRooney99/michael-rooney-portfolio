@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>A Screenshot Isn't a Measurement — Michael Rooney</title>
+<meta name="description" content="Real STL files, uploaded as reference, got their dimensions pulled directly from the mesh geometry itself rather than read off the screenshots showing them — confirming the same numbers, but earning the confidence rather than assuming it." />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Michael Rooney" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="A Screenshot Isn't a Measurement — Michael Rooney" />
+<meta property="og:description" content="Real STL files got their real dimensions pulled directly from the mesh geometry, not read off a screenshot — confirming the same numbers while earning the confidence rather than assuming it." />
+<meta property="og:url" content="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026d.html" />
+<meta property="og:site_name" content="Michael Rooney" />
+<meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A Screenshot Isn't a Measurement — Michael Rooney" />
+<meta name="twitter:description" content="Real STL files got their dimensions pulled directly from the mesh geometry, not read off a screenshot." />
+<meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+<meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+<link rel="canonical" href="https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026d.html" />
+<link rel="icon" type="image/svg+xml" href="../../../img/favicon/favicon.svg" />
+<link rel="stylesheet" href="../../../css/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Screenshot Isn't a Measurement",
+  "description": "Real STL files, uploaded as reference, got their dimensions pulled directly from the mesh geometry itself rather than read off the screenshots showing them — confirming the same numbers, but earning the confidence rather than assuming it.",
+  "datePublished": "2026-09-14",
+  "url": "https://michaelrooney.dev/work/leftfootlabs/journal/09-14-2026d.html",
+  "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+}
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <a href="../../../index.html" class="logo" aria-label="Home">MR</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+      <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+    </button>
+    <ul id="primary-nav">
+      <li><a href="../../../portfolio-showcase.html" data-section="work">Work</a></li>
+      <li><a href="../../../index.html#about">About</a></li>
+      <li><a href="../../../journal.html" class="active">Journal</a></li>
+      <li><a href="../../../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+      <a href="../leftfootlabs-index.html" class="back-link reveal">← Back to leftfootLabs</a>
+  <article>
+    <header class="entry-header reveal">
+      <div class="entry-meta">
+        <time datetime="09-14-2026">September 14, 2026</time>
+        <span class="tag tag-projects">Projects</span>
+      </div>
+      <h1>A Screenshot Isn't a Measurement</h1>
+    </header>
+    <div class="prose">
+      <p>
+        <a href="09-14-2026c.html" class="prose-link">The faceplate data foundation shipped</a>
+        with two real numbers still genuinely unknown: what a keystone
+        actually measures, and what a real "usable width" looks like on
+        an actual shelf. Real reference files closed both gaps the same
+        day — but only after the numbers already visible in a screenshot
+        got checked against the actual files, not just trusted.
+      </p>
+
+      <h2>Reading the mesh instead of the picture</h2>
+      <p>
+        A slicer screenshot had already shown a tray at 254 by 133 by
+        44.426mm and a matching faceplate at 214 by 42.5 by 5mm. Those
+        numbers could have been taken as given once the real STL and
+        3MF files arrived. Instead, the actual mesh geometry got parsed
+        directly and its bounding box computed from scratch — the same
+        numbers came back, which is exactly the point: the value isn't
+        in catching a discrepancy that wasn't there, it's in the
+        confidence being earned by checking rather than assumed because
+        two sources happened to agree.
+      </p>
+
+      <h2>The first real number that wasn't null</h2>
+      <p>
+        Six shelves had been seeded so far with a real per-shelf field
+        left honestly unmeasured, because nothing had actually measured
+        it yet. This tray's real faceplate opening — 214mm — became the
+        first real value for that field, seeded as a genuine seventh
+        catalog entry rather than kept as a screenshot with no home in
+        the actual data. The same real research that resolved the
+        keystone question turned into a second real seeded fact: one
+        universal keystone entry, 14.5 by 16.0mm, instead of an empty
+        table waiting on a measurement that was actually already
+        settled.
+      </p>
+
+      <p class="callout">
+        A real reference file sitting in a chat isn't the same thing as
+        a real fact sitting in the database. The gap between those two
+        is exactly the work that closed today.
+      </p>
+
+      <h2>What actually shipped</h2>
+      <p>
+        A height field added to the keystone table for a dimension that
+        didn't exist an hour earlier, one real keystone row seeded with
+        the actual standardized dimensions, and a seventh real shelf
+        seeded with the first non-null usable-width value in the
+        catalog — verified the same way every migration in this project
+        has been: against a fresh database, and separately against a
+        simulated existing one with real data already in it, confirming
+        the new column backfills correctly rather than assumed.
+      </p>
+    </div>
+    <nav class="entry-nav" aria-label="Entry navigation">
+      <span></span>
+      <a href="09-14-2026c.html">← Previous: The Route Not Forgotten</a>
+      <span></span>
+    </nav>
+  </article>
+</main>
+
+<footer role="contentinfo">
+  <span>© 2026 Michael Rooney</span>
+  <span>
+    <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+      <img src="../../../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+    </a>
+  </span>
+  <span>Front-End Developer</span>
+</footer>
+
+<script src="../../../js/main.js" defer></script>
+</body>
+</html>
