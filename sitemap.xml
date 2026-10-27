@@ -22,8 +22,13 @@
   </url>
   <url>
     <loc>https://michaelrooney.dev/work/leftfootlabs/leftfootlabs-index.html</loc>
-    <lastmod>2026-09-12</lastmod>
+    <lastmod>2026-09-14</lastmod>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://michaelrooney.dev/journal/10-27-2026.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://michaelrooney.dev/work/leftfootlabs/journal/09-15-2026d.html</loc>

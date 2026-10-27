@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Certificate Fix Browsers Couldn't Ship for Me — Michael Rooney</title>
+  <meta name="description" content="When eight eMudhra intermediate certificates turned out to have recoverable private keys, browsers were patched within hours — but cloudflared carries its own list of trusted certificates, so every Cloudflare Tunnel in the homelab needed a manual upgrade, and a container restart alone would not have applied the fix." />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Michael Rooney" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Certificate Fix Browsers Couldn't Ship for Me — Michael Rooney" />
+  <meta property="og:description" content="Browsers patched the eMudhra certificate compromise on their own. cloudflared keeps its own trust list, so every tunnel in the homelab needed a real upgrade — and a restart wasn't one." />
+  <meta property="og:url" content="https://michaelrooney.dev/journal/10-27-2026.html" />
+  <meta property="og:site_name" content="Michael Rooney" />
+  <meta property="og:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta property="og:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Certificate Fix Browsers Couldn't Ship for Me — Michael Rooney" />
+  <meta name="twitter:description" content="Browsers patched the eMudhra certificate compromise on their own. cloudflared keeps its own trust list, so every tunnel needed a real upgrade — and a restart wasn't one." />
+  <meta name="twitter:image" content="https://michaelrooney.dev/img/og-image.png" />
+  <meta name="twitter:image:alt" content="Michael Rooney — Operational Engineer and Front-End Developer, dark portfolio card" />
+  <link rel="canonical" href="https://michaelrooney.dev/journal/10-27-2026.html" />
+  <link rel="icon" type="image/svg+xml" href="../img/favicon/favicon.svg" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Certificate Fix Browsers Couldn't Ship for Me",
+    "description": "When eight eMudhra intermediate certificates turned out to have recoverable private keys, browsers were patched within hours — but cloudflared carries its own list of trusted certificates, so every Cloudflare Tunnel in the homelab needed a manual upgrade, and a container restart alone would not have applied the fix.",
+    "datePublished": "2026-10-27",
+    "url": "https://michaelrooney.dev/journal/10-27-2026.html",
+    "author": { "@type": "Person", "name": "Michael Rooney", "url": "https://michaelrooney.dev" }
+  }
+  </script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="../index.html" class="logo" aria-label="Home">MR</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="primary-nav">
+        <li><a href="../portfolio-showcase.html" data-section="work">Work</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../journal.html" class="active">Journal</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <a href="../journal.html" class="back-link reveal">← Back to Journal</a>
+
+    <article>
+      <header class="entry-header reveal">
+        <div class="entry-meta">
+          <time datetime="10-27-2026">October 27, 2026</time>
+          <span class="tag tag-homelab">Homelab</span>
+          <span class="tag tag-learning">Learning</span>
+        </div>
+        <h1>The Certificate Fix Browsers Couldn't Ship for Me</h1>
+      </header>
+
+      <div class="prose">
+
+        <p>
+          A certificate authority compromise gets fixed in two very
+          different places. Browsers and operating systems fix it for you,
+          usually before you've heard about it. Any software that ships its
+          own list of trusted certificates waits until someone upgrades it
+          by hand. The Cloudflare Tunnels that publish this site and the
+          Rack Planner fall into the second group, which is why a security
+          email from Cloudflare turned into an afternoon of upgrades.
+        </p>
+
+        <h2>What actually happened</h2>
+
+        <p>
+          On October 19, 2026, Cloudflare found that eight intermediate
+          certificates issued by eMudhra, an Indian certificate authority
+          that sells under the emSign brand, had been generated with weak
+          keys. The private keys could be recovered from the public
+          certificates alone. Anyone holding those keys could sign a
+          certificate for any domain, and every client that trusted the
+          chain would accept it as real. Cloudflare's
+          <a href="https://blog.cloudflare.com/emudhra-certificate-compromise/" target="_blank" rel="noopener noreferrer" class="prose-link">write-up of the incident</a>
+          covers the timeline. Mozilla pushed a revocation update the same
+          evening, and Chrome and Mozilla are both removing trust in the
+          affected root.
+        </p>
+
+        <p>
+          None of that reached <code>cloudflared</code>, the small daemon
+          that holds open the outbound connection between my servers and
+          Cloudflare's edge. It verifies certificates against a trust list
+          compiled into the binary, so a browser update changes nothing for
+          it. Versions before 2026.10.2 still trusted the compromised
+          intermediates.
+        </p>
+
+        <h2>Why a tunnel is worth patching at all</h2>
+
+        <p>
+          The tunnel is the only path between the public internet and the
+          services behind it. I wrote about what that path replaces in
+          <a href="08-08-2026.html" class="prose-link">Publishing Isn't the Same as Protecting</a>:
+          no open inbound ports, no port forwarding on OPNsense, every
+          request arriving through a connection the server dialed out
+          itself. That design only holds if the daemon can tell the real
+          Cloudflare edge from an impostor. A forged certificate that
+          <code>cloudflared</code> accepts breaks exactly that guarantee.
+          Cloudflare found no active exploitation, so this was hygiene
+          rather than an incident, but it is the kind of hygiene that keeps
+          an incident from happening.
+        </p>
+
+        <h2>A restart is not an upgrade</h2>
+
+        <p>
+          The step that would have been easiest to get wrong was the
+          container part. Restarting a Docker container brings it back up
+          from the same image it was already running. If the compose file
+          says <code>cloudflare/cloudflared:latest</code>, the local copy of
+          "latest" is whatever was pulled last time, and a restart or even
+          a <code>docker compose up -d</code> keeps using it. The fix only
+          lands after pulling the new image and recreating the container
+          from it:
+        </p>
+
+<pre><code>docker compose pull cloudflared
+docker compose up -d cloudflared
+docker exec &lt;container&gt; cloudflared --version</code></pre>
+
+        <p>
+          The last line is the part that actually proves the fix. The
+          tunnel's connector list in the Cloudflare dashboard shows the
+          same thing from the other side, with the version each connected
+          instance reports. It's also the quickest way to find an instance
+          you forgot was running.
+        </p>
+
+        <p class="callout">
+          The general rule: the tag in a compose file names an image, not a
+          version. <code>latest</code> means "whatever this host pulled
+          last," which can be months old. Checking the running binary's
+          version is the only check that tells you what is actually
+          deployed.
+        </p>
+
+        <h2>The fix you shouldn't reach for</h2>
+
+        <p>
+          Cloudflare's notice included one warning worth repeating. An
+          upgraded <code>cloudflared</code> will refuse to connect to an
+          HTTPS origin whose certificate chains to one of the bad
+          intermediates. The tempting response to that error is turning on
+          <code>noTLSVerify</code> so the tunnel connects again. That would
+          remove the exact check the upgrade restored. The right fix is
+          replacing the origin's certificate. Before upgrading, the thing
+          to check is which tunnel routes point at an <code>https://</code>
+          origin at all and where those origin certificates come from.
+        </p>
+
+        <h2>Why I did it by hand this time</h2>
+
+        <p>
+          This was a natural Ansible task: pin the image tag in a variable,
+          pull, recreate through a handler, and verify against the daemon's
+          <code>/ready</code> endpoint. I upgraded every instance manually
+          anyway, for the refresher. Walking through each host and each
+          compose file one at a time was a useful reminder of where every
+          tunnel actually lives, including the one on Dega, the isolated
+          VLAN 20 node from
+          <a href="07-10-2026.html" class="prose-link">Giving the Capstone a Real Home</a>.
+          A playbook would have been faster. The manual pass is the reason
+          I could write one confidently next time.
+        </p>
+
+        <p>
+          I also skipped Cloudflare's zero-downtime procedure, which adds a
+          second replica before restarting the first. That procedure exists
+          for production traffic. For a portfolio site and a planning tool,
+          a few seconds of downtime while a container recreates is an
+          acceptable cost, and adding temporary replicas would have been
+          ceremony rather than engineering.
+        </p>
+
+        <h2>What I'm taking from it</h2>
+
+        <p>
+          "Keep things updated" is too vague to act on. The useful version
+          is knowing which software trusts the operating system's
+          certificate store and which carries its own, because the second
+          kind is invisible to the update that fixes everything else.
+          Daemons, language runtimes, and container images that bundle
+          their own CA list all belong on that list. The
+          <a href="https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/downloads/update-cloudflared/" target="_blank" rel="noopener noreferrer" class="prose-link">cloudflared update guide</a>
+          covers each install method if you run tunnels too.
+        </p>
+
+      </div>
+
+      <nav class="entry-nav" aria-label="Entry navigation">
+        <span></span>
+        <a href="09-10-2026.html" class="prose-link">← Previous: 09-10-2026 Entry</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 Michael Rooney</span>
+    <span>
+      <a href="https://michaelrooney.dev" aria-label="Michael Rooney's Portfolio">
+        <img src="../img/leftFootPrint.svg" alt="Michael Rooney's Logo of a left foot print" class="leftfootmark" />
+      </a>
+    </span>
+    <span>Front-End Developer</span>
+  </footer>
+
+  <script src="../js/main.js" defer></script>
+</body>
+</html>
